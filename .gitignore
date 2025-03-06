@@ -1,0 +1,96 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear on external disks
+.Spotlight-V100
+.Trashes
+
+# Directories created by macOS
+**/.DS_Store
+**/._.DS_Store
+**/.apdisk
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Python-specific files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.env/
+.venv/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Databases
+*.sqlite
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Compiled files
+*.class
+*.exe
+*.dll
+*.o
+*.so
+*.a
+
+# Archives
+*.zip
+*.tar.gz
+*.tgz
+
+# Data files
+*.csv
+*.tsv
+*.xlsx
+*.json
+*.h5
+*.pkl
+*.pickle
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
