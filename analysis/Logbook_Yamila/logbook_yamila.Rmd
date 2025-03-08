@@ -1,0 +1,124 @@
+---
+title: "Logboek 3.1 Metagenomics"
+author: "Yamila Timmer"
+date: "`r Sys.Date()`"
+output:
+  word_document:
+    toc: true
+    toc_depth: '2'
+    number_sections: true
+  html_document:
+    toc: true
+    toc_depth: '3'
+    df_print: paged
+lang: nl
+bibliography: library.bib
+---
+
+
+# Our data
+
+Minion 16S data, taken from 3 different locations (digestor, lagoon in/lagoon out), with 4 replicates, with minor differences being that some samples have added glycerol, to protect the samples in the freezer. And half of the samples have been shaken.
+
+|    | Sample Location | Glycerol | Shaken |
+|----|-----------------|----------|--------|
+| 1  | Lagoon in       | +        | -      |
+| 2  | Lagoon in       | +        | +      |
+| 3  | Lagoon in       | -        | -      |
+| 4  | Lagoon in       | -        | +      |
+| 5  | Lagoon out      | +        | -      |
+| 6  | Lagoon out      | +        | +      |
+| 7  | Lagoon out      | -        | -      |
+| 8  | Lagoon out      | -        | +      |
+| 9  | Digestor        | +        | -      |
+| 10 | Digestor        | +        | +      |
+| 11 | Digestor        | -        | -      |
+| 12 | Digestor        | -        | +      |
+
+
+# Metagenomics Pipeline
+
+Before my group can get started on designing the pipeline for our specific case, I would like to look into what steps metagenomics consists of and what kind of tools get used. I will not be fully discussing the quality control step, as we are all already familiar with tools such as FastQC and Trimmomatic, from our previous genomics and transcriptomics project.
+
+
+The two tools I will be looking at are kraken 2 and krona, used for classification and visualisation respectively. Before implementing these tools into our pipeline, I will do some research on the tools.
+
+# Classification
+## Kraken 2
+
+Kraken 2 is a tool used for taxonomic classification in metagenomics and was released in 2018 as a more efficient version of Kraken 1 (using less RAM). The tool uses a special kraken classification algorithm with k-mer based classification. This tool is useful for our research, as it can be used to analyse 16S data. A con about kraken 2 is that it has a small false-positive rate (<1%) where it wrongly assigns a read to a species. Another classification tool, KrakenUniq, does not have this false-positive rate @Different_classification_tools. However, as kraken 2 still remains much more efficient we decided to use this tool, as we do not think the small false-positive rate will have a large effect on the outcome.
+
+Kraken assigns taxonomic labels to DNA sequences by examining the k-mers within a query sequence and then query a database. k-mers are substrings within the DNA sequence of length *k*. After quering the database, the k-mers get mapped to the lowest common ancestor (LCA) of all genomes that contain the given k-mer @Kraken2.
+
+Kraken2 offers support for 3 public 16S databases @Kraken2:
+
+- Greengenes
+- RDP
+- SILVA
+
+From these 3 databases, only Greengenes contains all available 16S data, whereas RDP and SILVA use smaller subsets of the data (e.g. containing only bacterial or achaeal 16S data). We have decided to continue with Greengenes, as we want to make a complete overview of the microbiome in the different steps of the water purification process, so it would make more sense to use a complete database for this and not a subset.
+
+The Greengenes database is already available on the server, in order to use Kraken2 with this database, the database has to be set using:
+
+```
+export KRAKEN2_DEFAULT_DB="/path/to/greengenes/db"
+```
+
+Next Kraken2 can be run with the code below, the database does not have to be specified, because it will automatically run with the set default database.
+
+```
+k2 classify path/to/fastq/directory
+```
+
+# Visualisation
+
+## Krona
+
+Krona is one of the tools we will use to visualise the data obtained through the other tools. Krona visualises classification data in a multi-layered pie chart. These charts are interactive and can be viewed within a webbrowser @Krona. The visualisation that follows from using this tool could prove as a nice overview of the classification, for in our paper.
+
+Below I describe how to use Krona, using Kraken2 output @AndreaTelatin:
+
+
+
+```
+conda install -c bioconda krona
+```
+After installing Krona, an installation message will show that the taxonomy databases need to manually be updated before Krona can generate taxonomic reports. For this, the following script has to be ran:
+
+```
+ktUpdateTaxonomy.sh
+```
+
+Krona can be run using the output of Kraken2, the two relevant variables are the counts (-m) and the NCBI taxonomy ID (-t). These variables are found in the Kraken2 output, in respectively column 3 and 5. 
+
+
+```
+ktImportTaxonomy -t 5 -m 3 -o krona.html Kraken.report 
+```
+
+or for multiple reports, use *
+
+```
+ktImportTaxonomy -t 5 -m 3 -o multi-krona.html *.report 
+```
+
+## Base Calling
+This step needs to be done when nanopore sequencing has been used (such as with MinION). This form of sequencing results in a 'squiggle', this is a long electrical signal that has peaks and dips signifying what kind of molecule passed through the nanopore at that moment. The passing of a molecule through the pore disrupts the ionic current flowing across it and adds a characteristical electrical signal to the 'squiggle'. 
+
+However, before you can move on to following steps in the metagenomics process, you first have to convert this electrical signal to a DNA or RNA sequence. This is normally done using **Dorado**, this is the default basecaller that is integrated within MinKNOW (the software used to control sequencing devices such as MinION) @OxfordNanopore_Basecalling.
+
+Dorado works optimally with the POD5 file-format. Our data consists of fast5 files, so we will have to convert these first.
+
+https://github.com/nanoporetech/pod5-file-format
+
+### Fast5 to POD5
+
+pip install pod5
+
+Dorado can be installed on Linux using:
+```{python}
+curl "https://cdn.oxfordnanoportal.com/software/analysis/dorado-0.9.1-linux-x64.tar.gz" -o dorado-0.9.1-linux-x64.tar.gz
+tar -xzf dorado-0.9.1-linux-x64.tar.gz
+dorado-0.9.1-linux-x64/bin/dorado --version
+```
+
