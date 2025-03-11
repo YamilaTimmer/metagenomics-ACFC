@@ -1,0 +1,22 @@
+samples:
+    A: data/samples/A.fastq
+    B: data/samples/B.fastq
+    
+
+GENOMES:
+    ["hg38_refgenome"] # Human ref genome.
+
+
+BARCODE_DIRECTORIES:
+    barcode01: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode01
+    barcode02: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode02
+    barcode03: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode03
+    barcode04: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode04
+    barcode05: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode05
+    barcode06: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode06
+    barcode07: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode07
+    barcode08: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode08
+    barcode09: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode09
+    barcode10: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode10
+    barcode11: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode11
+
