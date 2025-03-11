@@ -35,6 +35,7 @@ Minion 16S data, taken from 3 different locations (digestor, lagoon in/lagoon ou
 | 11 | Digestor        | -        | -      |
 | 12 | Digestor        | -        | +      |
 
+We will merge the data from the samples, depending on the location of origin. So sample 1-4, sample 5-8 and sample 9-12 will be merged, as for our research question it is not important whether glycerol got added or not and whether the sample was shaken or not. Sample 10 and 12 are absent, which means that the quality of these samples was poor and that the barcodes could not be read. However this will likely not be a problem, as the other two digestor samples still remain.
 
 # Metagenomics Pipeline
 
@@ -46,9 +47,20 @@ The two tools I will be looking at are kraken 2 and krona, used for classificati
 # Classification
 ## Kraken 2
 
+```
+conda install bioconda::kraken2
+```
+
 Kraken 2 is a tool used for taxonomic classification in metagenomics and was released in 2018 as a more efficient version of Kraken 1 (using less RAM). The tool uses a special kraken classification algorithm with k-mer based classification. This tool is useful for our research, as it can be used to analyse 16S data. A con about kraken 2 is that it has a small false-positive rate (<1%) where it wrongly assigns a read to a species. Another classification tool, KrakenUniq, does not have this false-positive rate @Different_classification_tools. However, as kraken 2 still remains much more efficient we decided to use this tool, as we do not think the small false-positive rate will have a large effect on the outcome.
 
 Kraken assigns taxonomic labels to DNA sequences by examining the k-mers within a query sequence and then query a database. k-mers are substrings within the DNA sequence of length *k*. After quering the database, the k-mers get mapped to the lowest common ancestor (LCA) of all genomes that contain the given k-mer @Kraken2.
+
+
+Kraken2 cannot take more than one file as input, so we will merge all fastq files that belong to the same sample locations. This can be done using:
+
+```
+cat FAX*.fastq.gz > sample_1.fastq.gz
+```
 
 Kraken2 offers support for 3 public 16S databases @Kraken2:
 
@@ -58,17 +70,45 @@ Kraken2 offers support for 3 public 16S databases @Kraken2:
 
 From these 3 databases, only Greengenes contains all available 16S data, whereas RDP and SILVA use smaller subsets of the data (e.g. containing only bacterial or achaeal 16S data). We have decided to continue with Greengenes, as we want to make a complete overview of the microbiome in the different steps of the water purification process, so it would make more sense to use a complete database for this and not a subset.
 
-The Greengenes database is already available on the server, in order to use Kraken2 with this database, the database has to be set using:
+The Greengenes database is already available on the server, in order to use Kraken2 with this database, the database has to be defined with the `--db` flag, followed by the location of the database.
+
+Later we will use Bracken to improve the quality of the Kraken2 output, however, Bracken only takes Kraken2 report files and not the direct output. So we will have to specify the `--report` flag, followed by an output location/name.
+
+Two other flags have to be specified, which are `--gzip-compressed` and `--fastq-input`, to let the tool know how the input file is formatted (file.fastq.gz)
 
 ```
-export KRAKEN2_DEFAULT_DB="/path/to/greengenes/db"
+kraken2 --db path/to/database path/to/input.fastq.gz --gzip-compressed --fastq-input --report path/to/report.txt > path/to/output/sample_1.kraken
 ```
 
-Next Kraken2 can be run with the code below, the database does not have to be specified, because it will automatically run with the set default database.
+(show bit of example output from kraken + what it means)
+(show bit of example output from report + what it means)
+
+
+## Bracken (Bayesian Re-estimation of Abundance with KrakEN)
 
 ```
-k2 classify path/to/fastq/directory
+conda install bioconda::bracken
 ```
+
+Using Bracken after Kraken2 can improve the Kraken2 output. Kraken2 output is often at the highest taxonomic level, using Bracken this can be corrected a deeper taxonomic level. A preferred level in metagenomics is either genus or species (G/S). Bracken uses a statistical method that computes to which e.g. species labels a read should be assigned, based on the number of other reads found within all other species. Combining Kraken2 and Bracken gives a more accurate output on a deeper level taxonomy @Schmeier.
+
+In total 4 arguments have to be given to use Bracken in this scenario:
+
+* `-d`: path to the database
+* `-i`: path to the input, which has to be the report output obtained with Kraken2
+* `-o`: user-chosen path for where the output will be saved
+* `-l`: allows user to choose the taxonomy level that the reads will be assigned as, e.g. S is species and G is genus
+
+
+Bracken can be run using the code below:
+```
+bracken -d /path/to/database -i /path/to/input/sample_1.report.txt -o /path/to/output.txt -l S
+
+```
+
+The output shows how many reads are newly assigned and to which species, the report output is not used other than for inspection by the user. Following steps will use the normal kraken output, which in this case is `sample_x.kraken`. Bracken has made changes in this file so we can continue working with this file.
+
+
 
 # Visualisation
 
@@ -76,12 +116,10 @@ k2 classify path/to/fastq/directory
 
 Krona is one of the tools we will use to visualise the data obtained through the other tools. Krona visualises classification data in a multi-layered pie chart. These charts are interactive and can be viewed within a webbrowser @Krona. The visualisation that follows from using this tool could prove as a nice overview of the classification, for in our paper.
 
-Below I describe how to use Krona, using Kraken2 output @AndreaTelatin:
-
-
+Below I describe how to use Krona, using Kraken2 output @AndreaTelatin, @Schmeier:
 
 ```
-conda install -c bioconda krona
+conda install bioconda::krona
 ```
 After installing Krona, an installation message will show that the taxonomy databases need to manually be updated before Krona can generate taxonomic reports. For this, the following script has to be ran:
 
@@ -89,18 +127,32 @@ After installing Krona, an installation message will show that the taxonomy data
 ktUpdateTaxonomy.sh
 ```
 
-Krona can be run using the output of Kraken2, the two relevant variables are the counts (-m) and the NCBI taxonomy ID (-t). These variables are found in the Kraken2 output, in respectively column 3 and 5. 
+Krona can be run using the output of Kraken2, the two relevant variables are the counts (-m) and the NCBI taxonomy ID (-t). These variables are found in the Kraken2 output, in column 2 and 3.
 
+The code below makes a file that consists of only column 2 and 3 from the kraken2 output. Column 2 contains the sequence ID (obtained from the FASTQ header) and column 3 contains the taxonomy ID that Kraken2 has used to label the sequence (equal to the NCBI taxonomy identifier) @Schmeier.
 
 ```
-ktImportTaxonomy -t 5 -m 3 -o krona.html Kraken.report 
+cat path/to/sample_1.kraken | cut -f 2,3 > path/to/output.kraken.krona
 ```
+
+Now the newly made file can be used with Krona, with the following code:
+
+```
+ktImportTaxonomy sample_1.kraken.krona
+```
+
 
 or for multiple reports, use *
 
 ```
 ktImportTaxonomy -t 5 -m 3 -o multi-krona.html *.report 
 ```
+
+## Krona results
+### Digestor
+### Lagoon in
+### Lagoon out
+
 
 ## Base Calling
 This step needs to be done when nanopore sequencing has been used (such as with MinION). This form of sequencing results in a 'squiggle', this is a long electrical signal that has peaks and dips signifying what kind of molecule passed through the nanopore at that moment. The passing of a molecule through the pore disrupts the ionic current flowing across it and adds a characteristical electrical signal to the 'squiggle'. 
