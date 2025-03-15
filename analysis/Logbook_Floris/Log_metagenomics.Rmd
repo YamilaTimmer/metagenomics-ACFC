@@ -1,0 +1,167 @@
+---
+title: "Metagenomics analysis ACFC Wastewater"
+author: "Floris Menninga"
+date: "`r Sys.Date()`"
+bibliography: references.bib
+link-citations: true
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  bookdown::pdf_document2:
+    keep_tex: false    
+    toc: false      
+    fig_caption: true
+    includes:  
+      #  in_header: include_tex_header.tex
+  word_document:
+    toc: yes
+    toc_depth: '3'
+  html_document:
+    toc: yes
+    toc_depth: '3'
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r libraries, results='hold', message=FALSE, warning=FALSE}
+library(tidyverse)
+
+```
+15-03-2025:
+
+## **Introduction** ##
+In the wastewater of a Kenyan water treatment plant can be many organisms whose presence influences the water quality by their production of toxins like those produced by algal blooms from Cyanobacteria. **1** These algal blooms are a global threat to freshwater systems like the Nyando River. 
+Using more traditional chemical analyses, an abundance of nitrogen, phosphorus and potassium was determined.
+
+It is imperative to measure those toxins or in this case genetic material from the micro-organisms that produce them. This wastewater is directly exhausted into the Nyando River, a basin covering about 3,590 square kilometers. The population density at the basin is higher than the national average, this indicates it’s importance. The life expectancy is very low with an average of 37.7 years for males and 42.9 years for females. Enhancing water quality could contribute to a higher lifespan for the people and other organisms that make use of these wetlands.
+
+This water provides food, stores energy and is crucial for biodiversity. **2** These resources are threatened by wastewater from factories and treatment plants.
+
+In the wastewater treatment facility is among other process steps a digester, with a lagoon where the  wastewater is expelled into. The influence of this digester on the microbial diversity and number will be determined.
+
+There are a total of three samples, the first one was taken before the water enters the digester, the second inside of the digester and the last one in the lagoon before entering the Nyando River. 
+We will make a comparison between these samples and we will determine if the amount of bacteria or other micro-organisms exceeds the limits for reclaimed water before and after entering the digester. Toxin producing algae can be present in the sample that exited the digester only if this was also the case before entering it. The scope of this article is limited to determining the influence of the digester in the wastewater treatment facility. So even if there already are contaminants, as long as their numbers are not increasing, the treatment process is not at fault.
+
+Metagenomics is DNA based and can provide information about what organisms are present in the sample, this can be taxonomic and phylogenetic information. **4** Metagenomics differs from whole genome sequencing which refers to the sequencing of a single genomes.
+
+To do this, a bio-informatics pipeline was constructed to compare these samples in which a taxonomic classification will be applied on the samples using the Kraken2 tool to check the presence of known algal bloom causing Cyanobacteria. **1**   Given the results from incubating the samples on agar plates, we hypothesize that there are toxin producing Cyanobacteria in the samples but that the digester doesn’t make a difference for the diversity and number of those organisms. 
+
+In addition to the phylogenetic classification, there will also be an anti-biotic resistance test to determine to what antibiotic resistance genes the micro-organisms have. This will provide an overview of means to combat the bacteria found in the sample more effectively. **7**
+
+To first assemble the microbial genomes from the metagenomic dataset, several tools can be used like Metabat, Concoct and Maxbin4. Identifying potentially up to 2000 micro-organisms in the sample can be challenging given that their average genome size would be 4 Mpb 8 Gpb of reads would have to be obtained to get an average coverage of 1x **5**.
+The diversity of the microbiome will be quantified using the alpha diversity measure. This is a formula that can be applied to calculate this measure for diversity. **6**.
+
+Biosynthetic gene clusters (BGCs) will also be detected by mapping the reads from the Oxford Nanopore sequencer to the MiBIG database. **3** The results from that analysis will show the biosynthetic potential of the organisms to produce toxins. 
+
+
+# **Pipeline** #
+The different steps of the pipeline are explained below.
+
+## 1. Sample preparation ##
+
+Samples: 
+
+| # | Condition |
+|---|------------|
+| 1 | In lag, + glyc, - schud |
+| 2 | In lag, + glyc, + schud |
+| 3 | In lag, - glyc, - schud |
+| 4 | In lag, - glyc, + schud |
+| 5 | Out lag, + glyc, -schud |
+| 6 | Out lag, + glyc, + schud |
+| 7 | Out lag, - glyc, - schud |
+| 8 | Out lag, - glyc, + schud |
+| 9 | Dig, + glyc, + schud |
+| 10 | Dig, + gly, + schud |
+| 11 | Dig, -gly, -schud |
+| 12 | Dig, - gly, +schud |
+
+The three groups: In the lagoon, Outside of the lagoon and in the digester. 
+Some samples have been treated with glycerol in order to better preserve the sample in the -80 freezer. 
+
+As per usual with Nanopore results, the samples were distributed over many seperate .fastq files. These were combined using the following bash script:
+
+First, to combine all fastq files for every barcode.
+```{bash eval = F}
+cat barcode01/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/data/barcode01.fastq
+cat barcode02/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/data/barcode02.fastq
+cat barcode03/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/data/barcode03.fastq
+cat barcode04/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/data/barcode04.fastq
+cat barcode05/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/data/barcode05.fastq
+cat barcode06/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/data/barcode06.fastq
+cat barcode07/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/data/barcode07.fastq
+cat barcode08/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/data/barcode08.fastq
+cat barcode09/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/data/barcode09.fastq
+cat barcode10/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/data/barcode10.fastq
+cat barcode11/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/data/barcode11.fastq
+```
+Combining multiple barcodes into three samples according to the group they are in (In lagoon, out lagoon and digester)
+
+
+
+```{bash eval = F}
+# Combining all barcodes for the "In lagoon" sample:
+cat barcode01.fastq barcode02.fastq barcode03.fastq barcode04.fastq  > /students/2024-2025/Thema07/metagenomics/wastewater/data/in_lagoon.fastq
+
+# The same was done for the "Out lagoon" sample:
+cat barcode05.fastq barcode06.fastq barcode07.fastq barcode08.fastq  > /students/2024-2025/Thema07/metagenomics/wastewater/data/out_lagoon.fastq
+
+# And the "Digester" sample:
+cat barcode09.fastq barcode10.fastq barcode11.fastq barcode12.fastq  > /students/2024-2025/Thema07/metagenomics/wastewater/data/digester.fastq
+```
+
+
+## **1. Quality control** ##
+To check the quality of the raw sequence data, Fastplong was used. This tool uses
+
+### **1.1 Results** ###
+Interpretation here....
+
+
+
+## **2. Taxonomic classification** ##
+To classify all the reads as belonging to a species or less specific taxon, Kraken2 was used. 
+
+### **Tool Comparison** ###
+This tools was chosen based on a comparison made in the following article, (@ye_benchmarking_2019)
+Kraken2 is 
+
+
+
+
+
+
+## **Citations** ##
+**To-do: use .bib file for this...**
+
+1. 
+ https://www.zotero.org/groups/5870913/acfc_afvalwater/items/WLVUDDXJ/attachment/RHY85NTI/reader
+ 
+2. https://www.zotero.org/groups/5870913/acfc_afvalwater/items/DW2JTKTX/reader
+
+3. biosynthetic gene clusters. Nucleic Acids Res 51:D603–D610. https:// doi.org/10.1093/nar/gkac1049
+
+4. https://www.zotero.org/groups/5870913/acfc_afvalwater/items/F3R5L7PV/attachment/6YZYPRXC/reader
+
+5. is the treated wastewater safe to reuse for agricultural irrigation? Water Res 73:277–290. https://doi .org/10.1016/
+
+6. Best practices for analysing microbiomes. Nat Rev Microbiol 16:410 – 422. https://doi.org/10.1038/s41579-018-0029-9.
+
+7. Platforms for elucidating antibiotic resistance in single genomes and complex metagenomes. Environ Int 138:105667. https://doi.org/10.1016/j.envint.2020.105667.
+
+
+Fastplong
+Shifu Chen. 2023. Ultrafast one-pass FASTQ data preprocessing, quality control, and deduplication using fastp. iMeta 2: e107. https://doi.org/10.1002/imt2.107
+
+
+Taxonomic_classifier_tool_comparison
+Ye, S. H., Siddle, K. J., Park, D. J., & Sabeti, P. C. (2019). Benchmarking Metagenomics Tools for Taxonomic Classification. Cell, 178(4), 779–794. https://doi.org/10.1016/j.cell.2019.07.010
+
