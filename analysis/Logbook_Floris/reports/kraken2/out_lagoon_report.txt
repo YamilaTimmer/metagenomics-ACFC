@@ -1,0 +1,133 @@
+  0.37	8	8	U	0	unclassified
+ 99.63	2156	0		1	root
+ 99.63	2156	180		3	  Bacteria
+ 67.42	1459	118		34	    Firmicutes
+ 57.76	1250	90	C	226	      Clostridia
+ 53.60	1160	959	O	527	        Clostridiales
+  3.05	66	56	F	1027	          [Mogibacteriaceae]
+  0.46	10	10	G	1861	            Anaerovorax
+  2.68	58	33	F	1028	          [Tissierellaceae]
+  0.69	15	15	G	1875	            Tissierella_Soehngenia
+  0.46	10	10	G	1872	            Sedimentibacter
+  1.76	38	11	F	1018	          Peptococcaceae
+  1.25	27	27	G	1818	            Pelotomaculum
+  0.97	21	13	F	1025	          Veillonellaceae
+  0.37	8	8	G	1855	            vadinHB04
+  0.37	8	8	F	1020	          Ruminococcaceae
+  0.18	4	3	F	1009	          Christensenellaceae
+  0.05	1	1	G	1768	            Christensenella
+  0.18	4	2	F	1013	          Eubacteriaceae
+  0.05	1	1	G	1789	            Alkalibacter
+  0.05	1	1	G	1792	            Pseudoramibacter_Eubacterium
+  0.09	2	1	F	1011	          Dehalobacteriaceae
+  0.05	1	1	G	1787	            Dehalobacterium
+  4.11	89	31	C	225	      Bacilli
+  2.68	58	23	O	524	        Lactobacillales
+  1.25	27	19	F	1006	          Streptococcaceae
+  0.37	8	8	G	1765	            Streptococcus
+  0.23	5	5	F	1002	          Carnobacteriaceae
+  0.14	3	0	F	1004	          Lactobacillaceae
+  0.14	3	3	G	1759	            Lactobacillus
+  0.09	2	0	C	227	      Erysipelotrichi
+  0.09	2	0	O	535	        Erysipelotrichales
+  0.09	2	1	F	1043	          Erysipelotrichaceae
+  0.05	1	1	G	1905	            PSB-M-3
+  9.57	207	16		67	    Proteobacteria
+  3.88	84	73	C	294	      Betaproteobacteria
+  0.51	11	9	O	606	        Burkholderiales
+  0.09	2	2	F	1101	          Alcaligenaceae
+  1.66	36	35	C	293	      Alphaproteobacteria
+  0.05	1	1	O	599	        Rhizobiales
+  1.43	31	13	C	295	      Deltaproteobacteria
+  0.60	13	0	O	648	        Syntrophobacterales
+  0.60	13	13	F	1143	          Syntrophaceae
+  0.18	4	0	O	630	        Desulfobacterales
+  0.18	4	2	F	1119	          Desulfobulbaceae
+  0.09	2	2	G	2160	            Desulfobulbus
+  0.05	1	0	O	633	        Desulfuromonadales
+  0.05	1	0	F	1127	          Geobacteraceae
+  0.05	1	1	G	2176	            Geobacter
+  0.97	21	18	C	297	      Gammaproteobacteria
+  0.05	1	0	O	673	        Xanthomonadales
+  0.05	1	0	F	1198	          Xanthomonadaceae
+  0.05	1	1	G	2356	            Ignatzschineria
+  0.05	1	0	O	659	        Enterobacteriales
+  0.05	1	0	F	1171	          Enterobacteriaceae
+  0.05	1	1	G	2279	            Sodalis
+  0.05	1	0	O	667	        Pseudomonadales
+  0.05	1	1	F	1190	          Pseudomonadaceae
+  0.88	19	0	C	296	      Epsilonproteobacteria
+  0.88	19	4	O	651	        Campylobacterales
+  0.69	15	14	F	1148	          Campylobacteraceae
+  0.05	1	1	G	2196	            Arcobacter
+  6.24	135	11		17	    Bacteroidetes
+  5.68	123	0	C	169	      Bacteroidia
+  5.68	123	87	O	423	        Bacteroidales
+  1.48	32	32	F	888	          Porphyromonadaceae
+  0.14	3	3	F	886	          ML635J-40
+  0.05	1	1	F	898	          p-2534-18B5
+  0.05	1	0	C	174	      Sphingobacteriia
+  0.05	1	1	O	426	        Sphingobacteriales
+  4.11	89	1		65	    Planctomycetes
+  4.07	88	0	C	289	      Planctomycetia
+  4.02	87	0	O	586	        Pirellulales
+  4.02	87	87	F	1067	          Pirellulaceae
+  0.05	1	0	O	585	        Gemmatales
+  0.05	1	1	F	1065	          Gemmataceae
+  1.16	25	0		73	    Synergistetes
+  1.16	25	0	C	311	      Synergistia
+  1.16	25	16	O	696	        Synergistales
+  0.32	7	1	F	1216	          Dethiosulfovibrionaceae
+  0.28	6	6	G	2391	            HA73
+  0.09	2	1	F	1217	          Synergistaceae
+  0.05	1	1	G	2399	            vadinCA02
+  0.88	19	6		11	    Actinobacteria
+  0.55	12	0	C	145	      Actinobacteria
+  0.51	11	11	O	403	        Actinomycetales
+  0.05	1	0	O	406	        WCHB1-81
+  0.05	1	1	F	866	          At425_EubF1
+  0.05	1	1	C	150	      OPB41
+  0.51	11	0		88	    WS6
+  0.51	11	1	C	334	      SC72
+  0.32	7	7	O	736	        WCHB1-15
+  0.14	3	3	O	734	        A-2AF
+  0.23	5	0		89	    WWE1
+  0.23	5	0	C	336	      [Cloacamonae]
+  0.23	5	1	O	738	        [Cloacamonales]
+  0.18	4	4	F	1254	          [Cloacamonaceae]
+  0.23	5	0		23	    Chloroflexi
+  0.23	5	2	C	189	      Anaerolineae
+  0.14	3	0	O	444	        Anaerolineales
+  0.14	3	0	F	932	          Anaerolinaceae
+  0.14	3	3	G	1632	            T78
+  0.18	4	0		59	    OP11
+  0.18	4	0	C	272	      WCHB1-64
+  0.18	4	4	O	555	        d153
+  0.14	3	0		72	    Spirochaetes
+  0.14	3	0	C	306	      MVP-15
+  0.14	3	3	O	688	        PL-11B10
+  0.14	3	0		26	    Deferribacteres
+  0.14	3	0	C	214	      Deferribacteres
+  0.14	3	0	O	509	        Deferribacterales
+  0.14	3	3	F	978	          Deferribacteraceae
+  0.09	2	0		76	    TM7
+  0.09	2	2	C	318	      TM7-3
+  0.09	2	0		75	    TM6
+  0.09	2	2	C	314	      SJA-4
+  0.05	1	1		83	    WS1
+  0.05	1	0		25	    Cyanobacteria
+  0.05	1	0	C	207	      4C0d-2
+  0.05	1	1	O	490	        YS2
+  0.05	1	0		24	    Chrysiogenetes
+  0.05	1	0	C	206	      Chrysiogenetes
+  0.05	1	0	O	486	        Chrysiogenales
+  0.05	1	1	F	955	          Chrysiogenaceae
+  0.05	1	1		82	    WPS-2
+  0.05	1	0		60	    OP3
+  0.05	1	0	C	275	      koll11
+  0.05	1	0	O	556	        GIF10
+  0.05	1	1	F	1062	          kpj58rc
+  0.05	1	0		57	    OD1
+  0.05	1	1	C	260	      ABY1
+  0.05	1	0		38	    GN02
+  0.05	1	1	C	232	      BD1-5

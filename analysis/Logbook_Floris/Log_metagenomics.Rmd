@@ -65,6 +65,14 @@ Biosynthetic gene clusters (BGCs) will also be detected by mapping the reads fro
 # **Pipeline** #
 The different steps of the pipeline are explained below.
 
+Overview:
+1. Quality control with Fastplong
+2. Trimming of adapter sequences with Fastplong
+3. Taxonomic classifiacation with Kraken2
+4. Visualization of Kraken2 results using Kurona / Pavian 
+5. Functional analysis of the micro-organisms found
+
+
 ## 1. Sample preparation ##
 
 Samples: 
@@ -123,7 +131,79 @@ cat barcode09.fastq barcode10.fastq barcode11.fastq barcode12.fastq  > /students
 To check the quality of the raw sequence data, Fastplong was used. This tool uses
 
 ### **1.1 Results** ###
-Interpretation here....
+
+The sample taken from the digester only contained 2 reads before filtering with Fastplong and 1 after. 
+
+
+| Statistic         | Before Filtering        | After Filtering         |
+|-----------------|-------------------------|-------------------------|
+| Total Reads       | 2                       | 1                       |
+| Total Bases       | 1.873000 K             | 507                     |
+| Minimum Length    | 507                     | 507                     |
+| Maximum Length    | 1.366000 K             | 507                     |
+| Median Length     | 1.366000 K             | 507                     |
+| Mean Length       | 936                     | 507                     |
+| N50 Length        | 1.366000 K             | 507                     |
+| GC Content        | 54.458089%              | 51.676529%              |
+| Q5 Bases          | 1.796000 K (95.888948%) | 490 (96.646943%)       |
+| Q7 Bases          | 1.631000 K (87.079552%) | 457 (90.138067%)       |
+| Q10 Bases         | 1.358000 K (72.504004%) | 378 (74.556213%)       |
+| Q15 Bases         | 1.107000 K (59.103043%) | 309 (60.946746%)       |
+| Q20 Bases         | 874 (46.663107%)        | 234 (46.153846%)       |
+| Q30 Bases         | 248 (13.240790%)        | 62 (12.228797%)        |
+| Q40 Bases         | 0 (0.000000%)           | 0 (0.000000%)           |
+
+
+The sample taken from inside the lagoon has ~18K reads after filtering. 
+
+
+| Statistic         | Before Filtering         | After Filtering          |
+|-----------------|--------------------------|--------------------------|
+| Total Reads       | 20.242000 K              | 18.042000 K              |
+| Total Bases       | 28.870993 M              | 23.485654 M              |
+| Minimum Length    | 3                        | 17                       |
+| Maximum Length    | 13.903000 K              | 13.903000 K              |
+| Median Length     | 1.452000 K              | 1.320000 K              |
+| Mean Length       | 1.426000 K              | 1.301000 K              |
+| N50 Length        | 1.453000 K              | 1.322000 K              |
+| GC Content        | 53.655196%               | 53.160078%               |
+| Q5 Bases          | 28.257982 M (97.876724%)  | 23.065575 M (98.211338%)  |
+| Q7 Bases          | 26.944736 M (93.328054%)  | 22.133635 M (94.243213%)  |
+| Q10 Bases         | 24.666336 M (85.436396%)  | 20.436812 M (87.018279%)  |
+| Q15 Bases         | 21.538507 M (74.602585%)  | 18.037896 M (76.803891%)  |
+| Q20 Bases         | 18.308551 M (63.415037%)  | 15.468003 M (65.861496%)  |
+| Q30 Bases         | 5.359630 M (18.564065%)   | 4.511358 M (19.208995%)   |
+| Q40 Bases         | 12.277000 K (0.042524%)   | 10.494000 K (0.044683%)   |
+
+
+
+And the last sample, taken when the water had exited the lagoon. 
+
+
+
+| Statistic         | Before Filtering         | After Filtering          |
+|-----------------|--------------------------|--------------------------|
+| Total Reads       | 2.410000 K              | 2.164000 K              |
+| Total Bases       | 3.400336 M              | 2.855180 M              |
+| Minimum Length    | 3                        | 17                       |
+| Maximum Length    | 2.075000 K              | 2.075000 K              |
+| Median Length     | 1.435000 K              | 1.298000 K              |
+| Mean Length       | 1.410000 K              | 1.319000 K              |
+| N50 Length        | 1.436000 K              | 1.309000 K              |
+| GC Content        | 54.223112%               | 53.883748%               |
+| Q5 Bases          | 3.327345 M (97.853418%)  | 2.802639 M (98.159801%)  |
+| Q7 Bases          | 3.172289 M (93.293398%)  | 2.687310 M (94.120511%)  |
+| Q10 Bases         | 2.901834 M (85.339625%)  | 2.477674 M (86.778207%)  |
+| Q15 Bases         | 2.530093 M (74.407147%)  | 2.181687 M (76.411540%)  |
+| Q20 Bases         | 2.145847 M (63.106911%)  | 1.865486 M (65.336896%)  |
+| Q30 Bases         | 592.594000 K (17.427513%)| 519.403000 K (18.191603%)|
+| Q40 Bases         | 1.333000 K (0.039202%)   | 1.168000 K (0.040908%)   |
+
+
+In the tables above, the N50 length is the largest lenght L such that 50% of all nucleotides are contained in contigs of size at least L. (source: https://www.nature.com/articles/35057062)
+
+Q5, Q7, Q10 etc. bases is the value of the number of bases at each quality level (Phred score). 
+
 
 
 
@@ -135,7 +215,8 @@ This tools was chosen based on a comparison made in the following article, (@ye_
 Kraken2 is 
 
 
-
+### **Visualization of Kraken2 results** ###
+A script to generate a Sankey graph based on the report from Kraken2 was used. 
 
 
 
@@ -158,9 +239,12 @@ Kraken2 is
 7. Platforms for elucidating antibiotic resistance in single genomes and complex metagenomes. Environ Int 138:105667. https://doi.org/10.1016/j.envint.2020.105667.
 
 
+
 Fastplong
 Shifu Chen. 2023. Ultrafast one-pass FASTQ data preprocessing, quality control, and deduplication using fastp. iMeta 2: e107. https://doi.org/10.1002/imt2.107
 
+Kraken2 visualization script:
+https://github.com/lorenzgerber/krakenSankey
 
 Taxonomic_classifier_tool_comparison
 Ye, S. H., Siddle, K. J., Park, D. J., & Sabeti, P. C. (2019). Benchmarking Metagenomics Tools for Taxonomic Classification. Cell, 178(4), 779–794. https://doi.org/10.1016/j.cell.2019.07.010

@@ -1,0 +1,7 @@
+100.00	1	0		1	root
+100.00	1	0		3	  Bacteria
+100.00	1	0		34	    Firmicutes
+100.00	1	0	C	225	      Bacilli
+100.00	1	0	O	524	        Lactobacillales
+100.00	1	0	F	1004	          Lactobacillaceae
+100.00	1	1	G	1759	            Lactobacillus
