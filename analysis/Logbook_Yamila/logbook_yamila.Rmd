@@ -15,8 +15,14 @@ lang: nl
 bibliography: library.bib
 ---
 
+- meer gedachtegang geven/waar ik tegen aanloop
+- snakemake erin zetten
+- uitleggen hoe ik dingen heb opgelost
+
 
 # Our data
+
+**05-03-2025**
 
 Minion 16S data, taken from 3 different locations (digestor, lagoon in/lagoon out), with 4 replicates, with minor differences being that some samples have added glycerol, to protect the samples in the freezer. And half of the samples have been shaken.
 
@@ -37,15 +43,19 @@ Minion 16S data, taken from 3 different locations (digestor, lagoon in/lagoon ou
 
 We will merge the data from the samples, depending on the location of origin. So sample 1-4, sample 5-8 and sample 9-12 will be merged, as for our research question it is not important whether glycerol got added or not and whether the sample was shaken or not. Sample 10 and 12 are absent, which means that the quality of these samples was poor and that the barcodes could not be read. However this will likely not be a problem, as the other two digestor samples still remain.
 
+
 # Metagenomics Pipeline
 
-Before my group can get started on designing the pipeline for our specific case, I would like to look into what steps metagenomics consists of and what kind of tools get used. I will not be fully discussing the quality control step, as we are all already familiar with tools such as FastQC and Trimmomatic, from our previous genomics and transcriptomics project.
+**04-03-2025**
 
+Before my group can get started on designing the pipeline for our specific case, I would like to look into what steps metagenomics consists of and what kind of tools get used. I will not be fully discussing the quality control step, as we are all already familiar with tools such as FastQC and Trimmomatic, from our previous genomics and transcriptomics project.
 
 The two tools I will be looking at are kraken 2 and krona, used for classification and visualisation respectively. Before implementing these tools into our pipeline, I will do some research on the tools.
 
 # Classification
 ## Kraken 2
+
+**04-03-2025**
 
 ```
 conda install bioconda::kraken2
@@ -61,6 +71,8 @@ Kraken2 cannot take more than one file as input, so we will merge all fastq file
 ```
 cat FAX*.fastq.gz > sample_1.fastq.gz
 ```
+
+**06-03-2025**
 
 Kraken2 offers support for 3 public 16S databases @Kraken2:
 
@@ -85,6 +97,8 @@ kraken2 --db path/to/database path/to/input.fastq.gz --gzip-compressed --fastq-i
 
 
 ## Bracken (Bayesian Re-estimation of Abundance with KrakEN)
+
+**11-03-2025**
 
 ```
 conda install bioconda::bracken
@@ -113,6 +127,8 @@ The output shows how many reads are newly assigned and to which species, the rep
 # Visualisation
 
 ## Krona
+
+**07-03-2025**
 
 Krona is one of the tools we will use to visualise the data obtained through the other tools. Krona visualises classification data in a multi-layered pie chart. These charts are interactive and can be viewed within a webbrowser @Krona. The visualisation that follows from using this tool could prove as a nice overview of the classification, for in our paper.
 
@@ -148,13 +164,30 @@ or for multiple reports, use *
 ktImportTaxonomy -t 5 -m 3 -o multi-krona.html *.report 
 ```
 
+**16-03-2025**
+
+I have ran all the above described steps and generated Krona plots for all of them, however lagoon in and lagoon out seem to contain large amounts of genetic data that is not identified by Kraken2, with the Greengenes database. 39% of the data of `Lagoon out` is assigned to "other root", and 16% of `Lagoon in`. A potential fix for this, could be to switch to a different, larger database. One that contains more than just 16S data of micro organisms. Although our focus for this research is on micro-organisms, the percentages of genetic data that fall outside of micro-organisms seems relatively large and could be interesting to look further into.
+
+Another issue we have run into is that the data for the digestor does not seem sufficient. Earlier I described how sample 10 and 12 were fully absent from the Minion output, however we expected to be able to work with the remaining data from sample 9 and 11. In total, only 2 species are identified from the two samples, which does not seem representative of the sample area it was taken from. As I expect many (anaerobic) bacteria to be present in the digester (verwijzen naar artikel over metagenomics analyze van zo'n soort digester).
+
 ## Krona results
 ### Digestor
+![](img/digester_krona.svg)
+
+
 ### Lagoon in
+![](img/lagoon_in_krona.svg)
+
+
 ### Lagoon out
+
+![](img/lagoon_out_krona.svg)
 
 
 ## Base Calling
+
+**03-03-2025**
+
 This step needs to be done when nanopore sequencing has been used (such as with MinION). This form of sequencing results in a 'squiggle', this is a long electrical signal that has peaks and dips signifying what kind of molecule passed through the nanopore at that moment. The passing of a molecule through the pore disrupts the ionic current flowing across it and adds a characteristical electrical signal to the 'squiggle'. 
 
 However, before you can move on to following steps in the metagenomics process, you first have to convert this electrical signal to a DNA or RNA sequence. This is normally done using **Dorado**, this is the default basecaller that is integrated within MinKNOW (the software used to control sequencing devices such as MinION) @OxfordNanopore_Basecalling.
