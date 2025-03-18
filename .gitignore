@@ -79,6 +79,8 @@ ENV/
 *.tar.gz
 *.tgz
 
+analysis/fastplong/*.html
+
 # Data files
 *.csv
 *.tsv
@@ -94,3 +96,4 @@ ENV/
 *.swp
 *.swo
 *~
+.Rproj.user

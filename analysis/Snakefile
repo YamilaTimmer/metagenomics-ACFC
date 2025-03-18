@@ -1,23 +1,43 @@
-# SAMPLES = ["A", "B", "C"]
-# GENOMES = ["hg38_refgenome"]
-# BARCODE_DIRECTORIES = ["barcode01",  "barcode02",  "barcode03",  "barcode04",  "barcode05",  "barcode06",  "barcode07",  "barcode08",  "barcode09",  "barcode11"]
-
 configfile: "config.yaml"
+
+
+# expand("{barcode}_kurona.fastq", barcode=config["BARCODE_DIRECTORIES"].keys()),
 
 
 
 rule all:
     input:
-        expand("fastqc_trimmed/{sample}_fastqc.zip", sample=config["samples"].keys())
-        expand("{barcode}_kurona.fastq", barcode=config["BARCODE_DIRECTORIES"].keys())
+        # QC with Fastplong:
+        expand("trimmed/{sample}.fastq", sample=config["samples"].keys()),
+        expand("reports/{sample}_fastplong_QC.html", sample=config["samples"].keys()),
+        # For kraken2:
+        expand("logs/kraken2/{sample}.log", sample=config["samples"].keys()), 
+        expand("kraken2/{sample}_output.txt", sample=config["samples"].keys()),
+        expand("reports/kraken2/{sample}_report.txt", sample=config["samples"].keys())
 
-# def get_fastqs(wildcards):
-#     return find_fast
 
 
-# Basecalling met Dorado i.p.v. Guppy:
-# rule dorado_basecall:
-#     input:
+rule kraken2_taxonomic_classification:
+    input:
+        reads="trimmed/{sample}.fastq"
+    output:
+        report="reports/kraken2/{sample}_report.txt",
+        output="kraken2/{sample}_output.txt"
+    log:
+        "logs/kraken2/{sample}.log"
+    params:
+        db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes/",  
+        confidence="0.1",               
+        threads=128                    
+    shell:
+        """
+        kraken2 --db {params.db} \
+                --threads {params.threads} \
+                --confidence {params.confidence} \
+                --output {output.output} \
+                --report {output.report} \
+                {input.reads} 2> {log}
+        """
 
 
 # rule get_fastq_samples:
@@ -41,15 +61,28 @@ rule all:
 #         "v5.8.2/bio/fastqc"
 
 
+# Quality control and adapter trimming:
 rule fastq_qc_plong:
     input:
         lambda wildcards: config["samples"][wildcards.sample]
     output:
-        html="fastqc/{sample}.html"
+        fastq="trimmed/{sample}.fastq",
+        html="reports/{sample}_fastplong_QC.html"
     log:
-        "logs/fastqc/{sample}.log"
+        "logs/QC/{sample}.log"
     shell:
-        "fastplong -i {input} -o {output} 2> {log}"
+        "tools/fastplong -i {input} -o {output.fastq} -h {output.html} 2> {log}"
+
+
+rule kurona_preprocessing:
+    input:
+        lambda wildcards: config["BARCODE_DIRECTORIES"][wildcards.barcode]
+    output: 
+    "{barcode}_kurona.fastq"
+
+    shell: 
+        "cat {input}/*.fastq > {output}"
+
 
 
 
@@ -89,17 +122,6 @@ rule fastq_qc_plong:
 #         "v5.8.2/bio/fastqc"
 
 
-
-# Om de fastq bestanden te combineren voor de analyze met kurona.
-# To-do: directories als input geven om deze bestanden te genereren.
-rule kurona_preprocessing:
-    input:
-        lambda wildcards: config["BARCODE_DIRECTORIES"][wildcards.barcode]
-    output: 
-    "{barcode}_kurona.fastq"
-
-    shell: 
-        "cat {input}/*.fastq > {output}"
 
 
 
@@ -161,3 +183,4 @@ rule kurona_preprocessing:
 #         32
 #     shell:
 #         "samtools depth -@ {threads} {input} > {output} 2> {log}"
+
