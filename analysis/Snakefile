@@ -14,6 +14,9 @@ rule all:
         expand("logs/kraken2/{sample}.log", sample=config["samples"].keys()), 
         expand("kraken2/{sample}_output.txt", sample=config["samples"].keys()),
         expand("reports/kraken2/{sample}_report.txt", sample=config["samples"].keys())
+        
+        expand("logs/krona/{sample}.log", sample=config["samples"].keys()), 
+        expand("krona/{sample}_krona.html", sample=config["samples"].keys()),
 
 
 
@@ -36,9 +39,24 @@ rule kraken2_taxonomic_classification:
                 --confidence {params.confidence} \
                 --output {output.output} \
                 --report {output.report} \
+                --gzip-compressed
                 {input.reads} 2> {log}
         """
 
+rule krona_visualisation:
+    input:
+        kraken_files="kraken2/{sample}_output.txt"
+    output: 
+        krona_vis="krona/{sample}_krona.html"
+    log:
+        "logs/krona/{sample}.log"
+    shell:
+        """
+         ktImportTaxonomy -t 5 \
+                          -m 3 \
+                          -o 
+        """
+ 
 
 # rule get_fastq_samples:
 #     input: 

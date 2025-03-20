@@ -44,6 +44,11 @@ Minion 16S data, taken from 3 different locations (digestor, lagoon in/lagoon ou
 We will merge the data from the samples, depending on the location of origin. So sample 1-4, sample 5-8 and sample 9-12 will be merged, as for our research question it is not important whether glycerol got added or not and whether the sample was shaken or not. Sample 10 and 12 are absent, which means that the quality of these samples was poor and that the barcodes could not be read. However this will likely not be a problem, as the other two digestor samples still remain.
 
 
+**18-03-2025**
+The digestor samples seem to be of very low quality, with in total resulting in 1 read (after trimming, before trimming it had 2 reads). This is clearly not enough to be able to give an overview of the micro organisms present in the digestor sample, for this reason we will not be further using the digester samples and we will discuss with the client about what other research questions we could have for the lagoon in/out samples. The general research questions remain: what is present in the samples (taxonomic analysis) and what do the present micro organisms do (functional analysis).
+
+
+
 # Metagenomics Pipeline
 
 **04-03-2025**
