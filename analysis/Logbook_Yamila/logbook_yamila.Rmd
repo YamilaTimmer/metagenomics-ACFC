@@ -19,6 +19,17 @@ bibliography: library.bib
 - snakemake erin zetten
 - uitleggen hoe ik dingen heb opgelost
 
+Kraken 2 is a tool used for taxonomic classification in metagenomics and was released in 2018 as a more efficient version of Kraken 1 (using less RAM). 
+# Used tools
+
+| Package Name        | Description                                                 | Version   |
+|---------------------|-------------------------------------------------------------|-----------|
+| [Kraken2](https://github.com/DerrickWood/kraken2)|Taxonomic classification of 16S data |2.1.3|
+| [Bracken](https://github.com/jenniferlu717/Bracken)|Re-estimating abundances from Kraken2 output|3.0.1|
+| [Krona](https://github.com/marbl/Krona)|Visualising taxonomic classification in a sample|2.8.1|
+| [kraken-biom](https://github.com/smdabdoub/kraken-biom)|Converting kraken file to json formatted .biom|1.2.0|
+| [FAPROTAX](http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home) |Functional analysis for finding (metabolic) pathways that match the founc OTU's|1.2.10|
+	
 
 # Our data
 
@@ -57,6 +68,7 @@ Before my group can get started on designing the pipeline for our specific case,
 
 The two tools I will be looking at are kraken 2 and krona, used for classification and visualisation respectively. Before implementing these tools into our pipeline, I will do some research on the tools.
 
+
 # Classification
 ## Kraken 2
 
@@ -69,6 +81,11 @@ conda install bioconda::kraken2
 Kraken 2 is a tool used for taxonomic classification in metagenomics and was released in 2018 as a more efficient version of Kraken 1 (using less RAM). The tool uses a special kraken classification algorithm with k-mer based classification. This tool is useful for our research, as it can be used to analyse 16S data. A con about kraken 2 is that it has a small false-positive rate (<1%) where it wrongly assigns a read to a species. Another classification tool, KrakenUniq, does not have this false-positive rate @Different_classification_tools. However, as kraken 2 still remains much more efficient we decided to use this tool, as we do not think the small false-positive rate will have a large effect on the outcome.
 
 Kraken assigns taxonomic labels to DNA sequences by examining the k-mers within a query sequence and then query a database. k-mers are substrings within the DNA sequence of length *k*. After quering the database, the k-mers get mapped to the lowest common ancestor (LCA) of all genomes that contain the given k-mer @Kraken2.
+
+We have chosen to use Kraken2, as it seems to be the most efficient and reliable tool available for classification. Another common used classification tool is QIIME 2, however 
+
+The user also can choose the value k that determines the length of the sequences that Kraken uses for its index; every sequence (or k-mer) of length k is associated with the species in which it occurs. K-mers that occur in two or more species are associated with the lowest common ancestor of those species. The database files contain the taxonomy and k-mer information for the specified database. Following generation of these files, Bracken requires users to generate a k-mer distribution file. Kraken and Bracken additionally allow the use of multiple threads to accelerate database construction. 
+
 
 
 Kraken2 cannot take more than one file as input, so we will merge all fastq files that belong to the same sample locations. This can be done using:
@@ -85,9 +102,19 @@ Kraken2 offers support for 3 public 16S databases @Kraken2:
 - RDP
 - SILVA
 
-From these 3 databases, only Greengenes contains all available 16S data, whereas RDP and SILVA use smaller subsets of the data (e.g. containing only bacterial or achaeal 16S data). We have decided to continue with Greengenes, as we want to make a complete overview of the microbiome in the different steps of the water purification process, so it would make more sense to use a complete database for this and not a subset.
+From these 3 databases, only Greengenes contains all available 16S data, whereas RDP and SILVA use smaller subsets of the data (e.g. containing only bacterial or achaeal 16S data). We have decided to continue with Greengenes, as we want to make a complete overview of the microbiome in the different steps of the water purification process, so it would make more sense to use a complete database for this and not a subset. We will however test all databases, to make sure that Greengenes is the most thorough database to use in this situation. Possibly RDP or SILVA might be able to classify on a deeper taxonomy level than Greengenes. 
 
-The Greengenes database is already available on the server, in order to use Kraken2 with this database, the database has to be defined with the `--db` flag, followed by the location of the database.
+There are also NCBI databases, which include whole genome data of organisms other than micro-organisms (e.g. eukaryota). I have tried to use the largest NCBI database (`core_nt`) and it was able to classify roots outside of the micro-biological roots, however the general results were much less thorough than when using Greengenes or any other 16S database. I imagine this is because `core_nt` is not specialised for classification of 16S data.
+
+Kraken 2 needs the database to have 3 files present, which are
+
+- `taxo.k2d`
+- `opts.k2d`
+- `hash.k2d`
+
+Normally, one would have to "build" the database using specific Kraken2 commands, however all 16S databases are already present on the server.
+
+In order to use Kraken2 with one of the databases, the database has to be defined with the `--db` flag, followed by the location of the database.
 
 Later we will use Bracken to improve the quality of the Kraken2 output, however, Bracken only takes Kraken2 report files and not the direct output. So we will have to specify the `--report` flag, followed by an output location/name.
 
@@ -118,14 +145,63 @@ In total 4 arguments have to be given to use Bracken in this scenario:
 * `-o`: user-chosen path for where the output will be saved
 * `-l`: allows user to choose the taxonomy level that the reads will be assigned as, e.g. S is species and G is genus
 
+For -l we will use genus (`G`), as you will get an error if the chosen rank is lower than the reported taxa from the Kraken 2 output. The lowest possible taxa is Species (`S`), however these are not reported in the Kraken 2 output, while genus are. The error being (https://github.com/jenniferlu717/Bracken/issues/117):
+
+```
+Error: no reads found. Please check your Kraken report
+```
+
 
 Bracken can be run using the code below:
 ```
-bracken -d /path/to/database -i /path/to/input/sample_1.report.txt -o /path/to/output.txt -l S
+bracken -d /path/to/database -i /path/to/input/sample_1.report.txt -o /path/to/output.txt -l G
 
 ```
 
-The output shows how many reads are newly assigned and to which species, the report output is not used other than for inspection by the user. Following steps will use the normal kraken output, which in this case is `sample_x.kraken`. Bracken has made changes in this file so we can continue working with this file.
+The output shows how many reads are newly assigned and to which species, the report output is not used other than for inspection by the user. Another file automatically gets added in the same directory as the report (`{sample}_bracken_genuses.txt`), containing the original report that is corrected with the output from Bracken. This is the file that we will use further down the pipeline. 
+
+
+```
+rule kraken2_taxonomic_classification:
+    input:
+        reads="trimmed/{sample}.fastq"
+    output:
+        report="reports/kraken2/{sample}_report.txt",
+        output="kraken2/{sample}_output.txt"
+    log:
+        "logs/kraken2/{sample}.log"
+    params:
+        db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes/",  
+        confidence="0.1",               
+        threads=128                    
+    shell:
+        """
+        kraken2 --db {params.db} \
+                --threads {params.threads} \
+                --confidence {params.confidence} \
+                --output {output.output} \
+                --report {output.report} \
+                --gzip-compressed
+                {input.reads} 2> {log}
+        """
+        
+rule bracken_estimation:
+    input:
+        kraken_report="reports/kraken2/{sample}_report.txt"
+    output:
+        
+    log:
+      "logs/bracken/{sample}.log"
+    shell:
+    """
+    bracken -d {params.db} \
+    -i {input} \
+    -o {output} \
+    -l G
+
+    """
+```
+
 
 
 
@@ -175,6 +251,61 @@ I have ran all the above described steps and generated Krona plots for all of th
 
 Another issue we have run into is that the data for the digestor does not seem sufficient. Earlier I described how sample 10 and 12 were fully absent from the Minion output, however we expected to be able to work with the remaining data from sample 9 and 11. In total, only 2 species are identified from the two samples, which does not seem representative of the sample area it was taken from. As I expect many (anaerobic) bacteria to be present in the digester (verwijzen naar artikel over metagenomics analyze van zo'n soort digester).
 
+
+## Comparing databases
+To test which 16S database gives the highest percentage of classified sequences, I will run the kraken2-bracken-krona pipeline for `in_lagoon.fastq.gz` for all 3 databases (Greengenes, RDP, Silva). I decided to test it on this file, because `in_lagoon.fastq.gz` contains the most reads out of the 3 different sample locations for this project. `in_lagoon.fastq.gz` contains a gz compressed fastq file in which samples 1-4 have been merged with cat, because Kraken2 only takes 1 input file. `in_lagoon.fastq.gz` has also been quality checked and trimmed accordingly using fastplong. These 2 pre-processing steps have been performed by Floris and more information about this can be found in his logbook.
+
+### Greengenes
+### RDP
+
+While running Krona, I got the following error:
+
+
+```
+[ WARNING ]  The following taxonomy IDs were not found in the local database and were set to root (if they were recently added to NCBI, use updateTaxonomy.sh to update the local database): 
+653 2863 2963 36 790 175 514 30 1093 698 2083 877 2837 417 677 3121 390 3 388 874 2545 336 871 591 2859 2954 682 345 2847 2860 2883 369 457 2967
+```
+
+Presumably these are sequences from non-microbiological organisms, which are not present in the 16S databases.
+
+
+Less not found sequences after correcting to genus with bracken
+
+
+Kraken2 output for in_lagoon:
+```
+20242 sequences (28.87 Mbp) processed in 4.575s (265.5 Kseq/m, 378.64 Mbp/m).
+  20215 sequences classified (99.87%)
+  27 sequences unclassified (0.13%)
+```
+bracken results
+
+```
+>> Checking for Valid Options...
+ >> Running Bracken 
+      >> python src/est_abundance.py -i /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt -o /students/2024-2025/Thema07/metagenomics/wastewater/data/bracken_output_rdp/in_lagoon.bracken -k /data/datasets/KRAKEN2_INDEX/16S_RDP/database100mers.kmer_distrib -l G -t 10
+PROGRAM START TIME: 03-24-2025 12:14:53
+>> Checking report file: /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt
+BRACKEN SUMMARY (Kraken report: /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt)
+    >>> Threshold: 10 
+    >>> Number of genuses in sample: 210 
+          >> Number of genuses with reads > threshold: 62 
+          >> Number of genuses with reads < threshold: 148 
+    >>> Total reads in sample: 20242
+          >> Total reads kept at genuses level (reads > threshold): 12868
+          >> Total reads discarded (genuses reads < threshold): 344
+          >> Reads distributed: 528
+          >> Reads not distributed (eg. no genuses above threshold): 6475
+          >> Unclassified reads: 27
+BRACKEN OUTPUT PRODUCED: /students/2024-2025/Thema07/metagenomics/wastewater/data/bracken_output_rdp/in_lagoon.bracken
+PROGRAM END TIME: 03-24-2025 12:14:53
+  Bracken complete.
+```
+### Silva
+
+
+
+                
 ## Krona results
 ### Digestor
 ![](img/digester_krona.svg)
@@ -187,6 +318,122 @@ Another issue we have run into is that the data for the digestor does not seem s
 ### Lagoon out
 
 ![](img/lagoon_out_krona.svg)
+(per figuur nog wat zeggen)
+
+## Functional analysis
+
+**21-03-2025**
+
+Now that we have gotten a general idea of what kind of micro organisms are present in the lagoon influent and effluent, we can take a closer look at what kind of processes these organisms indulge in. We can do this by doing a pathway analysis of all involved Operational Taxonomic Units (OTU's), this can refer to any classification such as a species, genus or class. But in this case we are only looking at species, as Bracken has been used to further classify any Kraken2 classifications to species level.
+
+We can use the output of Kraken2 in a tool called `FAPROTAX`, this is a database that maps prokaryotic OTU's against metabolic- and other ecological functions @Louca. Examples include processes such as methanogenesis, fermentation and denitrification. However Kraken2 output can not directly be used, first the output has to be converted to .BIOM format. This can be done using the kraken-biom tool.
+
+### kraken-biom
+
+**21-03-2025**
+
+Using kraken-biom, the output of Kraken2 can be converted to .BIOM format, which is the input needed for FAPROTAX. 
+
+Installing kraken-biom, using bioconda:
+```
+conda install bioconda::kraken-biom
+```
+
+Converting Kraken2 output to .BIOM format:
+
+```
+kraken-biom /path/to/input.kraken -o /path/to/output.biom --fmt json
+
+```
+
+Use --fmt json to specify that the biom output should have a json format (V.1.0). I did this, because the example .biom input in the faprotax documentation also uses json formatting. Kraken-biom can also output to a newer .biom format (V.2.x), which is HDF5 (Hierarchical Data Format version 5) format. But I decided to settle for the older .biom format as that seems to work well.
+
+
+## FAPROTAX (Functional Annotation of Prokaryotic Taxa)
+
+**23-03-2025**
+
+FAPROTAX uses a database of prokaryotic metabolic pathways (FAPROTAX.txt), which is essentially an extensive list describing different pathways, e.g. 'arsenate_detoxification', followed up by names of different prokaryotic species that partake in this pathway and including a reference to a paper which states the former. Below you can see an example of a snippet of this database.
+
+```
+arsenate_detoxification		
+
+elements:As; main_element:As; electron_donor:variable; electron_acceptor:As; aerobic:variable;
+exclusively_prokaryotic:yes; light_dependent:no
+
+# dissimilatory reduction of arsenate for detoxification
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+*Sinorhizobium*M14*									      # DOI:10.1080/01490450802402836
+*Bacillus*SXB*										        # DOI:10.1111/jam.12093
+*Pantoea*IMH*										          # DOI:10.1111/jam.12093
+*Microbacterium*hydrocarbonoxydans*				# DOI:10.1111/j.1365-2672.2009.04188.x
+*Variovorax*paradoxus*								    # DOI:10.1111/j.1365-2672.2009.04188.x
+*Kocuria*erythromyxa*								      # DOI:10.1111/j.1365-2672.2009.04188.x
+*Arsenicoccus*bolidensis
+```
+
+Faprotax does not have a github repo, so everything has to be downloaded from their website (http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Download). I downloaded the latest version (V.1.2.10) which is a zipped file that contains the faprotax database (`faprotax.txt`), a README and a python script (`collapse_table`).
+
+I used the following arguments:
+
+- i: input file (has to be json formatted .biom, containing info on species + abundances)
+- o: output file, shows all pathways included in the faprotax.txt database, with a corresponding number displaying how active this pathway is in the entire sample (or 'functional group abundances per sample'). See the example below:
+
+```
+sulfate_respiration	0.006833712984
+sulfur_respiration	0.005150044568
+dark_sulfite_oxidation	0
+sulfite_respiration	0.004159651382
+thiosulfate_respiration	0
+respiration_of_sulfur_compounds	0.01198375755
+arsenate_detoxification	0
+
+```
+
+-g path to the faprotax database (faprotax.txt)
+-n choose whether the output table should be normalized or not, by normalizing it will convert the number of OTU's to ratios. There are multiple different options:
+
+- `none` (default)
+- `columns_before_collapsing`
+- `columns_after_collapsing` 
+- `columns_before_collapsing_excluding_unassigned`
+
+I chose for columns_after_collapsing, because it gives a good overview of the ratio of metabolic processes in the sample, as it only counts the OTU's with assigned functions and ignores the unassigned OTU's. After using this form of normalization, all active metabolic processes together add up to 1. The higher the number, the more represented the metabolic process is in this sample, so the more OTU's there are that perform this metabolic process.
+
+
+before normalizing: 
+
+```
+group	in_lagoon_report_bracken_genuses
+sulfate_respiration	138
+sulfur_respiration	104
+```
+
+after normalizing:
+
+```
+group	in_lagoon_report_bracken_genuses
+sulfate_respiration	0.006833712984
+sulfur_respiration	0.005150044568
+```
+
+- `--collapse_by_metadata`
+Specify what OTU metadata field contains the taxonomic paths in the .biom input. kraken-biom sets this to `taxonomy`.
+
+```
+python3 collapse_table.py \
+-i /path/to/input.biom \
+-o /path/to/output.tsv \
+-g FAPROTAX.txt \
+-n columns_after_collapsing \
+--collapse_by_metadata "taxonomy"\
+--out_sub_tables_dir /path/to/output/dir
+--out_groups2records_table /path/to/output/table.txt \
+--out_report /path/to/output/.txt \ 
+--force \
+-v \
+
+```
 
 
 ## Base Calling
