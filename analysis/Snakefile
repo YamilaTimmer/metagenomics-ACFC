@@ -13,11 +13,11 @@ rule all:
         # For kraken2:
         expand("logs/kraken2/{sample}.log", sample=config["samples"].keys()), 
         expand("kraken2/{sample}_output.txt", sample=config["samples"].keys()),
-        expand("reports/kraken2/{sample}_report.txt", sample=config["samples"].keys())
-        
-        expand("logs/krona/{sample}.log", sample=config["samples"].keys()), 
+        expand("reports/kraken2/{sample}_report.txt", sample=config["samples"].keys()),
+        expand("bracken/{sample}.out", sample=config["samples"].keys())
+	# Krona:
+     	expand("logs/krona/{sample}.log", sample=config["samples"].keys()), 
         expand("krona/{sample}_krona.html", sample=config["samples"].keys()),
-
 
 
 rule kraken2_taxonomic_classification:
@@ -38,6 +38,7 @@ rule kraken2_taxonomic_classification:
                 --threads {params.threads} \
                 --confidence {params.confidence} \
                 --output {output.output} \
+                --special greengenes \
                 --report {output.report} \
                 --gzip-compressed
                 {input.reads} 2> {log}
@@ -58,27 +59,6 @@ rule krona_visualisation:
         """
  
 
-# rule get_fastq_samples:
-#     input: 
-#         get_fastqs
-
-# rule fastqc:
-#     input:
-#         "samples/{sample}.fastq"
-#     output:
-#         html="fastqc/{sample}.html",
-#         zip="fastqc/{sample}_fastqc.zip"
-#     params:
-#         extra = "--quiet"
-#     log:
-#         "logs/fastqc/{sample}.log"
-#     threads: 32
-#     resources:
-#         mem_mb = 1024
-#     wrapper:
-#         "v5.8.2/bio/fastqc"
-
-
 # Quality control and adapter trimming:
 rule fastq_qc_plong:
     input:
@@ -92,6 +72,8 @@ rule fastq_qc_plong:
         "tools/fastplong -i {input} -o {output.fastq} -h {output.html} 2> {log}"
 
 
+# Om de fastq bestanden te combineren voor de analyze met kurona.
+# To-do: directories als input geven om deze bestanden te genereren.
 rule kurona_preprocessing:
     input:
         lambda wildcards: config["BARCODE_DIRECTORIES"][wildcards.barcode]
@@ -102,103 +84,26 @@ rule kurona_preprocessing:
         "cat {input}/*.fastq > {output}"
 
 
+# For bracken, only genus level worked, not species level (https://github.com/jenniferlu717/Bracken/issues/117)
+rule bracken:
+    input:
+        kraken_report = "reports/kraken2/{sample}_report.txt",
+        kraken_database = "/data/datasets/KRAKEN2_INDEX/16S_Greengenes"
+    output:
+        bracken_report = "bracken/{sample}_bracken_report.txt",
+        bracken_output = "bracken/{sample}.out"
+    params:
+        read_lenght = 150,
+        threshold = 10,
+        level = "G"
+    log: 
+        "logs/bracken/{sample}.log"
+    threads: 32
+    shell:
+        """
+        bracken -d {input.kraken_database} -i {input.kraken_report} -o {output.bracken_output} -w {output.bracken_report} -r {params.read_lenght} -t {params.threshold} -l {params.level} 2> {log}
+
+        """
 
 
-# rule trimmomatic:
-#     input:
-#         "samples/{sample}.fastq" 
-#     output:
-#         "trimmed/{sample}.fastq"
-#     log:
-#         "logs/trimmomatic/{sample}.log"
-#     params:
-#         trimmer=["SLIDINGWINDOW:4:20", "MINLEN:50"],
-#         extra="",
-#         compression_level="-9"
-#     threads:
-#         32
-#     resources:
-#         mem_mb=1024
-#     wrapper:
-#         "v5.8.3/bio/trimmomatic/se"
-
-
-# rule fastqc_trimmed:
-#     input:
-#         "trimmed/{sample}.fastq"
-#     output:
-#         html="fastqc_trimmed/{sample}.html",
-#         zip="fastqc_trimmed/{sample}_fastqc.zip"
-#     params:
-#         extra = "--quiet"
-#     log:
-#         "logs/fastqc/{sample}.log"
-#     threads: 32
-#     resources:
-#         mem_mb = 1024
-#     wrapper:
-#         "v5.8.2/bio/fastqc"
-
-
-
-
-
-# rule bwa_index:
-#     input:
-#         "{genome}.fasta",
-#     output:
-#         idx=multiext("index/{genome}.bwtsw", ".amb", ".ann", ".bwt", ".pac", ".sa"),
-#     log:
-#         "logs/bwa_index/{genome}.bwtsw.log",
-#     params:
-#         extra="",
-#     wrapper:
-#         "v5.8.3/bio/bwa/index"
-
-
-
-# rule bwa_aln:
-#     input:
-#         fastq="trimmed/{sample}.fastq",
-#         idx=multiext("index/hg38_refgenome.bwtsw", ".amb", ".ann", ".bwt", ".pac", ".sa"),
-#     output:
-#         temp("sai/{sample}.sai"),
-#     params:
-#         extra="",
-#     log:
-#         "logs/bwa_aln/{sample}.log",
-#     threads: 8
-#     wrapper:
-#         "v5.8.3/bio/bwa/aln"
-
-
-# rule bwa_samse:
-#     input:
-#         fastq="trimmed/{sample}.fastq",
-#         sai="sai/{sample}.sai",
-#         idx=multiext("index/hg38_refgenome.bwtsw", ".amb", ".ann", ".bwt", ".pac", ".sa"),
-#     output:
-#         "mapped/{sample}.bam",
-#     params:
-#         extra=r"-r '@RG\tID:{sample}\tSM:{sample}'",
-#         sort="none", 
-#         sort_order="queryname", 
-#         sort_extra="",
-#     log:
-#         "logs/bwa_samse/{sample}.log",
-#     wrapper:
-#         "v5.8.3/bio/bwa/samse"
-
-
-# rule samtools_depth:
-#     input:
-#         "mapped/{sample}.bam",
-#     output:
-#         "coverage_depths/{sample}_depth.txt",
-#     log: 
-#         "logs/{sample}_depth_error.txt"
-#     threads:
-#         32
-#     shell:
-#         "samtools depth -@ {threads} {input} > {output} 2> {log}"
-
+# To-do: Use seperate environments for all rules...(base)
