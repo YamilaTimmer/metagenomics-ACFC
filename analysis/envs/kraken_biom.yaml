@@ -1,0 +1,6 @@
+name: kraken_biom
+channels:
+  - bioconda
+  
+dependencies:
+  - kraken-biom =1.2.0
