@@ -1,17 +1,17 @@
 samples:
-    digester: data/digester.fastq.gz
-    in_lagoon: data/in_lagoon.fastq.gz
-    out_lagoon: data/out_lagoon.fastq.gz
+    #digester: /students/2024-2025/Thema07/metagenomics/wastewater/data/digester.fastq.gz
+    in_lagoon: /students/2024-2025/Thema07/metagenomics/wastewater/data/in_lagoon.fastq.gz
+    out_lagoon: /students/2024-2025/Thema07/metagenomics/wastewater/data/out_lagoon.fastq.gz
 
 
 KRAKEN_DB:
-    16S_Greengenes: /data/datasets/KRAKEN2_INDEX/16S_Greengenes
-    16S_RDP: /data/datasets/KRAKEN2_INDEX/16S_RDP
-    16S_Silva: /data/datasets/KRAKEN2_INDEX/16S_Silva
-    k2_core_nt: /data/datasets/KRAKEN2_INDEX/k2_core_nt
-    k2_pluspf: /data/datasets/KRAKEN2_INDEX/k2_pluspf
-    k2_pluspfp: /data/datasets/KRAKEN2_INDEX/k2_pluspfp
-    k2_standard: /data/datasets/KRAKEN2_INDEX/k2_standard
+    16S_Greengenes: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/16S_Greengenes
+    16S_RDP: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/16S_RDP
+    16S_Silva: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/16S_Silva
+    k2_core_nt: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/k2_core_nt
+    k2_pluspf: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/k2_pluspf
+    k2_pluspfp: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/k2_pluspfp
+    k2_standard: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/k2_standard
 
 GENOMES:
     ["hg38_refgenome"] # Human ref genome.
