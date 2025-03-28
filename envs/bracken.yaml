@@ -1,0 +1,8 @@
+name: bracken
+
+channels:
+  - bioconda
+  
+dependencies:
+  - bracken = 3.0
+  - python = 3.12.8
