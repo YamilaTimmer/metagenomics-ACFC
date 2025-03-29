@@ -55,22 +55,76 @@ Minion 16S data, taken from 3 different locations (digestor, lagoon in/lagoon ou
 We will merge the data from the samples, depending on the location of origin. So sample 1-4, sample 5-8 and sample 9-12 will be merged, as for our research question it is not important whether glycerol got added or not and whether the sample was shaken or not. Sample 10 and 12 are absent, which means that the quality of these samples was poor and that the barcodes could not be read. However this will likely not be a problem, as the other two digestor samples still remain.
 
 
-**18-03-2025**
-The digestor samples seem to be of very low quality, with in total resulting in 1 read (after trimming, before trimming it had 2 reads). This is clearly not enough to be able to give an overview of the micro organisms present in the digestor sample, for this reason we will not be further using the digester samples and we will discuss with the client about what other research questions we could have for the lagoon in/out samples. The general research questions remain: what is present in the samples (taxonomic analysis) and what do the present micro organisms do (functional analysis).
+**16-03-2025**
+The digestor samples seem to be of very low quality, with in total resulting in 1 read (after trimming, before trimming it had 2 reads). The minion flowcell used for sequencing the data had already been used before and was likely reaching its quotum. The digestor samples got sequenced last and that is most likely the reason for the low quality of the samples. 
 
+1 read is clearly not enough to be able to give an overview of the micro organisms present in the digestor sample, for this reason we will not be further using the digester samples and we will discuss with the client about what other research questions we could have for the lagoon in/out samples. The general research questions remain: what is present in the samples (taxonomic analysis) and what do the present micro organisms do (functional analysis). So for the pipeline we will only work with the lagoon in/out samples.
+
+
+# Research question
+
+**17-03-2025**
+
+For this metagenomics project we have two main research questions, which are:
+- What Operational Taxonomic Units (OTU's) are present in the two samples: `lagoon_in` and `lagoon_out`
+- What (metabolic) processes take place in the samples of `lagoon_in` and `lagoon_out`
+
+These two main questions are a way to get a first insight into the two samples, after we have constructed a general profile of what OTU's live in the samples and what processes happen in the samples, we would like to compare the two samples to eachother:
+
+- What can be said on the difference/similarity of the processes that take place in the samples?
+- What can be said on the diversity in OTU's, looking at the alpha diversity?
+
+## Hypothesis
+What outcome do i expect?
 
 
 # Metagenomics Pipeline
 
-**04-03-2025**
+**03-03-2025**
 
-Before my group can get started on designing the pipeline for our specific case, I would like to look into what steps metagenomics consists of and what kind of tools get used. I will not be fully discussing the quality control step, as we are all already familiar with tools such as FastQC and Trimmomatic, from our previous genomics and transcriptomics project.
+Before my group can get started on designing the pipeline for our specific case, I would like to look into what steps metagenomics consists of and what kind of tools get used. 
+
+Steps:
+
+- Quality control
+- Trimming (if needed)
+- Classification (determining what OTU's are present)
+- Functional analysis (determining what processes take place in the samples)
+- Calculating alpha/beta diversity
+- Visualization
+
+Floris will be looking into the quality control and trimming steps. Quality control had already been performed for us, but our teacher recommended us to repeat this step, as it is always good to double check the data from a dataset that gets handed to you.
+
+Jarno will look into how we can calculate the alpha/beta diversity which gives an idea of the diversity of OTU's in the two samples.
+
+I will be looking into the classification and functional analysis steps. For this I will be using Kraken2 and FAPROTAX. And together we will look into a way to visualise our results, for which I will look into Krona.
+
+Finding a tool for functional analysis that can actually work with Kraken2 output was pretty hard. Most functional analysis tools work with outputs from other classification tools such as qiime and Humann. However I found that some people on forums mentioned that it is possible to convert kraken2 output to biom format and then plug it into a tool called faprotax.
+
+
+
+
 
 The two tools I will be looking at are kraken 2 and krona, used for classification and visualisation respectively. Before implementing these tools into our pipeline, I will do some research on the tools.
 
+## Base Calling
 
-# Classification
-## Kraken 2
+**03-03-2025**
+
+This step needs to be done when nanopore sequencing has been used (such as with MinION). This form of sequencing results in a 'squiggle', this is a long electrical signal that has peaks and dips signifying what kind of molecule passed through the nanopore at that moment. The passing of a molecule through the pore disrupts the ionic current flowing across it and adds a characteristical electrical signal to the 'squiggle'. 
+
+However, before you can move on to following steps in the metagenomics process, you first have to convert this electrical signal to a DNA or RNA sequence. This is normally done using **Dorado**, this is the default basecaller that is integrated within MinKNOW (the software used to control sequencing devices such as MinION) @OxfordNanopore_Basecalling.
+
+Dorado works optimally with the POD5 file-format. Our data consists of fast5 files, so we will have to convert these first.
+
+**04-03-2025**
+Our teacher has mentioned that base calling had already been performed on the data and that we were not expected to re-do this, so instead we moved onto the quality control, using the present .fastq  files instead of the FAST5 files.
+
+
+
+
+## Classification
+### Kraken 2
 
 **04-03-2025**
 
@@ -86,8 +140,6 @@ We have chosen to use Kraken2, as it seems to be the most efficient and reliable
 
 The user also can choose the value k that determines the length of the sequences that Kraken uses for its index; every sequence (or k-mer) of length k is associated with the species in which it occurs. K-mers that occur in two or more species are associated with the lowest common ancestor of those species. The database files contain the taxonomy and k-mer information for the specified database. Following generation of these files, Bracken requires users to generate a k-mer distribution file. Kraken and Bracken additionally allow the use of multiple threads to accelerate database construction. 
 
-
-
 Kraken2 cannot take more than one file as input, so we will merge all fastq files that belong to the same sample locations. This can be done using:
 
 ```
@@ -102,7 +154,9 @@ Kraken2 offers support for 3 public 16S databases @Kraken2:
 - RDP
 - SILVA
 
-From these 3 databases, only Greengenes contains all available 16S data, whereas RDP and SILVA use smaller subsets of the data (e.g. containing only bacterial or achaeal 16S data). We have decided to continue with Greengenes, as we want to make a complete overview of the microbiome in the different steps of the water purification process, so it would make more sense to use a complete database for this and not a subset. We will however test all databases, to make sure that Greengenes is the most thorough database to use in this situation. Possibly RDP or SILVA might be able to classify on a deeper taxonomy level than Greengenes. 
+From these 3 databases, only Greengenes contains all available 16S data, whereas RDP and SILVA use smaller subsets of the data (e.g. containing only bacterial or achaeal 16S data). However RDP and SILVA seem to have deeper taxonomic levels whereas greengenes is more broad (see table). In #Comparing databases I have compared all databases, to see which one classifies the highest amounts of reads, which turned out to be:
+
+We have decided to continue with Greengenes, as we want to make a complete overview of the microbiome in the different steps of the water purification process, so it would make more sense to use a complete database for this and not a subset. We will however test all databases, to make sure that Greengenes is the most thorough database to use in this situation. Possibly RDP or SILVA might be able to classify on a deeper taxonomy level than Greengenes. 
 
 There are also NCBI databases, which include whole genome data of organisms other than micro-organisms (e.g. eukaryota). I have tried to use the largest NCBI database (`core_nt`) and it was able to classify roots outside of the micro-biological roots, however the general results were much less thorough than when using Greengenes or any other 16S database. I imagine this is because `core_nt` is not specialised for classification of 16S data.
 
@@ -128,7 +182,7 @@ kraken2 --db path/to/database path/to/input.fastq.gz --gzip-compressed --fastq-i
 (show bit of example output from report + what it means)
 
 
-## Bracken (Bayesian Re-estimation of Abundance with KrakEN)
+### Bracken (Bayesian Re-estimation of Abundance with KrakEN)
 
 **11-03-2025**
 
@@ -150,7 +204,6 @@ For -l we will use genus (`G`), as you will get an error if the chosen rank is l
 ```
 Error: no reads found. Please check your Kraken report
 ```
-
 
 Bracken can be run using the code below:
 ```
@@ -202,124 +255,6 @@ rule bracken_estimation:
     """
 ```
 
-
-
-
-# Visualisation
-
-## Krona
-
-**07-03-2025**
-
-Krona is one of the tools we will use to visualise the data obtained through the other tools. Krona visualises classification data in a multi-layered pie chart. These charts are interactive and can be viewed within a webbrowser @Krona. The visualisation that follows from using this tool could prove as a nice overview of the classification, for in our paper.
-
-Below I describe how to use Krona, using Kraken2 output @AndreaTelatin, @Schmeier:
-
-```
-conda install bioconda::krona
-```
-After installing Krona, an installation message will show that the taxonomy databases need to manually be updated before Krona can generate taxonomic reports. For this, the following script has to be ran:
-
-```
-ktUpdateTaxonomy.sh
-```
-
-Krona can be run using the output of Kraken2, the two relevant variables are the counts (-m) and the NCBI taxonomy ID (-t). These variables are found in the Kraken2 output, in column 2 and 3.
-
-The code below makes a file that consists of only column 2 and 3 from the kraken2 output. Column 2 contains the sequence ID (obtained from the FASTQ header) and column 3 contains the taxonomy ID that Kraken2 has used to label the sequence (equal to the NCBI taxonomy identifier) @Schmeier.
-
-```
-cat path/to/sample_1.kraken | cut -f 2,3 > path/to/output.kraken.krona
-```
-
-Now the newly made file can be used with Krona, with the following code:
-
-```
-ktImportTaxonomy sample_1.kraken.krona
-```
-
-
-or for multiple reports, use *
-
-```
-ktImportTaxonomy -t 5 -m 3 -o multi-krona.html *.report 
-```
-
-**16-03-2025**
-
-I have ran all the above described steps and generated Krona plots for all of them, however lagoon in and lagoon out seem to contain large amounts of genetic data that is not identified by Kraken2, with the Greengenes database. 39% of the data of `Lagoon out` is assigned to "other root", and 16% of `Lagoon in`. A potential fix for this, could be to switch to a different, larger database. One that contains more than just 16S data of micro organisms. Although our focus for this research is on micro-organisms, the percentages of genetic data that fall outside of micro-organisms seems relatively large and could be interesting to look further into.
-
-Another issue we have run into is that the data for the digestor does not seem sufficient. Earlier I described how sample 10 and 12 were fully absent from the Minion output, however we expected to be able to work with the remaining data from sample 9 and 11. In total, only 2 species are identified from the two samples, which does not seem representative of the sample area it was taken from. As I expect many (anaerobic) bacteria to be present in the digester (verwijzen naar artikel over metagenomics analyze van zo'n soort digester).
-
-
-## Comparing databases
-To test which 16S database gives the highest percentage of classified sequences, I will run the kraken2-bracken-krona pipeline for `in_lagoon.fastq.gz` for all 3 databases (Greengenes, RDP, Silva). I decided to test it on this file, because `in_lagoon.fastq.gz` contains the most reads out of the 3 different sample locations for this project. `in_lagoon.fastq.gz` contains a gz compressed fastq file in which samples 1-4 have been merged with cat, because Kraken2 only takes 1 input file. `in_lagoon.fastq.gz` has also been quality checked and trimmed accordingly using fastplong. These 2 pre-processing steps have been performed by Floris and more information about this can be found in his logbook.
-
-### Greengenes
-### RDP
-
-While running Krona, I got the following error:
-
-
-```
-[ WARNING ]  The following taxonomy IDs were not found in the local database and were set to root (if they were recently added to NCBI, use updateTaxonomy.sh to update the local database): 
-653 2863 2963 36 790 175 514 30 1093 698 2083 877 2837 417 677 3121 390 3 388 874 2545 336 871 591 2859 2954 682 345 2847 2860 2883 369 457 2967
-```
-
-Presumably these are sequences from non-microbiological organisms, which are not present in the 16S databases.
-
-
-Less not found sequences after correcting to genus with bracken
-
-
-Kraken2 output for in_lagoon:
-```
-20242 sequences (28.87 Mbp) processed in 4.575s (265.5 Kseq/m, 378.64 Mbp/m).
-  20215 sequences classified (99.87%)
-  27 sequences unclassified (0.13%)
-```
-bracken results
-
-```
->> Checking for Valid Options...
- >> Running Bracken 
-      >> python src/est_abundance.py -i /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt -o /students/2024-2025/Thema07/metagenomics/wastewater/data/bracken_output_rdp/in_lagoon.bracken -k /data/datasets/KRAKEN2_INDEX/16S_RDP/database100mers.kmer_distrib -l G -t 10
-PROGRAM START TIME: 03-24-2025 12:14:53
->> Checking report file: /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt
-BRACKEN SUMMARY (Kraken report: /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt)
-    >>> Threshold: 10 
-    >>> Number of genuses in sample: 210 
-          >> Number of genuses with reads > threshold: 62 
-          >> Number of genuses with reads < threshold: 148 
-    >>> Total reads in sample: 20242
-          >> Total reads kept at genuses level (reads > threshold): 12868
-          >> Total reads discarded (genuses reads < threshold): 344
-          >> Reads distributed: 528
-          >> Reads not distributed (eg. no genuses above threshold): 6475
-          >> Unclassified reads: 27
-BRACKEN OUTPUT PRODUCED: /students/2024-2025/Thema07/metagenomics/wastewater/data/bracken_output_rdp/in_lagoon.bracken
-PROGRAM END TIME: 03-24-2025 12:14:53
-  Bracken complete.
-```
-### Silva
-
-
-
-                
-## Krona results
-### Digestor
-![](img/digester_krona.svg)
-
-
-### Lagoon in
-![](img/lagoon_in_krona.svg)
-
-
-### Lagoon out
-
-![](img/lagoon_out_krona.svg)
-(per figuur nog wat zeggen)
-
 ## Functional analysis
 
 **21-03-2025**
@@ -349,7 +284,7 @@ kraken-biom /path/to/input.kraken -o /path/to/output.biom --fmt json
 Use --fmt json to specify that the biom output should have a json format (V.1.0). I did this, because the example .biom input in the faprotax documentation also uses json formatting. Kraken-biom can also output to a newer .biom format (V.2.x), which is HDF5 (Hierarchical Data Format version 5) format. But I decided to settle for the older .biom format as that seems to work well.
 
 
-## FAPROTAX (Functional Annotation of Prokaryotic Taxa)
+### FAPROTAX (Functional Annotation of Prokaryotic Taxa)
 
 **23-03-2025**
 
@@ -434,28 +369,208 @@ python3 collapse_table.py \
 -v \
 
 ```
+### Minor adjustments faprotax script
+**25-03-2025**
+faprotax used the python script `collapse_table.py` to assign OTU's to corresponding (metabolic) pathways. However at first when I tried to run this script with the bash command, I would get errors coming from the script, mentioning unescaped escape characters. All I had to do to fix this was to change the `\` in the script to `\\`.
 
 
-## Base Calling
 
-**03-03-2025**
+## Visualisation
 
-This step needs to be done when nanopore sequencing has been used (such as with MinION). This form of sequencing results in a 'squiggle', this is a long electrical signal that has peaks and dips signifying what kind of molecule passed through the nanopore at that moment. The passing of a molecule through the pore disrupts the ionic current flowing across it and adds a characteristical electrical signal to the 'squiggle'. 
+### Krona
 
-However, before you can move on to following steps in the metagenomics process, you first have to convert this electrical signal to a DNA or RNA sequence. This is normally done using **Dorado**, this is the default basecaller that is integrated within MinKNOW (the software used to control sequencing devices such as MinION) @OxfordNanopore_Basecalling.
+**07-03-2025**
 
-Dorado works optimally with the POD5 file-format. Our data consists of fast5 files, so we will have to convert these first.
+Krona is one of the tools we will use to visualise the data obtained through the other tools. Krona visualises classification data in a multi-layered pie chart. These charts are interactive and can be viewed within a webbrowser @Krona. The visualisation that follows from using this tool could prove as a nice overview of the classification, for in our paper.
 
-https://github.com/nanoporetech/pod5-file-format
+Below I describe how to use Krona, using Kraken2 output @AndreaTelatin, @Schmeier:
 
-### Fast5 to POD5
+```
+conda install bioconda::krona
+```
+After installing Krona, an installation message will show that the taxonomy databases need to manually be updated before Krona can generate taxonomic reports. For this, the following script has to be ran:
 
-pip install pod5
-
-Dorado can be installed on Linux using:
-```{python}
-curl "https://cdn.oxfordnanoportal.com/software/analysis/dorado-0.9.1-linux-x64.tar.gz" -o dorado-0.9.1-linux-x64.tar.gz
-tar -xzf dorado-0.9.1-linux-x64.tar.gz
-dorado-0.9.1-linux-x64/bin/dorado --version
+```
+ktUpdateTaxonomy.sh
 ```
 
+update taxonomy naar conda locatie heel belangrijk!!! en in envs overal python versie zetten yay
+
+ktUpdateTaxonomy.sh /students/2024-2025/Thema07/metagenomics/wastewater/.snakemake/conda/692460f6e8eec96f3093b62149341dd8_/opt/krona/taxonomy
+Fetching taxdump.tar.gz...
+
+Krona can be run using the output of Kraken2, the two relevant variables are the counts (-m) and the NCBI taxonomy ID (-t). These variables are found in Kraken2 reports, in column 3 and 5.
+
+In the bash command you have to let Krona know which columns to use, and Krona can be run using:
+
+```
+ktImportTaxonomy -t 5 -m 3 {input} -o {output}
+```
+
+
+**16-03-2025**
+
+I have ran all the above described steps and generated Krona plots for all of them, however lagoon in and lagoon out seem to contain large amounts of genetic data that is not identified by Kraken2, with the Greengenes database. 39% of the data of `Lagoon out` is assigned to "other root", and 16% of `Lagoon in`. A potential fix for this, could be to switch to a different, larger database. One that contains more than just 16S data of micro organisms. Although our focus for this research is on micro-organisms, the percentages of genetic data that fall outside of micro-organisms seems relatively large and could be interesting to look further into.
+
+Another issue we have run into is that the data for the digestor does not seem sufficient. Earlier I described how sample 10 and 12 were fully absent from the Minion output, however we expected to be able to work with the remaining data from sample 9 and 11. In total, only 2 species are identified from the two samples, which does not seem representative of the sample area it was taken from. As I expect many (anaerobic) bacteria to be present in the digester (verwijzen naar artikel over metagenomics analyze van zo'n soort digester).
+
+
+# Snakemake
+
+Floris has written the SnakeMake code for fastplong, bracken and Kraken2. I have made the Snakemake code for kraken-biom, faprotax and krona:
+
+```
+rule krona_visualisation:
+    input:
+        bracken_files="bracken/reports/{sample}.txt"
+    output: 
+        krona_vis="krona/{sample}_krona.html"
+    log:
+        "logs/krona/{sample}.log"
+    conda:
+        "envs/krona.yaml"
+    shell:
+        """
+        ktImportTaxonomy -t 5 \
+                         -m 3 \
+                         {input} \
+                         -o {output} \
+                         2> {log}
+        """
+```
+```
+rule kraken_biom:
+    input:  
+        bracken_kraken="bracken/reports/{sample}.txt"		
+    output: 
+        biom_files="kraken_biom/{sample}_output.biom"
+    log:
+        "logs/kraken_biom/{sample}.log"
+    conda:
+        "envs/kraken_biom.yaml"
+    shell:
+        """
+        kraken-biom {input} \
+                    -o {output} \
+                    --fmt json \
+                    2> {log}
+        """
+```
+```
+rule faprotax:
+    input:
+        biom_files="kraken_biom/{sample}_output.biom"
+    output:
+        function_table="faprotax/{sample}/{sample}_function_table.tsv",
+        faprotax_report="faprotax/{sample}/{sample}_report.txt",
+        sub_table_dir=directory("faprotax/{sample}/sub_groups/"),
+        groups_to_records="faprotax/{sample}/group_table.txt"
+    log:
+        "logs/faprotax/{sample}.log"
+    shell:
+        """
+        python3 tools/FAPROTAX_1.2.10/collapse_table.py \
+        -i {input.biom_files} \
+        -o {output.function_table} \
+        -g tools/FAPROTAX_1.2.10/FAPROTAX.txt \
+        -n columns_after_collapsing \
+        --collapse_by_metadata "taxonomy" \
+        --out_sub_tables_dir {output.sub_table_dir} \
+        --out_groups2records_table {output.groups_to_records} \
+        --out_report {output.faprotax_report} \
+        -v \
+        2> {log}
+        """
+```
+
+## Building envs for the tools
+**26-03-2025**
+To make it easier for other users to use this pipeline, without them having to download/install all the used tools/packages I will make environments for all tools that are available through bioconda. For this I use the following format, in a `.yaml` file:
+
+```
+name: kraken_biom
+
+channels:
+  - bioconda
+  
+dependencies:
+  - kraken-biom = 1.2.0
+  - python = 3.12.8
+```
+
+For the dependencies I enter the used tool, including the version that we have made the pipeline with and I specify the python version the pipeline was made with. At first I had not specified the python version. which resulted in me getting an error where conda was trying to build the kraken-biom environment using an old version of python (2.7), but after specifying the correct version of python this problem was solved.
+
+
+# Comparing databases
+To test which 16S database gives the highest percentage of classified sequences, I will run the kraken2-bracken-krona pipeline for `in_lagoon.fastq.gz` for all 3 databases (Greengenes, RDP, Silva). I decided to test it on this file, because `in_lagoon.fastq.gz` contains the most reads out of the 3 different sample locations for this project. `in_lagoon.fastq.gz` contains a gz compressed fastq file in which samples 1-4 have been merged with cat, because Kraken2 only takes 1 input file. `in_lagoon.fastq.gz` has also been quality checked and trimmed accordingly using fastplong. These 2 pre-processing steps have been performed by Floris and more information about this can be found in his logbook.
+
+### Greengenes
+### RDP
+
+While running Krona, I got the following error:
+
+
+```
+[ WARNING ]  The following taxonomy IDs were not found in the local database and were set to root (if they were recently added to NCBI, use updateTaxonomy.sh to update the local database): 
+653 2863 2963 36 790 175 514 30 1093 698 2083 877 2837 417 677 3121 390 3 388 874 2545 336 871 591 2859 2954 682 345 2847 2860 2883 369 457 2967
+```
+
+Presumably these are sequences from non-microbiological organisms, which are not present in the 16S databases.
+
+
+Less not found sequences after correcting to genus with bracken
+
+
+Kraken2 output for in_lagoon:
+```
+20242 sequences (28.87 Mbp) processed in 4.575s (265.5 Kseq/m, 378.64 Mbp/m).
+  20215 sequences classified (99.87%)
+  27 sequences unclassified (0.13%)
+```
+bracken results
+
+```
+>> Checking for Valid Options...
+ >> Running Bracken 
+      >> python src/est_abundance.py -i /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt -o /students/2024-2025/Thema07/metagenomics/wastewater/data/bracken_output_rdp/in_lagoon.bracken -k /data/datasets/KRAKEN2_INDEX/16S_RDP/database100mers.kmer_distrib -l G -t 10
+PROGRAM START TIME: 03-24-2025 12:14:53
+>> Checking report file: /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt
+BRACKEN SUMMARY (Kraken report: /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt)
+    >>> Threshold: 10 
+    >>> Number of genuses in sample: 210 
+          >> Number of genuses with reads > threshold: 62 
+          >> Number of genuses with reads < threshold: 148 
+    >>> Total reads in sample: 20242
+          >> Total reads kept at genuses level (reads > threshold): 12868
+          >> Total reads discarded (genuses reads < threshold): 344
+          >> Reads distributed: 528
+          >> Reads not distributed (eg. no genuses above threshold): 6475
+          >> Unclassified reads: 27
+BRACKEN OUTPUT PRODUCED: /students/2024-2025/Thema07/metagenomics/wastewater/data/bracken_output_rdp/in_lagoon.bracken
+PROGRAM END TIME: 03-24-2025 12:14:53
+  Bracken complete.
+```
+
+### Silva
+
+
+
+                
+# Krona results
+### Digestor
+![](img/digester_krona.svg)
+
+
+### Lagoon in
+![](img/lagoon_in_krona.svg)
+
+
+### Lagoon out
+
+![](img/lagoon_out_krona.svg)
+(per figuur nog wat zeggen)
+
+
+# Conclusion
+
+- answer hypothesis/conclusion
