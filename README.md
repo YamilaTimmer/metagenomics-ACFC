@@ -97,6 +97,16 @@ snakemake --use-conda
 
 You have to pass the flag `--use-conda`, so that conda knows that it has to use/build the environments in the env dir.
 
+
+#### Using with slurm
+
+```bash
+ pip install snakemake-executor-plugin-slurm
+```
+```bash
+snakemake --use-conda --profile slurm/
+```
+
 ### Version details
 The pipeline is made using SnakeMake version `8.27.1` and python version `3.12.8`. The following tools have been used for the pipeline:
 
