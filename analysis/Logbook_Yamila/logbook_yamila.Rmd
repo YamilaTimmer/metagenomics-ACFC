@@ -19,7 +19,7 @@ bibliography: library.bib
 - snakemake erin zetten
 - uitleggen hoe ik dingen heb opgelost
 
-Kraken 2 is a tool used for taxonomic classification in metagenomics and was released in 2018 as a more efficient version of Kraken 1 (using less RAM). 
+ 
 # Used tools
 
 | Package Name        | Description                                                 | Version   |
@@ -31,11 +31,23 @@ Kraken 2 is a tool used for taxonomic classification in metagenomics and was rel
 | [FAPROTAX](http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home) |Functional analysis for finding (metabolic) pathways that match the founc OTU's|1.2.10|
 	
 
+# Introduction
+
+This introduction was written based on an overview of the purification processes and the problems that ACFC faces with, provided by Peter Matuku, a professor from the university of Eldoret, that is specialized in water purification.
+
+For this metagenomics project we will look at a Kenyan factory, owned by [Agro Chemical & Food Company Limited or ACFC](https://acfc.co.ke/), that produces industrial spirits and yeast from sugar molasses (waste product of sugar production). Specifically we will take a closer look at microbial communities present in different steps in the water purification process of this factory. 
+
+The production of alcohol and yeast from molasses generates a high volume of wastewater rich in organic matter, nutrients and recalcitrant compounds (slowly biodegradable or non-biodegradable compounds). The first step in the water purification process is anaerobic digestion, which facilitates organic matter degradation and also produces biogas as a byproduct. The efficiency of anaerobic treatment depends on the dynamics within the microbial community involved in the process. Looking into these dynamics using metagenomics, could offer a way to improve the overall efficiency of the digester.
+
+The following step after anaerobic digestion, is aerobic digestion. The wastewater flows into large, but undeep lagoons where the water is exposed to a lot of oxygen. The wastewater remains in the lagoons for a number of days. After this the water flows back into the Nyando river.
+
+The main problem is that the effluent from the lagoons does not meet Kenyan standards for water pollution, as certain qualities as the amount of organic matter and nutrients are too high. This causes damage not only for animals and plants in the river, but also to people that live downstream, that use this water for bathing, cooking and drinking.
+
 # Our data
 
 **05-03-2025**
 
-Minion 16S data, taken from 3 different locations (digestor, lagoon in/lagoon out), with 4 replicates, with minor differences being that some samples have added glycerol, to protect the samples in the freezer. And half of the samples have been shaken.
+Minion 16S data, taken from 3 different locations (digester, lagoon influent/lagoon effluent), with 4 replicates, with minor differences being that some samples have added glycerol, to protect the samples in the freezer. And half of the samples have been shaken. The lagoon influent (which is the effluent of the digester), will be called `lagoon in` from now. And the lagoon effluent (which is the river influent), will be called `lagoon out` from now.
 
 |    | Sample Location | Glycerol | Shaken |
 |----|-----------------|----------|--------|
@@ -420,6 +432,12 @@ Another issue we have run into is that the data for the digestor does not seem s
 Floris has written the SnakeMake code for fastplong, bracken and Kraken2. I have made the Snakemake code for kraken-biom, faprotax and krona:
 
 ```
+rule all:
+    input:
+
+        expand("krona/{sample}_krona.html", sample=config["samples"].keys()),
+        expand("logs/krona/{sample}.log", sample=config["samples"].keys()), 
+    
 rule krona_visualisation:
     input:
         bracken_files="bracken/reports/{sample}.txt"
@@ -438,7 +456,15 @@ rule krona_visualisation:
                          2> {log}
         """
 ```
+
+
 ```
+rule all:
+    input:
+    
+        expand("kraken_biom/{sample}_output.biom", sample=config["samples"].keys()),
+        expand("logs/kraken_biom/{sample}.log", sample=config["samples"].keys()),
+
 rule kraken_biom:
     input:  
         bracken_kraken="bracken/reports/{sample}.txt"		
@@ -457,6 +483,15 @@ rule kraken_biom:
         """
 ```
 ```
+rule all:
+    input:
+    
+        expand("faprotax/{sample}/{sample}_function_table.tsv", sample=config["samples"].keys()),
+        expand("faprotax/{sample}/{sample}_report.txt", sample=config["samples"].keys()),
+        expand("faprotax/{sample}/group_table.txt", sample=config["samples"].keys()),
+        expand("faprotax/{sample}/sub_groups/", sample=config["samples"].keys()),
+        expand("logs/faprotax/{sample}.log", sample=config["samples"].keys())
+
 rule faprotax:
     input:
         biom_files="kraken_biom/{sample}_output.biom"
@@ -484,6 +519,7 @@ rule faprotax:
 ```
 
 ## Building envs for the tools
+
 **26-03-2025**
 To make it easier for other users to use this pipeline, without them having to download/install all the used tools/packages I will make environments for all tools that are available through bioconda. For this I use the following format, in a `.yaml` file:
 
@@ -574,3 +610,6 @@ PROGRAM END TIME: 03-24-2025 12:14:53
 # Conclusion
 
 - answer hypothesis/conclusion
+
+
+
