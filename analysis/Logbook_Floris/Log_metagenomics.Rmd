@@ -38,7 +38,7 @@ library(tidyverse)
 15-03-2025:
 
 ## **Introduction** ##
-In the wastewater of a Kenyan water treatment plant can be many organisms whose presence influences the water quality by their production of toxins like those produced by algal blooms from Cyanobacteria. **1** These algal blooms are a global threat to freshwater systems like the Nyando River. 
+The wastewater of a Kenyan water treatment plant contains many organisms whose presence influences the water quality by their production of toxins like those produced by algal blooms from Cyanobacteria. **1** These algal blooms are a global threat to freshwater systems like the Nyando River. 
 Using more traditional chemical analyses, an abundance of nitrogen, phosphorus and potassium was determined.
 
 It is imperative to measure those toxins or in this case genetic material from the micro-organisms that produce them. This wastewater is directly exhausted into the Nyando River, a basin covering about 3,590 square kilometers. The population density at the basin is higher than the national average, this indicates it’s importance. The life expectancy is very low with an average of 37.7 years for males and 42.9 years for females. Enhancing water quality could contribute to a higher lifespan for the people and other organisms that make use of these wetlands.
@@ -57,9 +57,13 @@ To do this, a bio-informatics pipeline was constructed to compare these samples 
 In addition to the phylogenetic classification, there will also be an anti-biotic resistance test to determine to what antibiotic resistance genes the micro-organisms have. This will provide an overview of means to combat the bacteria found in the sample more effectively. **7**
 
 To first assemble the microbial genomes from the metagenomic dataset, several tools can be used like Metabat, Concoct and Maxbin4. Identifying potentially up to 2000 micro-organisms in the sample can be challenging given that their average genome size would be 4 Mpb 8 Gpb of reads would have to be obtained to get an average coverage of 1x **5**.
+
+**To-do: 16S DNA explanation.**
+
 The diversity of the microbiome will be quantified using the alpha diversity measure. This is a formula that can be applied to calculate this measure for diversity. **6**.
 
 Biosynthetic gene clusters (BGCs) will also be detected by mapping the reads from the Oxford Nanopore sequencer to the MiBIG database. **3** The results from that analysis will show the biosynthetic potential of the organisms to produce toxins. 
+
 
 
 # **Pipeline** #
@@ -68,7 +72,7 @@ The different steps of the pipeline are explained below.
 Overview:
 1. Quality control with Fastplong
 2. Trimming of adapter sequences with Fastplong
-3. Taxonomic classifiacation with Kraken2
+3. Taxonomic classification with Kraken2
 4. Visualization of Kraken2 results using Kurona / Pavian 
 5. Functional analysis of the micro-organisms found
 
@@ -157,23 +161,23 @@ The sample taken from the digester only contained 2 reads before filtering with 
 The sample taken from inside the lagoon has ~18K reads after filtering. 
 
 
-| Statistic         | Before Filtering         | After Filtering          |
-|-----------------|--------------------------|--------------------------|
-| Total Reads       | 20.242000 K              | 18.042000 K              |
-| Total Bases       | 28.870993 M              | 23.485654 M              |
-| Minimum Length    | 3                        | 17                       |
-| Maximum Length    | 13.903000 K              | 13.903000 K              |
-| Median Length     | 1.452000 K              | 1.320000 K              |
-| Mean Length       | 1.426000 K              | 1.301000 K              |
-| N50 Length        | 1.453000 K              | 1.322000 K              |
-| GC Content        | 53.655196%               | 53.160078%               |
-| Q5 Bases          | 28.257982 M (97.876724%)  | 23.065575 M (98.211338%)  |
-| Q7 Bases          | 26.944736 M (93.328054%)  | 22.133635 M (94.243213%)  |
-| Q10 Bases         | 24.666336 M (85.436396%)  | 20.436812 M (87.018279%)  |
-| Q15 Bases         | 21.538507 M (74.602585%)  | 18.037896 M (76.803891%)  |
-| Q20 Bases         | 18.308551 M (63.415037%)  | 15.468003 M (65.861496%)  |
-| Q30 Bases         | 5.359630 M (18.564065%)   | 4.511358 M (19.208995%)   |
-| Q40 Bases         | 12.277000 K (0.042524%)   | 10.494000 K (0.044683%)   |
+| Statistic         | Before Filtering          | After Filtering          |
+|-------------------|---------------------------|--------------------------|
+| Total Reads       | 20.242000 K               | 18.042000 K              |
+| Total Bases       | 28.870993 M               | 23.485654 M              |
+| Minimum Length    | 3                         | 17                       |
+| Maximum Length    | 13.903000 K               | 13.903000 K              |
+| Median Length     | 1.452000 K                | 1.320000 K               |
+| Mean Length       | 1.426000 K                | 1.301000 K               |
+| N50 Length        | 1.453000 K                | 1.322000 K               | 
+| GC Content        | 53.655196%                | 53.160078%               |
+| Q5 Bases          | 28.257982 M (97.876724%)  | 23.065575 M (98.211338%) |
+| Q7 Bases          | 26.944736 M (93.328054%)  | 22.133635 M (94.243213%) |
+| Q10 Bases         | 24.666336 M (85.436396%)  | 20.436812 M (87.018279%) |
+| Q15 Bases         | 21.538507 M (74.602585%)  | 18.037896 M (76.803891%) |
+| Q20 Bases         | 18.308551 M (63.415037%)  | 15.468003 M (65.861496%) |
+| Q30 Bases         | 5.359630 M (18.564065%)   | 4.511358 M (19.208995%)  |
+| Q40 Bases         | 12.277000 K (0.042524%)   | 10.494000 K (0.044683%)  |
 
 
 
@@ -182,14 +186,14 @@ And the last sample, taken when the water had exited the lagoon.
 
 
 | Statistic         | Before Filtering         | After Filtering          |
-|-----------------|--------------------------|--------------------------|
-| Total Reads       | 2.410000 K              | 2.164000 K              |
-| Total Bases       | 3.400336 M              | 2.855180 M              |
+|-------------------|--------------------------|--------------------------|
+| Total Reads       | 2.410000 K               | 2.164000 K               |
+| Total Bases       | 3.400336 M               | 2.855180 M               |
 | Minimum Length    | 3                        | 17                       |
-| Maximum Length    | 2.075000 K              | 2.075000 K              |
-| Median Length     | 1.435000 K              | 1.298000 K              |
-| Mean Length       | 1.410000 K              | 1.319000 K              |
-| N50 Length        | 1.436000 K              | 1.309000 K              |
+| Maximum Length    | 2.075000 K               | 2.075000 K               |
+| Median Length     | 1.435000 K               | 1.298000 K               |
+| Mean Length       | 1.410000 K               | 1.319000 K               |
+| N50 Length        | 1.436000 K               | 1.309000 K               |
 | GC Content        | 54.223112%               | 53.883748%               |
 | Q5 Bases          | 3.327345 M (97.853418%)  | 2.802639 M (98.159801%)  |
 | Q7 Bases          | 3.172289 M (93.293398%)  | 2.687310 M (94.120511%)  |
@@ -204,6 +208,41 @@ In the tables above, the N50 length is the largest lenght L such that 50% of all
 
 Q5, Q7, Q10 etc. bases is the value of the number of bases at each quality level (Phred score). 
 
+![image](fastplong/In_lagoon.png)
+The figure above displays the difference in read quality before and after filtering with Fastplong. 
+The amount of reads was reduced but the quality increased. Perhaps the reads with a lower phred score would suffice but I chose to remove them in order to have more statistical power in the downstream analyses like in Kraken2.
+
+
+
+
+![image](fastplong/Out_lagoon.png)
+The same was done with the sample from the water that had exited the lagoon. The digester sample contained only one read after filtering so displaying this graph would be meaningless.
+
+The rule in snakemake takes all the samples from the config.yaml used for all the rules. 
+FastPlong generates both a .html report for the quality control and a fastq file that has been trimmed. (adapter sequences removed and low quality reads removed)
+The standard error is redirected to the logs/QC/ directory for every individual sample. 
+
+```{snakemake, eval=F}
+
+rule fastq_qc_plong:
+    input:
+        lambda wildcards: config["samples"][wildcards.sample]
+    output:
+        fastq="trimmed/{sample}.fastq",
+        html="QC/{sample}_fastplong_QC.html"
+    log:
+        "logs/QC/{sample}.log"
+    shell:
+        """
+        tools/fastplong \
+        -i {input} \
+        -o {output.fastq} \
+        -h {output.html} \
+        2> {log}
+        """
+
+```
+
 
 
 
@@ -215,9 +254,9 @@ This tools was chosen based on a comparison made in the following article, (@ye_
 Kraken2 is 
 
 
+
 ### **Visualization of Kraken2 results** ###
 A script to generate a Sankey graph based on the report from Kraken2 was used. 
-
 
 
 ## **Citations** ##
