@@ -87,6 +87,12 @@ Now there should be a folder called `FAPROTAX_1.2.10.zip`, containing:
 
 You are now done downloading all necessary files for FAPROTAX, make sure to **not** change any of the file names
 
+### Krona
+By running the pipeline, an environment for Krona will automatically be created, however, the user still needs to manually run the following below, in order to manually update the taxonomy databases. If this is not done, Krona will not be able to generate a piechart.
+
+```bash
+ktUpdateTaxonomy.sh
+```
 
 ### Running the pipeline
 In order to run the pipeline, you have to run the snakefile. This can be done using:
