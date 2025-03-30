@@ -107,7 +107,7 @@ Below is a breakdown of the results from a FastQC check and how to
 interpret them.
 
 | Category                         | Result                                                                                                                                      | How to Interpret                                                                                                                                                                                                                                                                                                                                                         |
-|--------------|---------------|-------------------------------------------|
+|------------------|------------------|------------------------------------|
 | **Basic Statistics**             | A table with details such as Filename, File Type, Sequence Length, %GC, Total Sequences, Encoding, and Sequences Flagged as Poor Quality.   | Read and check the table for errors.                                                                                                                                                                                                                                                                                                                                     |
 | **Per Base Sequence Quality**    | A graph (see Figure 1).                                                                                                                     | The graph has three colored zones: 28-40 (green, good quality), 20-28 (yellow/orange, moderate quality), and 0-20 (red, poor quality). The yellow box represents the 25th to 75th percentile, the black lines show the 10th and 90th percentiles, and the blue line represents the average quality score. A drop in quality after base 100 indicates trimming is needed. |
 | **Per Tile Sequence Quality**    | A heatmap plot showing read quality per tile and position.                                                                                  | Dark blue tiles indicate good quality, while lighter tiles indicate poorer quality. The Y-axis shows the tile number, and the X-axis shows the position.                                                                                                                                                                                                                 |
@@ -340,7 +340,7 @@ A Franzosa2,3 ,Nicola Segata1,4
 diverse microbial communities with bioBakery
 3](https://doi.org/10.7554/eLife.65088)
 
-[ eLife 2021;10:e65088](https://doi.org/10.7554/eLife.65088)
+[eLife 2021;10:e65088](https://doi.org/10.7554/eLife.65088)
 
 1 Department CIBIO, University of Trento, Italy\
 2 Harvard T. H. Chan School of Public Health, Boston, MA, USA\
@@ -479,6 +479,10 @@ strategies, ultimately contributing to sustainable industrial wastewater
 management and renewable energy generation.
 
 ### What does this mean for us?
+
+```{bash}
+
+```
 
 We now know the exact problem, this being: “Instability and incomplete
 degradation of organic pollutants + low methane yield persist in the
@@ -694,9 +698,6 @@ finally eluted for analysis.
 This method ensures efficient isolation of bacterial DNA from complex
 samples, reducing host DNA interference.
 
-Sequencing - <https://nanoporetech.com/document/16S-barcoding-1-24> -
-14Aug2019 - Rapid sequencing amplicons - 16S barcoding (SQK-16S024)
-
 28 mrt
 
 ```         
@@ -771,3 +772,191 @@ shell:
 
 "python beta_diversity.py -i {input.file1} {input.file2} --type bracken --level G > {output}"
 ```
+
+29 mrt
+
+Sequencing - <https://nanoporetech.com/document/16S-barcoding-1-24> -
+14Aug2019 - Rapid sequencing amplicons - 16S barcoding (SQK-16S024)
+
+It has occured that the flow cell used in our minION was not of the
+highest quality / able to produce a good read ammount for our last
+sample. This has caused us to have only the Lagoon in and out as useable
+samples.
+
+The MinION Flow Cell can generate up to 50 Gb of data for sequencing
+DNA, cDNA or native RNA in real-time. A flowcell is a core sensing unit
+this is made up out of nanopores, array of microscaffolds that supports
+membrane and embedded nanopore. The array keeps the multiple nanopores
+stable during shipping and usage. A sensor chip Each microscaffold
+corresponds to its own electrode that is connectedAn array chip to a
+channel in the sensor array chip. Sensor arrays may be manufactured with
+any number of channels and a ASIC each nanopore channel is controlled
+ASICand measured individually by the bespoke ASIC. This allows for
+multiple nanopore experiments to be performed in parallel. More than one
+ASIC may be included in a device and Oxford Nanopore is building ASICs
+of different sizes for different purposes.
+
+<https://nanoporetech.com/platform/technology/flow-cells-and-nanopores>
+
+Using MinKNOW the sequence was started, to get the settings needed for
+the minION sequencing the user had to go to the kit page in MinKNOW and
+select the kit used tfor the library preperation
+
+The risk of using a old minION flowcell will be that the flowcell can
+change overtime but the change between each sequencing run is also very
+hard to predict.
+
+For the downstream analysis quality check and trimming will be needed to
+ensure good quality, It has already shown for use after using fastplong
+that our flowcell was indeed having problem with the digester samples
+and did not give us uesable reads.
+
+30 mrt
+
+**Sankey plot**
+
+To visualize the difference between lagoon in and lagoon out it is nice
+to have an easy to interpret plot, a sankey plot gives. anice overview
+of the different levels.
+
+A gitrepo was found that can turn kreports and bracken reports into
+sankey plots. Repo -
+<https://github.com/taniagmangolini/awesome_kreport_charts>
+
+A bracken reports looks like this -
+<https://ccb.jhu.edu/software/bracken/index.shtml?t=manual> -
+<https://github.com/jenniferlu717/Bracken/blob/master/sample_data/sample_output_bracken.report>
+
+1.60 425595 425595 U 0 unclassified 98.40 26241408 0 R 1 root 98.40
+26241408 0 R1 131567 cellular organisms 96.78 25808392 0 D 2 Bacteria
+40.89 10903399 0 P 1224 Proteobacteria 22.31 5950178 0 C 1236
+Gammaproteobacteria 11.01 2936805 0 O 91347 Enterobacteriales 11.01
+2936805 0 F 543 Enterobacteriaceae 5.44 1449813 0 G 561 Escherichia 5.44
+1449813 1449813 S 562 Escherichia coli 1.47 392102 0 G 590 Salmonella
+1.47 392102 392102 S 28901 Salmonella enterica
+
+this shows report shows: - name. The name of this taxon in the
+taxonomy. - tax_id. The taxonomy identifier of this taxon in the
+taxonomy. - rank. The rank of this taxon in the taxonomy. -
+tax_count_krk. The number of reads classified to this taxon by
+kraken2. - added_brk. The additional reads assigned by bracken. -
+tax_count. The final number of reads assigned to this taxon. - fraction.
+The fraction of the total number of reads assigned to this taxon.
+
+This repo has the option to use pip install however when i used it i got
+an error seen below
+
+```         
+Getting requirements to build wheel ... error error:
+subprocess-exited-with-error
+
+× Getting requirements to build wheel did not run successfully. │ exit
+code: 1
+```
+
+Because of this i went ahead and cloned into the repo and ran the
+setup.py file manually.
+
+After this i tried making my snakemake pipeline with this script the
+readme however wasn't very helpfull.
+
+my pipeline looked as following
+
+```         
+SAMPLES, = glob_wildcards("data/bracken/{sample}.txt")
+
+rule all:
+    input:
+        expand("results/{sample}.html", sample=SAMPLES)
+
+rule generate_sankey:
+    input:
+        bracken_file = "data/bracken/{sample}.txt"
+    output:
+        html = "results/{sample}.html"
+    shell:
+        python3 awesome_kreport_charts --min_bacteria 10  -o {output} -- {input}
+```
+
+This gave me allot of errors the script not being able to run was one of
+the main ones
+
+Due to all these problems i asked deepseek to look at the script and
+write me a new one that would work using plotly. This gave me the
+following script:
+
+```{python}
+import pandas as pd
+import plotly.graph_objects as go
+
+def parse_bracken(file_path):
+    """Parse indentation-based Bracken file into nodes and links
+    Read the file and devide them into the collums that correspond to them"""
+    
+    df = pd.read_csv(file_path, sep="\t", header=None,
+                     names=["percent", "reads", "direct_reads", "rank", "taxID", "name"])
+    
+    nodes = []
+    links = []
+    hierarchy = []  # Track last parent at each depth
+    
+    # for loop that removes white spaces, calculates indentation level and hierarchy
+    for idx, row in df.iterrows():
+        name = row["name"].lstrip()
+        depth = (len(row["name"]) - len(name)) // 2
+        node_id = len(nodes)
+        nodes.append({"name": name, "depth": depth})
+        
+        # if not the root find the hierarchy (last node at prev depth) and create a link using reads
+        if depth > 0:
+            parent_id = hierarchy[depth-1]
+            links.append({
+                "source": parent_id,
+                "target": node_id,
+                "value": row["reads"]
+            })
+        
+        # Update hierarchy tracking
+        if depth >= len(hierarchy):
+            hierarchy.append(node_id)
+        else:
+            hierarchy[depth] = node_id
+    
+    return pd.DataFrame(nodes), pd.DataFrame(links)
+
+# Snakemake integration
+if __name__ == "__main__":
+    # Get input/output paths from Snakemake
+    input_file = snakemake.input[0]
+    output_file = snakemake.output[0]
+    
+    # Generate the Sankey chart
+    nodes_df, links_df = parse_bracken(input_file)
+    
+    fig = go.Figure(go.Sankey(
+        node=dict(
+            label=nodes_df["name"],
+            pad=15,
+            thickness=20
+        ),
+        link=dict(
+            source=links_df["source"],
+            target=links_df["target"],
+            value=links_df["value"]
+        )
+    ))
+    
+    fig.update_layout(title="Taxonomic Sankey Chart", font_size=10)
+    fig.write_html(output_file)
+```
+
+Using this script i was able to generate two html files that contain the
+sankey plots for lagoon in and lagoon out.
+
+Here is a screenshot of the **lagoon out**
+
+![Figure 1: Sankey chart lagoon out](images/newplot.png)
+
+![Figure 2: Sankey chart lagoon in](images/newplot-2.png)
+
+It seems that the bacili group has fallen away.
