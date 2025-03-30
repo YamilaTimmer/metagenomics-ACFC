@@ -22,6 +22,8 @@ bibliography: library.bib
  
 # Used tools
 
+The pipeline has been made using SnakeMake version 8.27.1 and python version 3.12.8.
+
 | Package Name        | Description                                                 | Version   |
 |---------------------|-------------------------------------------------------------|-----------|
 | [Kraken2](https://github.com/DerrickWood/kraken2)|Taxonomic classification of 16S data |2.1.3|
@@ -47,7 +49,7 @@ The main problem is that the effluent from the lagoons does not meet Kenyan stan
 
 **05-03-2025**
 
-Minion 16S data, taken from 3 different locations (digester, lagoon influent/lagoon effluent), with 4 replicates, with minor differences being that some samples have added glycerol, to protect the samples in the freezer. And half of the samples have been shaken. The lagoon influent (which is the effluent of the digester), will be called `lagoon in` from now. And the lagoon effluent (which is the river influent), will be called `lagoon out` from now.
+Our data consists of 16S data, which stems from the 16S rRNA component of prokaryotic ribosomes. The data is sequenced using a minION flowcell. The samples are taken from 3 different locations (digester, lagoon influent/lagoon effluent), with 4 replicates, with minor differences being that some samples have added glycerol, to protect the samples in the freezer. And half of the samples have been shaken. The lagoon influent (which is the effluent of the digester), will be called `lagoon in` from now. And the lagoon effluent (which is the river influent), will be called `lagoon out` from now.
 
 |    | Sample Location | Glycerol | Shaken |
 |----|-----------------|----------|--------|
@@ -68,6 +70,7 @@ We will merge the data from the samples, depending on the location of origin. So
 
 
 **16-03-2025**
+
 The digestor samples seem to be of very low quality, with in total resulting in 1 read (after trimming, before trimming it had 2 reads). The minion flowcell used for sequencing the data had already been used before and was likely reaching its quotum. The digestor samples got sequenced last and that is most likely the reason for the low quality of the samples. 
 
 1 read is clearly not enough to be able to give an overview of the micro organisms present in the digestor sample, for this reason we will not be further using the digester samples and we will discuss with the client about what other research questions we could have for the lagoon in/out samples. The general research questions remain: what is present in the samples (taxonomic analysis) and what do the present micro organisms do (functional analysis). So for the pipeline we will only work with the lagoon in/out samples.
@@ -87,7 +90,36 @@ These two main questions are a way to get a first insight into the two samples, 
 - What can be said on the diversity in OTU's, looking at the alpha diversity?
 
 ## Hypothesis
-What outcome do i expect?
+
+In order to hypothesize about what OTU's are likely present in the two samples and what processes likely take place, I looked for research papers on microbial communities in industrial ethanol production using molasses.
+
+### What OTU's are present?
+
+My first expectation is that both samples (lagoon in/out) will mostly consist of aerobic bacteria, as both sample locations have aerobic conditions with plenty of exposure to oxygen. And that the anaerobic digester mostly contains anaerobic and facultative anaerobic bacteria, however this cannot be confirmed due to the lack of reads in the digester samples.
+
+In order to research how to optimize ethanol yield in industrial sugarcane ethanol refineries, @De_Oliveira_Lino created a model system to simulate the 'typical' real world setup. This model system consists of *Lactobacillus amylovorus*, *Lactobacillus fermentum*, *Lactobacillus helveticus*, *Pediococcus claussenii*, *Zymomonas mobilis* and *Saccharomyces cerevisiae*, which is a type of yeast cells that are responsible for ethanol fermentation. These species make up over 80% of the diversity typically found in a real world setup.
+
+While *Saccharomyces cerevisiae* is essential to the process of producing ethanol, all the bacterial species are seen as 'contaminants', meaning that they do not serve a purpose in the primary process of ethanol production. They will even compete with yeast for available nutrients and the metabolic products of these bacteria can also inhibit yeast cells.
+
+@Iltchenco measured microbial diversity from a factory with comparable wastewater to ACFC (with sugarcane molasses). During the highest methane production, the phyla that dominated here were *bacteroidetes*, *firmicutes* and *proteobacteria*.
+
+Most of the earlier named species are either anaerobic (e.g. *Lactobacillus*), facultative anaerobic (e.g. *Zymomonas mobilis*, *Saccharomyces cerevisiae*) or aerotolerant (e.g. *Pediococcus claussenii*), meaning they do not use oxygen but they are not harmed by oxygen either. All of the species could be present in the anaerobic digester, however this is difficult to confirm due to the lack of data from the digester samples. 
+
+Some of the anaerobic species could still be present in the lagoon influent, but likely not in the lagoon effluent, as the sample will have been exposed to oxygen over a span of multiple days. The facultative anaerobic species and aerotolerant species could however be present in both the lagoon influent and effluent, as they can either use oxygen or are not affected by it.
+
+### What processes take place?
+
+Before the wastewater purification process, fermentation takes place, by *zymomonas mobilis*.
+
+In an anaerobic digester, the available organic carbon from the wastewater gets converted into biogas (60–70% methane + 30–40% carbon dioxide). This process consists of four stages: hydrolysis, acidogenesis, acetogenesis, and methanogenesis. In the image below the involved micro-organisms are shown per process @De_Carvalho.
+
+![](imgs/digester_overview.jpg)
+
+It is difficult to say what processes likely take place in the aerobic lagoons, as there is not one 'type' of aerobic lagoon. I was not able to find any studies that discuss metagenomics on aerobic lagoons in the treatment process of wastewater from ethanol production. Obvious to state would be that in the lagoons mostly aerobic processes take place, as aerobic lagoons have a large surface area and low depth, allowing maximum exposure to oxygen.
+
+### Diversity between lagoon in/out samples
+
+I expect the lagoon in sample to have a higher diversity than the lagoon out sample, as species might still be present from the anaerobic digester. However there is likely a difference in conditions between the digester and the lagoon. Such as a difference in pressure, temperature, humidity and of course the fact that oxygen is not present in the digestor. So any microbial species that leave the digester, might still be present in the digestor effluent (the lagoon in) sample, but might not be present in the lagoon effluent sample anymore, which is after a few days. Because of this I also expect that less (metabolic) take place in the lagoon out sample.
 
 
 # Metagenomics Pipeline
@@ -114,11 +146,6 @@ I will be looking into the classification and functional analysis steps. For thi
 Finding a tool for functional analysis that can actually work with Kraken2 output was pretty hard. Most functional analysis tools work with outputs from other classification tools such as qiime and Humann. However I found that some people on forums mentioned that it is possible to convert kraken2 output to biom format and then plug it into a tool called faprotax.
 
 
-
-
-
-The two tools I will be looking at are kraken 2 and krona, used for classification and visualisation respectively. Before implementing these tools into our pipeline, I will do some research on the tools.
-
 ## Base Calling
 
 **03-03-2025**
@@ -130,9 +157,8 @@ However, before you can move on to following steps in the metagenomics process, 
 Dorado works optimally with the POD5 file-format. Our data consists of fast5 files, so we will have to convert these first.
 
 **04-03-2025**
+
 Our teacher has mentioned that base calling had already been performed on the data and that we were not expected to re-do this, so instead we moved onto the quality control, using the present .fastq  files instead of the FAST5 files.
-
-
 
 
 ## Classification
@@ -267,6 +293,9 @@ rule bracken_estimation:
     """
 ```
 
+
+${THRESHOLD} - Default = 10. For species classification, any species with <= 10 (or otherwise specified) reads will not receive any additional reads from higher taxonomy levels when distributing reads for abundance estimation. If another classification level is specified, thresholding will occur at that level.
+
 ## Functional analysis
 
 **21-03-2025**
@@ -309,13 +338,13 @@ elements:As; main_element:As; electron_donor:variable; electron_acceptor:As; aer
 exclusively_prokaryotic:yes; light_dependent:no
 
 # dissimilatory reduction of arsenate for detoxification
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-*Sinorhizobium*M14*									      # DOI:10.1080/01490450802402836
-*Bacillus*SXB*										        # DOI:10.1111/jam.12093
-*Pantoea*IMH*										          # DOI:10.1111/jam.12093
-*Microbacterium*hydrocarbonoxydans*				# DOI:10.1111/j.1365-2672.2009.04188.x
-*Variovorax*paradoxus*								    # DOI:10.1111/j.1365-2672.2009.04188.x
-*Kocuria*erythromyxa*								      # DOI:10.1111/j.1365-2672.2009.04188.x
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+*Sinorhizobium*M14*									    # DOI:10.1080/01490450802402836
+*Bacillus*SXB*										      # DOI:10.1111/jam.12093
+*Pantoea*IMH*	                          # DOI:10.1111/jam.12093
+*Microbacterium*hydrocarbonoxydans*			# DOI:10.1111/j.1365-2672.2009.04188.x
+*Variovorax*paradoxus*							    # DOI:10.1111/j.1365-2672.2009.04188.x
+*Kocuria*erythromyxa*							      # DOI:10.1111/j.1365-2672.2009.04188.x
 *Arsenicoccus*bolidensis
 ```
 
@@ -382,7 +411,9 @@ python3 collapse_table.py \
 
 ```
 ### Minor adjustments faprotax script
+
 **25-03-2025**
+
 faprotax used the python script `collapse_table.py` to assign OTU's to corresponding (metabolic) pathways. However at first when I tried to run this script with the bash command, I would get errors coming from the script, mentioning unescaped escape characters. All I had to do to fix this was to change the `\` in the script to `\\`.
 
 
@@ -521,6 +552,7 @@ rule faprotax:
 ## Building envs for the tools
 
 **26-03-2025**
+
 To make it easier for other users to use this pipeline, without them having to download/install all the used tools/packages I will make environments for all tools that are available through bioconda. For this I use the following format, in a `.yaml` file:
 
 ```
@@ -540,58 +572,32 @@ For the dependencies I enter the used tool, including the version that we have m
 # Comparing databases
 To test which 16S database gives the highest percentage of classified sequences, I will run the kraken2-bracken-krona pipeline for `in_lagoon.fastq.gz` for all 3 databases (Greengenes, RDP, Silva). I decided to test it on this file, because `in_lagoon.fastq.gz` contains the most reads out of the 3 different sample locations for this project. `in_lagoon.fastq.gz` contains a gz compressed fastq file in which samples 1-4 have been merged with cat, because Kraken2 only takes 1 input file. `in_lagoon.fastq.gz` has also been quality checked and trimmed accordingly using fastplong. These 2 pre-processing steps have been performed by Floris and more information about this can be found in his logbook.
 
+First I ran Kraken2 with all 16S databases, the results can be seen in the table below. The percentages are the amount of reads that were classified, the remainder (100%-classified reads) are the amount of unclassified reads. RDP seems to have performed best here and Greengenes worst, however the differences do not seem to be very large. However the goal is to classify as many OTU's on genus level, as this will give better insights into metabolic processes and will help visualising the diversity. Kraken2 only mentions how many reads get classified, but not what level they get classified at.
+
+|            | Lagoon in | Lagoon out |
+|------------|-----------|------------|
+| RDP        | 99.81%    | 99.77%     |
+| Silva      | 99.78%    | 99.68%     |
+| Greengenes | 99.71%    | 99.63%     |
+
+
+Now I will run Bracken on all the Kraken2 reports generated by Kraken2
+
+
+
 ### Greengenes
+8 processen lagoon in
+3 processen lagoon out
+
 ### RDP
-
-While running Krona, I got the following error:
-
-
-```
-[ WARNING ]  The following taxonomy IDs were not found in the local database and were set to root (if they were recently added to NCBI, use updateTaxonomy.sh to update the local database): 
-653 2863 2963 36 790 175 514 30 1093 698 2083 877 2837 417 677 3121 390 3 388 874 2545 336 871 591 2859 2954 682 345 2847 2860 2883 369 457 2967
-```
-
-Presumably these are sequences from non-microbiological organisms, which are not present in the 16S databases.
-
-
-Less not found sequences after correcting to genus with bracken
-
-
-Kraken2 output for in_lagoon:
-```
-20242 sequences (28.87 Mbp) processed in 4.575s (265.5 Kseq/m, 378.64 Mbp/m).
-  20215 sequences classified (99.87%)
-  27 sequences unclassified (0.13%)
-```
-bracken results
-
-```
->> Checking for Valid Options...
- >> Running Bracken 
-      >> python src/est_abundance.py -i /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt -o /students/2024-2025/Thema07/metagenomics/wastewater/data/bracken_output_rdp/in_lagoon.bracken -k /data/datasets/KRAKEN2_INDEX/16S_RDP/database100mers.kmer_distrib -l G -t 10
-PROGRAM START TIME: 03-24-2025 12:14:53
->> Checking report file: /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt
-BRACKEN SUMMARY (Kraken report: /students/2024-2025/Thema07/metagenomics/wastewater/data/kraken_output_rdp/in_lagoon_report.txt)
-    >>> Threshold: 10 
-    >>> Number of genuses in sample: 210 
-          >> Number of genuses with reads > threshold: 62 
-          >> Number of genuses with reads < threshold: 148 
-    >>> Total reads in sample: 20242
-          >> Total reads kept at genuses level (reads > threshold): 12868
-          >> Total reads discarded (genuses reads < threshold): 344
-          >> Reads distributed: 528
-          >> Reads not distributed (eg. no genuses above threshold): 6475
-          >> Unclassified reads: 27
-BRACKEN OUTPUT PRODUCED: /students/2024-2025/Thema07/metagenomics/wastewater/data/bracken_output_rdp/in_lagoon.bracken
-PROGRAM END TIME: 03-24-2025 12:14:53
-  Bracken complete.
-```
+2 processen lagoon in
+0 processen lagoon out
 
 ### Silva
+6 processen lagoon in
+2 processen lagoon out
 
 
-
-                
 # Krona results
 ### Digestor
 ![](img/digester_krona.svg)
