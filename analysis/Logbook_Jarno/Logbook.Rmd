@@ -11,7 +11,7 @@ output:
   pdf_document:
     toc: true
     number_sections: true
-bibliography: references.bib    # Path to your .bib file
+bibliography: bibliography.bib    # Path to your .bib file
 header-includes:
   - \usepackage{setspace}\doublespacing  # For PDF double-spacing (optional)
 editor_options: 
@@ -31,11 +31,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Feedback - logboek
-
-exacte datums waar komt de data van daan + wat is de data document
-verwerken afrikaanse proffesor meer denk stappen exacte output van tools
-en versie nummers
+# Tools
 
 # Introductie
 
@@ -63,9 +59,42 @@ showed the distribution of the species in the samples. Also, using a
 different Python script, a beta diversity analysis was made. With all
 this information, an analysis of each stage of the lagoon has been made.
 
+For this metagenomics project our group was asked to look what microbial
+community lives in the waste water from a Molasses-Based Spirit and
+Yeast Production Factory. The waste water samples we're taken from 3
+stages. The waste water straight from the factory, within the digester
+(a closed container utilising anaerobic bacteria to break down organic
+material and produce methane) and from the exit of the lagoon where the
+water flows back into the river. These samples we're sequenced with
+minION but due to a problem with it's flowcell our digester sample
+turned out bad. Therefore we have chosen to no include it in this
+research. Using Snakemake we created a pipeline that trims and checks
+the sample quality. this was done using `Fastplong` @fastplong, Then the
+data was ran through a tool called `Kraken2` @Wood2019 this is a
+computational tool for microbial classification. This gave kreports
+(kraken reports) and kraken.out files that were used to make
+visualizations. `Kronatools` @Ondov2011 was used to make some Krona
+charts, Krona visualises classification data in a multi-layered pie
+chart. These charts are interactive and can be viewed within a
+webbrowser @Krona The visualisation that follows from using this tool
+could prove as a nice overview of the classification, for in our paper.
+(for more info look at Logbook - Yamila). Another visualisation that was
+used was a sankey plot, The custom Snakemake workflow for generating
+taxonomic Sankey charts was developed with guidance from
+DeepSeek-R1-Lite-Preview, a large language model @deepseek2024 . A
+functional analysys was then made with the Kraken2 output, faprotax
+
+Finding a tool for functional analysis that can actually work with
+Kraken2 output was pretty hard. Most functional analysis tools work with
+outputs from other classification tools such as qiime and Humann.
+However I found that some people on forums mentioned that it is possible
+to convert kraken2 output to biom format and then plug it into a tool
+called faprotax.
+
 ## Research question
 
-What microorganisms live in the different places within the lagoon.
+What Microbial Community live in an Anaerobic Reactor for the Treatment
+of Wastewater from a Molasses-Based Spirit and Yeast Production Factory
 
 # Inhoud
 
@@ -75,14 +104,13 @@ What microorganisms live in the different places within the lagoon.
 
 # Mat en Meth {#mat-en-meth}
 
-## week 1
-
 Goals: Find tools that will build our pipeline Find What our pipeline
 needs to do Write material and methods Clear up our question from our
 supervisor
 
-Mar 4 Setting up a github project to devide the tasks among the team
-members
+## March 4th
+
+Setting up a github project to devide the tasks among the team members
 
 The tasks: - Write materials - Jarno - Write Methods - Jarno - Snakemake
 pipeline - Fastplong - Floris - Trimming (fastplong) - Floris -
@@ -90,7 +118,7 @@ kraken2 - Yamila - Pavian - Floris - KronaTools - Yamila - HUManN 3.0 -
 Floris - Shannon index for alpha diversity - Jarno - Presentation -
 conlusion and discussion needs to be written by everyone
 
-### 6 Mar
+## March 6th
 
 First Version and back ground research for the materials and methods \##
 background info for the usage of the tools
@@ -107,7 +135,7 @@ Below is a breakdown of the results from a FastQC check and how to
 interpret them.
 
 | Category                         | Result                                                                                                                                      | How to Interpret                                                                                                                                                                                                                                                                                                                                                         |
-|------------------|------------------|------------------------------------|
+|-------------------|-------------------|----------------------------------|
 | **Basic Statistics**             | A table with details such as Filename, File Type, Sequence Length, %GC, Total Sequences, Encoding, and Sequences Flagged as Poor Quality.   | Read and check the table for errors.                                                                                                                                                                                                                                                                                                                                     |
 | **Per Base Sequence Quality**    | A graph (see Figure 1).                                                                                                                     | The graph has three colored zones: 28-40 (green, good quality), 20-28 (yellow/orange, moderate quality), and 0-20 (red, poor quality). The yellow box represents the 25th to 75th percentile, the black lines show the 10th and 90th percentiles, and the blue line represents the average quality score. A drop in quality after base 100 indicates trimming is needed. |
 | **Per Tile Sequence Quality**    | A heatmap plot showing read quality per tile and position.                                                                                  | Dark blue tiles indicate good quality, while lighter tiles indicate poorer quality. The Y-axis shows the tile number, and the X-axis shows the position.                                                                                                                                                                                                                 |
@@ -197,7 +225,7 @@ lagoon” this needs to be fixed because there arent problems within the
 lagoon the problem is what is exciting the lagoon into the river. -
 Explanation of the usage of BGP.
 
-**8th of march**
+## March 8th
 
 Second feedback on the materials and methods, This time from my team
 members and the teacher.
@@ -374,13 +402,13 @@ URL <http://www.rstudio.com/>.\
 Used as an interface, also known as the IDE for the R programming
 software and Rmarkdown.
 
-## 10th of march
+## March 10th
 
 **Recieved study concept** Due to our study leader at the hanze having
 to drop out, we made direct contact with the person at AFAC who
 collected the samples and guided the studies there.
 
-## Study concept AFAC
+### Study concept AFAC
 
 **Study Concept: Investigating Microbial Community in an Anaerobic
 Reactor for the Treatment of Wastewater from a Molasses-Based Spirit and
@@ -480,10 +508,6 @@ management and renewable energy generation.
 
 ### What does this mean for us?
 
-```{bash}
-
-```
-
 We now know the exact problem, this being: “Instability and incomplete
 degradation of organic pollutants + low methane yield persist in the
 digestor”.
@@ -492,7 +516,9 @@ The goal of this project is: “Understanding the microbial diversity,
 interactions, and metabolic pathways will help optimise performance,
 improve resilience and maximise energy recovery from the digestor”
 
-**14th of march** *Starting my part of the snakemake pipeline*
+## 14th of march
+
+*Starting my part of the snakemake pipeline*
 
 Finding the right tools was difficult, this was because there wasn’t
 allot of documentation regarding QIIME2 in snakemake. There was no
@@ -510,7 +536,8 @@ classification - Show the diversity of what the samples contain
 
 18 mrt **Qiime2 - versie (niet gekozen)**
 
-```         
+```{python}
+
 SAMPLES = ["forward"]
 
   
@@ -557,9 +584,13 @@ being from the minION) after that it needed a feature table, then after
 generating all these files a shannon index for alpha diversity could be
 created. The visualisation was also
 
-20 mrt **Python script (gekozen versie)**
+## March 20th
 
-```         
+**Snakemake rules for calculation of alpha and beta diversity** This
+build was done in a test enviroment on assemblix where i had the
+following file structure
+
+```{python}
 SAMPLES, = glob_wildcards("data/kraken2/{sample}.kraken")
 
 rule all:
@@ -593,7 +624,7 @@ for alpha and beta diversity** - 25 mrt The alpha diversity is fully
 working but there are some problems with the beta diversity settings and
 inputs
 
-```         
+```{python}
 
 SAMPLES, = glob_wildcards("data/bracken/{sample}.out")
 
@@ -676,7 +707,7 @@ $$pi=n/N$$
 
 Collection - Kit -
 <https://www.qiagen.com/us/products/discovery-and-translational-research/dna-rna-purification/dna-purification/microbial-dna/qiaamp-dna-microbiome-kit> -
-28 mrt 2025
+\## 26 mrt
 
 **QIAamp DNA Microbiome Kit (50) - 51704** - What is this kit used for:
 This is a purification and enrichment kit of bacterial microbiome DNA
@@ -698,9 +729,9 @@ finally eluted for analysis.
 This method ensures efficient isolation of bacterial DNA from complex
 samples, reducing host DNA interference.
 
-28 mrt
+## 28 mrt
 
-```         
+```{python}
 from itertools import combinations
 #To make a combination list for the beta diversity
 
@@ -773,7 +804,7 @@ shell:
 "python beta_diversity.py -i {input.file1} {input.file2} --type bracken --level G > {output}"
 ```
 
-29 mrt
+## 29 mrt
 
 Sequencing - <https://nanoporetech.com/document/16S-barcoding-1-24> -
 14Aug2019 - Rapid sequencing amplicons - 16S barcoding (SQK-16S024)
@@ -811,7 +842,7 @@ ensure good quality, It has already shown for use after using fastplong
 that our flowcell was indeed having problem with the digester samples
 and did not give us uesable reads.
 
-30 mrt
+## 30 mrt
 
 **Sankey plot**
 
@@ -827,26 +858,21 @@ A bracken reports looks like this -
 <https://ccb.jhu.edu/software/bracken/index.shtml?t=manual> -
 <https://github.com/jenniferlu717/Bracken/blob/master/sample_data/sample_output_bracken.report>
 
-1.60 425595 425595 U 0 unclassified 98.40 26241408 0 R 1 root 98.40
-26241408 0 R1 131567 cellular organisms 96.78 25808392 0 D 2 Bacteria
-40.89 10903399 0 P 1224 Proteobacteria 22.31 5950178 0 C 1236
-Gammaproteobacteria 11.01 2936805 0 O 91347 Enterobacteriales 11.01
-2936805 0 F 543 Enterobacteriaceae 5.44 1449813 0 G 561 Escherichia 5.44
-1449813 1449813 S 562 Escherichia coli 1.47 392102 0 G 590 Salmonella
-1.47 392102 392102 S 28901 Salmonella enterica
-
-this shows report shows: - name. The name of this taxon in the
-taxonomy. - tax_id. The taxonomy identifier of this taxon in the
-taxonomy. - rank. The rank of this taxon in the taxonomy. -
-tax_count_krk. The number of reads classified to this taxon by
-kraken2. - added_brk. The additional reads assigned by bracken. -
-tax_count. The final number of reads assigned to this taxon. - fraction.
-The fraction of the total number of reads assigned to this taxon.
+this shows report shows:\
+- name. The name of this taxon in the taxonomy.\
+- tax_id. The taxonomy identifier of this taxon in the taxonomy.\
+- rank. The rank of this taxon in the taxonomy.\
+- tax_count_krk. The number of reads classified to this taxon by
+kraken2.\
+- added_brk. The additional reads assigned by bracken.\
+- tax_count. The final number of reads assigned to this taxon.\
+- fraction. The fraction of the total number of reads assigned to this
+taxon.
 
 This repo has the option to use pip install however when i used it i got
 an error seen below
 
-```         
+```{shell}
 Getting requirements to build wheel ... error error:
 subprocess-exited-with-error
 
@@ -858,11 +884,19 @@ Because of this i went ahead and cloned into the repo and ran the
 setup.py file manually.
 
 After this i tried making my snakemake pipeline with this script the
-readme however wasn't very helpfull.
+readme however wasn't very helpfull. The user probably made this tool
+for herself and did not update the readme for commercial usage.
 
-my pipeline looked as following
+my pipeline looked like this using "python3 awesome_kreport_charts" to
+run the tool and based on the other example shell command line arguments
+i knew -o meant where the output needed to be, that -- {input} was used
+to define the input and that -- min_bacteria was a standard used
+command.
 
-```         
+the readme however did not explain what all the param options were.
+
+```{python}
+       
 SAMPLES, = glob_wildcards("data/bracken/{sample}.txt")
 
 rule all:
@@ -882,8 +916,18 @@ This gave me allot of errors the script not being able to run was one of
 the main ones
 
 Due to all these problems i asked deepseek to look at the script and
-write me a new one that would work using plotly. This gave me the
-following script:
+write me a new one that would work using plotly. using this prompt "Hey,
+i want to make a sankey chart and i have the following files "bracken,
+bracken report, kreport and kraken" files, the bracken file has the
+following structure: 100.00 17648 0 R 1 root 100.00 17648 0 R1 3
+Bacteria 96.07 16955 0 R2 34 Firmicutes can u make me a script that does
+all of that and i can call for snakemake?"
+
+*"The custom Snakemake workflow for generating taxonomic Sankey charts
+was developed with guidance from DeepSeek-R1-Lite-Preview, a large
+language model* @deepseek2024"
+
+This gave me the following script:
 
 ```{python}
 import pandas as pd
@@ -898,16 +942,15 @@ def parse_bracken(file_path):
     
     nodes = []
     links = []
-    hierarchy = []  # Track last parent at each depth
+    hierarchy = []  
     
-    # for loop that removes white spaces, calculates indentation level and hierarchy
+    
     for idx, row in df.iterrows():
         name = row["name"].lstrip()
         depth = (len(row["name"]) - len(name)) // 2
         node_id = len(nodes)
         nodes.append({"name": name, "depth": depth})
         
-        # if not the root find the hierarchy (last node at prev depth) and create a link using reads
         if depth > 0:
             parent_id = hierarchy[depth-1]
             links.append({
@@ -960,3 +1003,33 @@ Here is a screenshot of the **lagoon out**
 ![Figure 2: Sankey chart lagoon in](images/newplot-2.png)
 
 It seems that the bacili group has fallen away.
+
+## 31 March
+
+Implemented my code into the snakemake pipeline and changed the git
+structure to conform to the snakemake conformaties
+
+Changes alpha diversity rule
+
+Made a new file in the rules folder that is named
+"calculation_alpha_diversity" this rule looks the following
+
+```{python}
+
+rule alpha_diversity:
+    input:
+        kraken_file=rules.kraken2_taxonomic_classification.output.kraken_report
+    output:
+        "results/alpha/{sample}_alpha.txt"
+    params:
+        shannon_index="Sh"
+    shell:
+        """
+        python scripts/alpha_diversity.py
+            -f {input}
+            -a {params.shannon_index}
+        > {output}
+        """
+
+
+```
