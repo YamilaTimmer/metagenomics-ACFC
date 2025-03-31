@@ -2,6 +2,8 @@ configfile: "config.yaml"
 
 SAMPLES = config["samples"]
 
+include: "rules/generate_sankey.smk"
+
 rule all:
     input:
     # QC with Fastplong:
@@ -189,10 +191,4 @@ rule faprotax:
 #     shell: 
 #         "cat {input}/*.fastq > {output}"
 
-rule generate_sankey:
-    input:
-        bracken_file=rules.bracken.output.bracken_report
-    output:
-        html="results/sankey/{sample}.html"
-    script:
-        
+
