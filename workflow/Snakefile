@@ -77,7 +77,7 @@ rule kraken2_taxonomic_classification:
         "logs/kraken2/{sample}.log"
     params:
         db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes/",  
-        confidence="0.1",               
+        confidence="1",               
         threads=128
     conda:
         "envs/kraken2.yaml"              

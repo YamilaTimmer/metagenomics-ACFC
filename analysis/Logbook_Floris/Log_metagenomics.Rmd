@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 bibliography: references.bib
 link-citations: true
 output:
-  pdf_document:
+  html_document:
     toc: yes
     toc_depth: '3'
   bookdown::pdf_document2:
@@ -17,7 +17,7 @@ output:
   word_document:
     toc: yes
     toc_depth: '3'
-  html_document:
+  pdf_document:
     toc: yes
     toc_depth: '3'
 editor_options: 
@@ -266,7 +266,7 @@ rule kraken2_taxonomic_classification:
         "logs/kraken2/{sample}.log"
     params:
         db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes",  
-        confidence="0.1",               
+        confidence="1",               
         threads=128
     conda:
         "envs/kraken2.yaml"              
@@ -282,6 +282,7 @@ rule kraken2_taxonomic_classification:
 ```
 In the snakemake rule above, kraken2 is run with the parameters: database, confidence and threads. 
 The database used is Greengenes, this is a database for use with 16S reads. 
+Confidence is kept at its default value of 0 and 128 threads are used for this operation. 
 
 
 ### **Tool Comparison** ###
@@ -295,13 +296,15 @@ The workflow diagram displays the analyses that where not done by us in gray and
 
 
 ### **Visualization of Kraken2 results** ###
-A script to generate a Sankey graph based on the report from Kraken2 was used. 
+Pavian was used to generate a Sankey graph based on the report from Kraken2.
 
 
+![In Lagoon](In_Lagoon.png)
+There are many more different microorganisms found in the "In lagoon" sample compared to the "Out lagoon" sample.
 
 
-
-
+![Out Lagoon](Out_lagoon.png)
+.
 
 
 
