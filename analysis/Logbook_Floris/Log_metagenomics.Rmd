@@ -118,7 +118,6 @@ cat barcode11/*.fastq.gz > /students/2024-2025/Thema07/metagenomics/wastewater/d
 Combining multiple barcodes into three samples according to the group they are in (In lagoon, out lagoon and digester)
 
 
-
 ```{bash eval = F}
 # Combining all barcodes for the "In lagoon" sample:
 cat barcode01.fastq barcode02.fastq barcode03.fastq barcode04.fastq  > /students/2024-2025/Thema07/metagenomics/wastewater/data/in_lagoon.fastq
@@ -128,6 +127,12 @@ cat barcode05.fastq barcode06.fastq barcode07.fastq barcode08.fastq  > /students
 
 # And the "Digester" sample:
 cat barcode09.fastq barcode10.fastq barcode11.fastq barcode12.fastq  > /students/2024-2025/Thema07/metagenomics/wastewater/data/digester.fastq
+```
+
+Later, I consolidated these bash commands into a snakemake rule:
+
+```{r}
+
 ```
 
 
@@ -222,7 +227,7 @@ The rule in snakemake takes all the samples from the config.yaml used for all th
 FastPlong generates both a .html report for the quality control and a fastq file that has been trimmed. (adapter sequences removed and low quality reads removed)
 The standard error is redirected to the logs/QC/ directory for every individual sample. 
 
-```{snakemake, eval=F}
+```{r, eval=F}
 
 rule fastq_qc_plong:
     input:
@@ -249,14 +254,158 @@ rule fastq_qc_plong:
 ## **2. Taxonomic classification** ##
 To classify all the reads as belonging to a species or less specific taxon, Kraken2 was used. 
 
+```{bash, eval=F}
+rule kraken2_taxonomic_classification:
+    input:
+        reads="trimmed/{sample}.fastq"
+    output:
+        kraken_report="kraken2/reports/{sample}_report.txt",
+        output="kraken2/output/{sample}_output.txt"
+
+    log:
+        "logs/kraken2/{sample}.log"
+    params:
+        db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes",  
+        confidence="0.1",               
+        threads=128
+    conda:
+        "envs/kraken2.yaml"              
+    shell:
+        """
+        kraken2 --db {params.db} \
+                --threads {params.threads} \
+                --confidence {params.confidence} \
+                --output {output.output} \
+                --report {output.kraken_report} \
+                {input.reads} 2> {log}
+        """
+```
+In the snakemake rule above, kraken2 is run with the parameters: database, confidence and threads. 
+The database used is Greengenes, this is a database for use with 16S reads. 
+
+
 ### **Tool Comparison** ###
 This tools was chosen based on a comparison made in the following article, (@ye_benchmarking_2019)
 Kraken2 is 
 
 
+![Workflow](Workflow_Diagram.jpg)
+The workflow diagram displays the analyses that where not done by us in gray and those that where done by us in light blue. 
+
+
 
 ### **Visualization of Kraken2 results** ###
 A script to generate a Sankey graph based on the report from Kraken2 was used. 
+
+
+
+
+
+
+
+
+
+
+# Test deseq2
+
+```{r, eval=F}
+colnames <- c("Group")
+
+coldata <- data.frame(c("In_Lagoon", "Out_Lagoon"), c("In_Lagoon","Out_Lagoon"), row.names = 1)
+colnames(coldata) <- colnames
+
+coldata$Group <- factor(coldata$Group)
+
+```
+
+```{r deseq2 test, eval=F, warning=F, message=FALSE}
+
+dds <- DESeqDataSetFromMatrix(countData = counts_df,
+                              colData = coldata,
+                              design= ~ Group)
+
+dds <- DESeq(dds)
+
+resultsNames(dds) 
+
+res <- results(dds, name="In_vs_Out_lagoon")
+
+# Use lfcschrink to do a log transformation on the data:
+res <- lfcShrink(dds, coef="In_vs_Out_lagoon", type="apeglm")
+
+summary(res)
+```
+
+
+```{r}
+
+faprotax_in_lagoon <- read.csv2("~/Documenten/Data_set/ACFC_Wastewater_Metagenomics/faprotax/in_lagoon/in_lagoon_function_table.tsv", sep = "\t")
+
+faprotax_in_lagoon <- faprotax_in_lagoon %>% filter(in_lagoon > 0)
+
+ggplot(data = faprotax_in_lagoon, mapping = aes(x = group, y = in_lagoon)) +
+    geom_bar(stat="identity", fill = "blue", alpha=0.5) +
+    theme(axis.text.x=element_text(angle=45, hjust=1)) +
+    coord_flip()
+
+```
+The graph above displays the results of the FAPROTAX analysis. This is a database with microorganisms and their known functions.
+FAPROTAX maintains a database of Over 7600 functional annotations covering over 4600 taxa.
+One of FAPROTAX's applications is the ecological interpretation of 16S marker gene data like what is done for this study. FAPROTAX is non-exhaustive, that means it is likely that many organisms known to perform certain functions may be missing or may only be partially included in the database. This could explain the few pathways found in both samples but especially in the "out lagoon" sample below. 
+
+(Source: https://pages.uoregon.edu/slouca/LoucaLab/archive/FAPROTAX/lib/php/index.php)
+
+
+
+```{r}
+faprotax_out_lagoon <- read.csv2("~/Documenten/Data_set/ACFC_Wastewater_Metagenomics/faprotax/out_lagoon/out_lagoon_function_table.tsv", sep = "\t")
+
+faprotax_out_lagoon <- faprotax_out_lagoon %>% filter(out_lagoon > 0)
+
+ggplot(data = faprotax_out_lagoon, mapping = aes(x = group, y = out_lagoon)) +
+    geom_bar(stat="identity", fill = "blue", alpha=0.5) +
+    theme(axis.text.x=element_text(angle=45, hjust=1)) +
+    coord_flip()
+
+```
+
+
+```{r bubblechart-pathway-abundance}
+faprotax_out_lagoon <- read.table("~/Documenten/Data_set/ACFC_Wastewater_Metagenomics/faprotax/out_lagoon/out_lagoon_function_table.tsv", header = TRUE, sep = "\t", row.names = 1)
+faprotax_in_lagoon <- read.table("~/Documenten/Data_set/ACFC_Wastewater_Metagenomics/faprotax/in_lagoon/in_lagoon_function_table.tsv", header = TRUE, sep = "\t", row.names = 1)
+
+combination_in_out_lagoon <- cbind(faprotax_out_lagoon, faprotax_in_lagoon) 
+
+data_long <- combination_in_out_lagoon %>% # Make it into long format for the plot.
+  rownames_to_column("Pathway") %>%
+  pivot_longer(cols = -Pathway, 
+                      names_to = "Sample", 
+                      values_to = "Abundance")
+
+data_long <- data_long %>% filter(Abundance > 0) # Filter the 0 values.
+
+ggplot(data_long, aes(x = Sample, y = Pathway, size = Abundance)) +
+  geom_point(aes(color=Sample)) +
+  scale_size(range = c(1, 15), name = "Abundance") + # Looks better with scaling...
+  theme_minimal() +
+  labs(title = "Amount of pathways for the samples:",x = "Sample",y = "Pathway")
+
+
+```
+The bubble chart above looks anemic with only a few pathways. I had to filter the data_long to only include pathways with an abundance of more than 0. 
+
+```{r heatmap-pathway-abundance}
+ggplot(data_long, aes(x = Sample, y = Pathway, fill = Abundance)) +
+    geom_tile() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(title = "Amount of pathways for the samples:", x = "Sample", y = "Pathway") +
+    theme_minimal() 
+```
+The same data visualized with a heatmap. There is only overlap between the samples for three pathways so it might not be the most informative graph. 
+
+
+
+Unit tests where generated for all the snakemake rules: "snakemake --generate-unit-tests"
 
 
 ## **Citations** ##
