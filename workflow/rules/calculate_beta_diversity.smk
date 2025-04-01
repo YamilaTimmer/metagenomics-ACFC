@@ -1,9 +1,9 @@
 rule beta_diversity:
     input:
-        sample1="{sample1}.out",
-        sample2="{sample2}.out"
+        sample1 = f"{OUT_DIR}/bracken/output/{{sample1}}.out",
+        sample2 = f"{OUT_DIR}/bracken/output/{{sample2}}.out"
     output:
-        "results/beta/{sample1}_vs_{sample2}.txt"
+        f"{RESULTS_DIR}/beta/{{sample1}}_vs_{{sample2}}.txt"
     params:
         sample_type="kreport2"
     shell:

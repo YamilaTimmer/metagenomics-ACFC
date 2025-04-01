@@ -1,7 +1,7 @@
 rule generate_sankey:
     input:
-        kraken_file=rules.kraken2_taxonomic_classification.output.kraken_report
+        kraken_report = f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt"
     output:
-        html="results/sankey/{sample}.html"
+        html = f"{RESULTS_DIR}/sankey/{{sample}}.html"
     script:
         workflow.source_path("../scripts/kraken_to_sankey.py")
