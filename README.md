@@ -7,16 +7,16 @@
 
 ## Description
 
-This repository contains a metagenomics pipeline for analyzing 16S data in .fastq format. We have constructed this pipeline in order to get insights into the contents of different steps in the water purification process of a Kenyan factory that produces alcohol from sugar molasses, owned by [ACFC](https://acfc.co.ke/). But this pipeline can be used for any 16S fastq formatted data. The pipeline is constructed using SnakeMake and can be found [here](https://github.com/YamilaTimmer/metagenomics-ACFC/blob/main/analysis/Snakefile).
+This repository contains a metagenomics pipeline for analyzing 16S data in .FASTQ format. We have constructed this pipeline in order to get insights into the contents of different steps in the water purification process of a Kenyan factory that produces alcohol from sugar molasses, owned by [ACFC](https://acfc.co.ke/). But this pipeline can be used for any 16S .FASTQ formatted data. The pipeline is constructed using SnakeMake and can be found [here](https://github.com/YamilaTimmer/metagenomics-ACFC/blob/main/analysis/Snakefile).
 
 
-### Key-features
-Analyses 16S .fastq data by:
-- Quality control/trimming using fastplong
-- Producing a taxonomic classification report using Kraken2, which will show the Operational Taxonomic Units (OTU's) that are present in the sample(s)
-- Improving OTU assignment by using Bracken
-- Visualising classification output with a krona piechart
-- Calculating alpha/beta diversity
+### Pipeline features
+
+1. Quality control/trimming using fastplong
+2. Producing a taxonomic classification report using Kraken2, which will show the Operational Taxonomic Units (OTU's) that are present in the sample(s)
+3. Improving OTU assignment by using Bracken (optional)
+4. Visualising classification output with a Krona piechart
+5. Calculating alpha/beta diversity
 
 ## System requirements and installation
 
