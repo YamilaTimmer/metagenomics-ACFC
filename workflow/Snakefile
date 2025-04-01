@@ -110,7 +110,7 @@ rule kraken2_taxonomic_classification:
     params:
         db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes/",
         confidence="0.1",               
-        threads=128
+        threads=64
     conda:
         "./envs/kraken2.yaml"
     shell:
@@ -126,7 +126,6 @@ rule kraken2_taxonomic_classification:
 
 # For bracken, only genus level worked, not species level (https://github.com/jenniferlu717/Bracken/issues/117)
 
-# threads nog erbij zetten
 rule bracken:
     input:
         kraken_report=f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt",
@@ -214,5 +213,26 @@ rule faprotax:
             --out_groups2records_table {output.groups_to_records} \
             --out_report {output.faprotax_report} \
             -v \
-        2> {log}
+            2> {log}
+        """
+
+
+rule generate_pathway_bubble_plot:
+    input:
+        f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_report.txt",
+    output:
+        bubble_plot_pdf = f"{OUT_DIR}/results/pathway_bubble_plot{{sample}}.pdf",
+        heatmap_pdf = f"{OUT_DIR}/results/pathway_heatmap.pdf",
+    log:
+        "logs/generate_pathway_plots.log"
+    params:
+        script = "scripts/bubble_chart.r"
+    shell:
+        """
+        Rscript {params.script} \
+            {input.in_lagoon} \
+            {input.out_lagoon} \
+            {output.bubble_plot} \
+            {output.heatmap} \
+            2> {log}
         """
