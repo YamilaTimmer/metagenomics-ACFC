@@ -97,3 +97,5 @@ analysis/fastplong/*.html
 *.swo
 *~
 .Rproj.user
+
+/analysis/
