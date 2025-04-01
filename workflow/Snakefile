@@ -18,9 +18,9 @@ include: "rules/calculate_beta_diversity.smk"
 rule all:
     input:
         # Concatenation of barcode fastq's:
-	    expand("data/fastq/{barcode}.fastq.gz", barcode=config["BARCODE_DIRECTORIES"].keys()),
-	    # Combined sample files:
-        expand("/data/{sample}.fastq", sample=config["sample_barcodes"].keys()),
+        expand(f"{OUT_DIR}/data/fastq/{barcode}.fastq.gz", barcode=config["BARCODE_DIRECTORIES"].keys()),
+        # Combined sample files:
+        expand(f"{OUT_DIR}/data/{sample}.fastq", sample=config["sample_barcodes"].keys()),
 
         # QC with Fastplong:
         expand(f"{OUT_DIR}/trimmed/{{sample}}.fastq", sample=SAMPLE_NAMES),
@@ -34,7 +34,7 @@ rule all:
         expand(f"{OUT_DIR}/bracken/output/{{sample}}.out", sample=SAMPLE_NAMES),
         expand(f"{OUT_DIR}/bracken/reports/{{sample}}.txt", sample=SAMPLE_NAMES),
 
-	    # Krona
+        # Krona
         expand(f"{OUT_DIR}/krona/{{sample}}_krona.html", sample=SAMPLE_NAMES),
 
         # kraken-biom
@@ -57,16 +57,16 @@ rule all:
 
 
 rule barcode_concatenation:
-	input:
-		lambda wildcards: glob.glob(config["BARCODE_DIRECTORIES"][wildcards.barcode] + "/*")
-	output:
+    input:
+        lambda wildcards: glob.glob(config["BARCODE_DIRECTORIES"][wildcards.barcode] + "/*")
+    output:
 		"data/fastq/{barcode}.fastq.gz"
-	log:
-		"logs/cat/{barcode}.log"
-	shell:
-		"""
-		cat {input} > {output} 2> {log}
-		"""
+    log:
+        "logs/cat/{barcode}.log"
+    shell:
+        """
+        cat {input} > {output} 2> {log}
+        """
 
 
 rule combining_samples:
