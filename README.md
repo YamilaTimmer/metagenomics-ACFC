@@ -23,7 +23,9 @@ This repository contains a metagenomics pipeline for analyzing 16S data in .FAST
 ### System requirements
 
 - OS: Linux
-- ?
+- Python: 3.8 or higher
+
+Hardware requirements, such as processing power or memory depend on the size of the input files. 
 
 ### Clone the repository
 
@@ -132,8 +134,16 @@ The pipeline is made using SnakeMake version `8.27.1` and python version `3.12.8
 
 
 ## Examples of visualisations
-### krona plot
+### Krona Piechart
+Below you can see an example of a Krona piechart that gets generated using this pipeline. The piechart shows an overview of the different classifications found by Kraken2, based on the input .FASTQ reads.
+
+![Piechart Example](analysis/Logbook_Yamila/img/krona_in_lagoon.png)
+
+
 ### R plots
+Below you can see an example of a visualization of the different (metabolic) pathways across samples. It shows what processes take place in what samples, and with what abundance the processes take place. The more classified species that perform a certain metabolic pathway, the higher the abundance (and the larger the bubble).
+
+![Bubblechart Example](analysis/Logbook_Floris/Bubble_chart.png)
 
 ## Support
 In case of any bugs or needed support, open up an issue at [this repo](https://github.com/YamilaTimmer/depmap-portal-data-visualizations/issues).
