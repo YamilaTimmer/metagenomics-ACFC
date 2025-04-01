@@ -1,3 +1,8 @@
+data_dir: /students/2024-2025/Thema07/metagenomics/wastewater/data
+out_dir: /students/2024-2025/Thema07/metagenomics/wastewater/metagenomics-ACFC/output
+results_dir: /students/2024-2025/Thema07/metagenomics/wastewater/metagenomics-ACFC/results
+log_dir: /students/2024-2025/Thema07/metagenomics/wastewater/metagenomics-ACFC/logs
+
 samples:
     #digester: /students/2024-2025/Thema07/metagenomics/wastewater/data/digester.fastq.gz
     in_lagoon: /students/2024-2025/Thema07/metagenomics/wastewater/data/in_lagoon.fastq.gz
@@ -29,4 +34,3 @@ BARCODE_DIRECTORIES:
     barcode09: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode09
     barcode10: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode10
     barcode11: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode11
-

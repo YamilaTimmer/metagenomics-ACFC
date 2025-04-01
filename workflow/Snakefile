@@ -2,6 +2,11 @@ from itertools import combinations
 
 configfile: "config.yaml"
 
+DATA_DIR = config["data_dir"]
+OUT_DIR = config["out_dir"]
+RESULTS_DIR = config["results_dir"]
+LOG_DIR = config["log_dir"]
+
 SAMPLE_NAMES = config["samples"].keys()
 SAMPLE_PAIRS = list(combinations(SAMPLE_NAMES, 2))
 
@@ -12,83 +17,79 @@ include: "rules/calculate_beta_diversity.smk"
 rule all:
     input:
         # QC with Fastplong:
-        expand("trimmed/{sample}.fastq", sample=SAMPLE_NAMES),
-        expand("QC/{sample}_fastplong_QC.html", sample=SAMPLE_NAMES),
-        expand("logs/QC/{sample}.log", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/trimmed/{{sample}}.fastq", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/QC/{{sample}}_fastplong_QC.html", sample=SAMPLE_NAMES),
 
         # kraken2:
-        expand("kraken2/output/{sample}_output.txt", sample=SAMPLE_NAMES),
-        expand("kraken2/reports/{sample}_report.txt", sample=SAMPLE_NAMES),
-        expand("logs/kraken2/{sample}.log", sample=SAMPLE_NAMES), 
+        expand(f"{OUT_DIR}/kraken2/output/{{sample}}_output.txt", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt", sample=SAMPLE_NAMES),
 
         # Bracken
-        expand("bracken/output/{sample}.out", sample=SAMPLE_NAMES),
-        expand("bracken/reports/{sample}.txt", sample=SAMPLE_NAMES),
-        expand("logs/bracken/{sample}.log", sample=SAMPLE_NAMES), 
+        expand(f"{OUT_DIR}/bracken/output/{{sample}}.out", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/bracken/reports/{{sample}}.txt", sample=SAMPLE_NAMES),
 
 	    # Krona
-        expand("krona/{sample}_krona.html", sample=SAMPLE_NAMES),
-        expand("logs/krona/{sample}.log", sample=SAMPLE_NAMES), 
-    
+        expand(f"{OUT_DIR}/krona/{{sample}}_krona.html", sample=SAMPLE_NAMES),
+
         # kraken-biom
-        expand("kraken_biom/{sample}_output.biom", sample=SAMPLE_NAMES),
-        expand("logs/kraken_biom/{sample}.log", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/kraken_biom/{{sample}}_output.biom", sample=SAMPLE_NAMES),
 
         #Faprotax
-        expand("faprotax/{sample}/{sample}_function_table.tsv", sample=SAMPLE_NAMES),
-        expand("faprotax/{sample}/{sample}_report.txt", sample=SAMPLE_NAMES),
-        expand("faprotax/{sample}/group_table.txt", sample=SAMPLE_NAMES),
-        expand("faprotax/{sample}/sub_groups/", sample=SAMPLE_NAMES),
-        expand("logs/faprotax/{sample}.log", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_report.txt", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/faprotax/{{sample}}/group_table.txt", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/faprotax/{{sample}}/sub_groups/", sample=SAMPLE_NAMES),
 
-        alpha_diversity=expand("results/alpha/{sample}_alpha.txt", sample=SAMPLES),
+        alpha_diversity=expand(f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt", sample=SAMPLES),
         beta_diversity=expand(
-            "results/beta/{sample1}_vs_{sample2}.txt",
+            f"{RESULTS_DIR}/beta/{{sample1}}_vs_{{sample2}}.txt",
             zip,
             sample1=[p[0] for p in SAMPLE_PAIRS],
             sample2=[p[1] for p in SAMPLE_PAIRS]
         ),
+        sankey_plot=expand(f"{RESULTS_DIR}/sankey/{{sample}}.html", sample=SAMPLE_NAMES)
 
 # Quality control and adapter trimming:
 rule fastq_qc_plong:
     input:
         lambda wildcards: SAMPLES[wildcards.sample]
     output:
-        fastq="trimmed/{sample}.fastq",
-        html="QC/{sample}_fastplong_QC.html"
+        fastq=f"{OUT_DIR}/trimmed/{{sample}}.fastq",
+        html=f"{OUT_DIR}/QC/{{sample}}_fastplong_QC.html"
     log:
-        "logs/QC/{sample}.log"
+        f"{LOG_DIR}/QC/{{sample}}.log"
     shell:
         """
         tools/fastplong \
-        -i {input} \
-        -o {output.fastq} \
-        -h {output.html} \
-        2> {log}
+            -i {input} \
+            -o {output.fastq} \
+            -h {output.html} \
+            2> {log}
         """
 
 rule kraken2_taxonomic_classification:
     input:
-        reads="trimmed/{sample}.fastq"
+        reads=f"{OUT_DIR}/trimmed/{{sample}}.fastq"
     output:
-        kraken_report="kraken2/reports/{sample}_report.txt",
-        output="kraken2/output/{sample}_output.txt"
+        kraken_report=f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt",
+        output=f"{OUT_DIR}/kraken2/output/{{sample}}_output.txt"
     log:
-        "logs/kraken2/{sample}.log"
+        f"{LOG_DIR}/kraken2/{{sample}}.log"
     params:
-        db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes/",  
+        db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes/",
         confidence="1",               
         threads=128
     conda:
-        "envs/kraken2.yaml"              
+        "./envs/kraken2.yaml"
     shell:
         """
-        kraken2 --db {params.db} \
-                --threads {params.threads} \
-                --confidence {params.confidence} \
-                --output {output.output} \
-                --report {output.kraken_report} \
-                {input.reads} 2> {log}
+        kraken2
+            --db {params.db} \
+            --threads {params.threads} \
+            --confidence {params.confidence} \
+            --output {output.output} \
+            --report {output.kraken_report} \
+            {input.reads} 2> {log}
         """
 
 # For bracken, only genus level worked, not species level (https://github.com/jenniferlu717/Bracken/issues/117)
@@ -96,39 +97,41 @@ rule kraken2_taxonomic_classification:
 # threads nog erbij zetten
 rule bracken:
     input:
-        kraken_report = "kraken2/reports/{sample}_report.txt",
-        kraken_database = "/data/datasets/KRAKEN2_INDEX/16S_Greengenes"
+        kraken_report=f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt",
+        kraken_database="/data/datasets/KRAKEN2_INDEX/16S_Greengenes"
     output:
-        bracken_report = "bracken/reports/{sample}.txt",
-        bracken_output = "bracken/output/{sample}.out"
+        bracken_report=f"{OUT_DIR}/bracken/reports/{{sample}}.txt",
+        bracken_output=f"{OUT_DIR}/bracken/output/{{sample}}.out"
     params:
-        read_length = 150,
-        threshold = 10,
-        level = "G"
+        read_length=150,
+        threshold=10,
+        level="G"
     log: 
-        "logs/bracken/{sample}.log"
-    threads: 32
+        f"{LOG_DIR}/bracken/{{sample}}.log"
+    threads:
+        32
     conda:
         "envs/bracken.yaml" 
     shell:
         """
-        bracken -d {input.kraken_database} \
-                -i {input.kraken_report} \
-                -o {output.bracken_output} \
-                -w {output.bracken_report} \
-                -r {params.read_length} \
-                -t {params.threshold} \
-                -l {params.level} \
-                2> {log}
+        bracken \
+            -d {input.kraken_database} \
+            -i {input.kraken_report} \
+            -o {output.bracken_output} \
+            -w {output.bracken_report} \
+            -r {params.read_length} \
+            -t {params.threshold} \
+            -l {params.level} \
+        2> {log}
         """
 
 rule krona_visualisation:
     input:
-        bracken_files="bracken/reports/{sample}.txt"
+        bracken_files=f"{OUT_DIR}/bracken/reports/{{sample}}.txt"
     output: 
-        krona_vis="krona/{sample}_krona.html"
+        krona_vis=f"{OUT_DIR}/krona/{{sample}}_krona.html"
     log:
-        "logs/krona/{sample}.log"
+        f"{LOG_DIR}/krona/{{sample}}.log"
     conda:
         "envs/krona.yaml"
     shell:
@@ -142,11 +145,11 @@ rule krona_visualisation:
 
 rule kraken_biom:
     input:  
-        bracken_kraken="bracken/reports/{sample}.txt"		
+        bracken_kraken=f"{OUT_DIR}/bracken/reports/{{sample}}.txt"
     output: 
-        biom_files="kraken_biom/{sample}_output.biom"
+        biom_files=f"{OUT_DIR}/kraken_biom/{{sample}}_output.biom"
     log:
-        "logs/kraken_biom/{sample}.log"
+        f"{LOG_DIR}/kraken_biom/{{sample}}.log"
     conda:
         "envs/kraken_biom.yaml"
     shell:
@@ -159,26 +162,26 @@ rule kraken_biom:
 
 rule faprotax:
     input:
-        biom_files="kraken_biom/{sample}_output.biom"
+        biom_files=f"{OUT_DIR}/kraken_biom/{{sample}}_output.biom"
     output:
-        function_table="faprotax/{sample}/{sample}_function_table.tsv",
-        faprotax_report="faprotax/{sample}/{sample}_report.txt",
-        sub_table_dir=directory("faprotax/{sample}/sub_groups/"),
-        groups_to_records="faprotax/{sample}/group_table.txt"
+        function_table=f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv",
+        faprotax_report=f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_report.txt",
+        sub_table_dir=directory(f"{OUT_DIR}/faprotax/{{sample}}/sub_groups/"),
+        groups_to_records=f"{OUT_DIR}/faprotax/{{sample}}/group_table.txt"
     log:
-        "logs/faprotax/{sample}.log"
+        f"{LOG_DIR}/faprotax/{{sample}}.log"
     shell:
         """
         python3 tools/FAPROTAX_1.2.10/collapse_table.py \
-        -i {input.biom_files} \
-        -o {output.function_table} \
-        -g tools/FAPROTAX_1.2.10/FAPROTAX.txt \
-        -n columns_after_collapsing \
-        --collapse_by_metadata "taxonomy" \
-        --out_sub_tables_dir {output.sub_table_dir} \
-        --out_groups2records_table {output.groups_to_records} \
-        --out_report {output.faprotax_report} \
-        -v \
+            -i {input.biom_files} \
+            -o {output.function_table} \
+            -g tools/FAPROTAX_1.2.10/FAPROTAX.txt \
+            -n columns_after_collapsing \
+            --collapse_by_metadata "taxonomy" \
+            --out_sub_tables_dir {output.sub_table_dir} \
+            --out_groups2records_table {output.groups_to_records} \
+            --out_report {output.faprotax_report} \
+            -v \
         2> {log}
         """
 
