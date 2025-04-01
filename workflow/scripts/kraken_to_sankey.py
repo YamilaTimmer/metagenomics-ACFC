@@ -1,8 +1,8 @@
 import pandas as pd
 import plotly.graph_objects as go
 
-def parse_bracken(file_path):
-    """Parse indentation-based Bracken file into nodes and links"""
+def parse_kraken(file_path):
+    """Parse indentation-based Kraken file into nodes and links"""
     df = pd.read_csv(file_path, sep="\t", header=None,
                      names=["percent", "reads", "direct_reads", "rank", "taxID", "name"])
     
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     output_file = snakemake.output[0]
     
     # Generate the Sankey chart
-    nodes_df, links_df = parse_bracken(input_file)
+    nodes_df, links_df = parse_kraken(input_file)
     
     fig = go.Figure(go.Sankey(
         node=dict(
