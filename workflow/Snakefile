@@ -58,7 +58,7 @@ rule all:
 
 rule barcode_concatenation:
 	input:
-		lambda wildcards: glob.glob(config["BARCODE_DIRECTORIES"][wildcards.barcode] + "/*.fastq")
+		lambda wildcards: glob.glob(config["BARCODE_DIRECTORIES"][wildcards.barcode] + "/*")
 	output:
 		"data/fastq/{barcode}.fastq.gz"
 	log:
@@ -109,7 +109,7 @@ rule kraken2_taxonomic_classification:
         f"{LOG_DIR}/kraken2/{{sample}}.log"
     params:
         db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes/",
-        confidence="1",               
+        confidence="0.1",               
         threads=128
     conda:
         "./envs/kraken2.yaml"
