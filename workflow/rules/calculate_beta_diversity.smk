@@ -1,7 +1,7 @@
 rule beta_diversity:
     input:
-        sample1 = f"{OUT_DIR}/bracken/output/{{sample1}}.out",
-        sample2 = f"{OUT_DIR}/bracken/output/{{sample2}}.out"
+        sample1 = f"{OUT_DIR}/kraken2/output/{{sample1}}_output.txt",
+        sample2 = f"{OUT_DIR}/kraken2/output/{{sample2}}_output.txt"
     output:
         f"{RESULTS_DIR}/beta/{{sample1}}_vs_{{sample2}}.txt"
     params:
