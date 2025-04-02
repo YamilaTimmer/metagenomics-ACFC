@@ -18,9 +18,9 @@ include: "rules/calculate_beta_diversity.smk"
 rule all:
     input:
         # Concatenation of barcode fastq's:
-        expand(f"{OUT_DIR}/data/fastq/{barcode}.fastq.gz", barcode=config["BARCODE_DIRECTORIES"].keys()),
+        expand(f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz", barcode=config["BARCODE_DIRECTORIES"].keys()),
         # Combined sample files:
-        expand(f"{OUT_DIR}/data/{sample}.fastq", sample=config["sample_barcodes"].keys()),
+        expand(f"{OUT_DIR}/combined_fastq/{{sample}}.fastq", sample=config["sample_barcodes"].keys()),
 
         # QC with Fastplong:
         expand(f"{OUT_DIR}/trimmed/{{sample}}.fastq", sample=SAMPLE_NAMES),
@@ -60,9 +60,9 @@ rule barcode_concatenation:
     input:
         lambda wildcards: glob.glob(config["BARCODE_DIRECTORIES"][wildcards.barcode] + "/*")
     output:
-        "data/fastq/{barcode}.fastq.gz"
+        f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz"
     log:
-        "logs/cat/{barcode}.log"
+        f"{LOG_DIR}/cat/{{barcode}}.log"
     shell:
         """
         cat {input} > {output} 2> {log}
@@ -71,11 +71,11 @@ rule barcode_concatenation:
 
 rule combining_samples:
     input:
-            lambda wildcards: expand("data/fastq/{barcode}.fastq.gz", barcode=config["sample_barcodes"][wildcards.sample])
+        lambda wildcards: expand("data/fastq/{barcode}.fastq.gz", barcode=config["sample_barcodes"][wildcards.sample])
     output:
-        "/data/{sample}.fastq"
+        f"{OUT_DIR}/combined_fastq/{{sample}}.fastq"
     log:
-        "logs/combining_samples/{sample}.log"
+        f"{LOG_DIR}/combining_samples/{{sample}}.log"
     shell:
         """
         cat {input} > {output} 2> {log}
@@ -86,7 +86,7 @@ rule fastq_qc_plong:
     input:
         lambda wildcards: SAMPLES[wildcards.sample]
     output:
-        fastq=f"{OUT_DIR}/trimmed/{{sample}}.fastq",
+        trimmed_fastq=f"{OUT_DIR}/trimmed/{{sample}}.fastq",
         html=f"{OUT_DIR}/QC/{{sample}}_fastplong_QC.html"
     log:
         f"{LOG_DIR}/QC/{{sample}}.log"
@@ -94,7 +94,7 @@ rule fastq_qc_plong:
         """
         tools/fastplong \
             -i {input} \
-            -o {output.fastq} \
+            -o {output.trimmed_fastq} \
             -h {output.html} \
             2> {log}
         """
