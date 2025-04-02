@@ -2,10 +2,10 @@ rule faprotax:
     input:
         biom_files=rules.kraken_biom.output.biom_files
     output:
-        function_table=f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv",
+        function_table=f"{RESULTS_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv",
         faprotax_report=f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_report.txt",
-        sub_table_dir=directory(f"{OUT_DIR}/faprotax/{{sample}}/sub_groups/"),
-        groups_to_records=f"{OUT_DIR}/faprotax/{{sample}}/group_table.txt"
+        groups_to_records=f"{OUT_DIR}/faprotax/{{sample}}/group_table.txt",
+        sub_table_dir=directory(f"{RESULTS_DIR}/faprotax/{{sample}}/sub_groups/")
     log:
         f"{LOG_DIR}/faprotax/{{sample}}.log"
     conda:

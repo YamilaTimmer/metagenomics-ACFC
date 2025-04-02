@@ -50,14 +50,26 @@ include: "rules/calculate_beta_diversity.smk"
 
 rule all:
     input:
-        alpha_diversity = expand(f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt",sample=SAMPLE_NAMES),
-        beta_diversity = expand(
+        faprotax_function_table=expand(f"{RESULTS_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv", sample=SAMPLE_NAMES),
+        faprotax_sub_groups=expand(f"{RESULTS_DIR}/faprotax/{{sample}}/sub_groups/", sample=SAMPLE_NAMES),
+        alpha_diversity=expand(f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt", sample=SAMPLE_NAMES),
+        beta_diversity=expand(
             f"{RESULTS_DIR}/beta/{{sample1}}_vs_{{sample2}}.txt",
             zip,
             sample1=[p[0] for p in SAMPLE_PAIRS],
             sample2=[p[1] for p in SAMPLE_PAIRS]
         ),
-        sankey_plot = expand(f"{RESULTS_DIR}/sankey/{{sample}}.html",sample=SAMPLE_NAMES),
-        pathway_bubble_plot = expand(f"{RESULTS_DIR}/pathway_bubble_plot/{{sample}}.pdf",sample=SAMPLE_NAMES),
-        pathway_heatmap_pdf = expand(f"{RESULTS_DIR}/pathway_heatmap/{{sample}}_pathway_heatmap.pdf",sample=SAMPLE_NAMES),
-        krona_vis = expand(f"{RESULTS_DIR}/krona/{{sample}}_krona.html",sample=SAMPLE_NAMES)
+        # pathway_bubble_plot=expand(
+        #     f"{RESULTS_DIR}/pathway_bubble_plot/{{sample1}}_{{sample2}}.pdf",
+        #     zip,
+        #     sample1=[p[0] for p in SAMPLE_PAIRS],
+        #     sample2=[p[1] for p in SAMPLE_PAIRS]
+        # ),
+        # pathway_heatmap_pdf=expand(
+        #     f"{RESULTS_DIR}/pathway_heatmap/{{sample1}}_{{sample2}}_pathway_heatmap.pdf",
+        #     zip,
+        #     sample1=[p[0] for p in SAMPLE_PAIRS],
+        #     sample2=[p[1] for p in SAMPLE_PAIRS]
+        # ),
+        sankey_plot=expand(f"{RESULTS_DIR}/sankey/{{sample}}.html", sample=SAMPLE_NAMES),
+        krona_vis=expand(f"{RESULTS_DIR}/krona/{{sample}}_krona.html", sample=SAMPLE_NAMES)

@@ -1,6 +1,5 @@
 rule fastq_qc_plong:
     input:
-        # lambda wildcards: SAMPLES[wildcards.sample]
         sample_data=f"{DATA_DIR}/{{sample}}.fastq.gz"
     output:
         trimmed_fastq=f"{OUT_DIR}/trimmed/{{sample}}.fastq",
