@@ -177,8 +177,8 @@ rule generate_pathway_bubble_plot:
     input:
         rules.faprotax.output.faprotax_report
     output:
-        bubble_plot_pdf = f"{OUT_DIR}/results/pathway_bubble_plot{{sample}}.pdf",
-        heatmap_pdf = f"{OUT_DIR}/results/pathway_heatmap.pdf",
+        bubble_plot_pdf = f"{RESULTS_DIR}/pathway_bubble_plot/{{sample}}.pdf",
+        heatmap_pdf = f"{RESULTS_DIR}/pathway_heatmap/{{sample}}_pathway_heatmap.pdf",
     log:
         "logs/generate_pathway_plots.log"
     params:
