@@ -9,6 +9,7 @@ rule krona_visualisation:
         workflow.source_path("../envs/krona.yaml")
     shell:
         """
+        ktUpdateTaxonomy.sh
         ktImportTaxonomy \
             -t 5 \
             -m 3 \
