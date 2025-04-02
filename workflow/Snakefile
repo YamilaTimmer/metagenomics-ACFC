@@ -11,50 +11,6 @@ LOG_DIR = config["log_dir"]
 SAMPLE_NAMES = config["samples"].keys()
 SAMPLE_PAIRS = list(combinations(SAMPLE_NAMES, 2))
 
-include: "rules/generate_sankey.smk"
-include: "rules/calculate_alpha_diversity.smk"
-include: "rules/calculate_beta_diversity.smk"
-
-rule all:
-    input:
-        # Concatenation of barcode fastq's:
-        expand(f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz", barcode=config["BARCODE_DIRECTORIES"].keys()),
-        # Combined sample files:
-        expand(f"{OUT_DIR}/combined_fastq/{{sample}}.fastq", sample=config["sample_barcodes"].keys()),
-
-        # QC with Fastplong:
-        expand(f"{OUT_DIR}/trimmed/{{sample}}.fastq", sample=SAMPLE_NAMES),
-        expand(f"{OUT_DIR}/QC/{{sample}}_fastplong_QC.html", sample=SAMPLE_NAMES),
-
-        # kraken2:
-        expand(f"{OUT_DIR}/kraken2/output/{{sample}}_output.txt", sample=SAMPLE_NAMES),
-        expand(f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt", sample=SAMPLE_NAMES),
-
-        # Bracken
-        expand(f"{OUT_DIR}/bracken/output/{{sample}}.out", sample=SAMPLE_NAMES),
-        expand(f"{OUT_DIR}/bracken/reports/{{sample}}.txt", sample=SAMPLE_NAMES),
-
-        # Krona
-        expand(f"{OUT_DIR}/krona/{{sample}}_krona.html", sample=SAMPLE_NAMES),
-
-        # kraken-biom
-        expand(f"{OUT_DIR}/kraken_biom/{{sample}}_output.biom", sample=SAMPLE_NAMES),
-
-        #Faprotax
-        expand(f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv", sample=SAMPLE_NAMES),
-        expand(f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_report.txt", sample=SAMPLE_NAMES),
-        expand(f"{OUT_DIR}/faprotax/{{sample}}/group_table.txt", sample=SAMPLE_NAMES),
-        expand(f"{OUT_DIR}/faprotax/{{sample}}/sub_groups/", sample=SAMPLE_NAMES),
-
-        alpha_diversity=expand(f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt", sample=SAMPLES),
-        beta_diversity=expand(
-            f"{RESULTS_DIR}/beta/{{sample1}}_vs_{{sample2}}.txt",
-            zip,
-            sample1=[p[0] for p in SAMPLE_PAIRS],
-            sample2=[p[1] for p in SAMPLE_PAIRS]
-        ),
-        sankey_plot=expand(f"{RESULTS_DIR}/sankey/{{sample}}.html", sample=SAMPLE_NAMES)
-
 
 rule barcode_concatenation:
     input:
@@ -67,7 +23,6 @@ rule barcode_concatenation:
         """
         cat {input} > {output} 2> {log}
         """
-
 
 rule combining_samples:
     input:
@@ -126,7 +81,6 @@ rule kraken2_taxonomic_classification:
         """
 
 # For bracken, only genus level worked, not species level (https://github.com/jenniferlu717/Bracken/issues/117)
-
 rule bracken:
     input:
         kraken_report=rules.kraken2_taxonomic_classification.output.kraken_report,
@@ -138,12 +92,12 @@ rule bracken:
         read_length=150,
         threshold=10,
         level="G"
-    log: 
+    log:
         f"{LOG_DIR}/bracken/{{sample}}.log"
     threads:
         32
     conda:
-        "envs/bracken.yaml" 
+        "envs/bracken.yaml"
     shell:
         """
         bracken \
@@ -158,9 +112,9 @@ rule bracken:
         """
 
 rule krona_visualisation:
-    input:
-        bracken_files=rules.bracken.output.bracken_report
-    output: 
+    input:rules.bracken.output.bracken_report
+        bracken_files=
+    output:
         krona_vis=f"{OUT_DIR}/krona/{{sample}}_krona.html"
     log:
         f"{LOG_DIR}/krona/{{sample}}.log"
@@ -177,9 +131,9 @@ rule krona_visualisation:
         """
 
 rule kraken_biom:
-    input:  
+    input:
         bracken_kraken=rules.bracken.output.bracken_report
-    output: 
+    output:
         biom_files=f"{OUT_DIR}/kraken_biom/{{sample}}_output.biom"
     log:
         f"{LOG_DIR}/kraken_biom/{{sample}}.log"
@@ -238,3 +192,46 @@ rule generate_pathway_bubble_plot:
             {output.heatmap} \
             2> {log}
         """
+
+include: "rules/generate_sankey.smk"
+include: "rules/calculate_alpha_diversity.smk"
+include: "rules/calculate_beta_diversity.smk"
+
+rule all:
+    input:
+        # Concatenation of barcode fastq's:
+        expand(f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz", barcode=config["BARCODE_DIRECTORIES"].keys()),
+        # Combined sample files:
+        expand(f"{OUT_DIR}/combined_fastq/{{sample}}.fastq", sample=config["sample_barcodes"].keys()),
+
+        # QC with Fastplong:
+        expand(f"{OUT_DIR}/QC/{{sample}}_fastplong_QC.html", sample=SAMPLE_NAMES),
+
+        # kraken2:
+        expand(f"{OUT_DIR}/kraken2/output/{{sample}}_output.txt", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt", sample=SAMPLE_NAMES),
+
+        # Bracken
+        expand(f"{OUT_DIR}/bracken/output/{{sample}}.out", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/bracken/reports/{{sample}}.txt", sample=SAMPLE_NAMES),
+
+        # Krona
+        expand(f"{OUT_DIR}/krona/{{sample}}_krona.html", sample=SAMPLE_NAMES),
+
+        # kraken-biom
+        expand(f"{OUT_DIR}/kraken_biom/{{sample}}_output.biom", sample=SAMPLE_NAMES),
+
+        #Faprotax
+        expand(f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_report.txt", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/faprotax/{{sample}}/group_table.txt", sample=SAMPLE_NAMES),
+        expand(f"{OUT_DIR}/faprotax/{{sample}}/sub_groups/", sample=SAMPLE_NAMES),
+
+        alpha_diversity=expand(f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt", sample=SAMPLES),
+        beta_diversity=expand(
+            f"{RESULTS_DIR}/beta/{{sample1}}_vs_{{sample2}}.txt",
+            zip,
+            sample1=[p[0] for p in SAMPLE_PAIRS],
+            sample2=[p[1] for p in SAMPLE_PAIRS]
+        ),
+        sankey_plot=expand(f"{RESULTS_DIR}/sankey/{{sample}}.html", sample=SAMPLE_NAMES)
