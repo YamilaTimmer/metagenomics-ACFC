@@ -1,10 +1,5 @@
 library(tidyverse)
 library(ggplot2)
-library(reshape2)
-
-
-faprotax_out_lagoon <- read.table("~/Documenten/Data_set/ACFC_Wastewater_Metagenomics/faprotax/out_lagoon/out_lagoon_function_table.tsv", header = TRUE, sep = "\t", row.names = 1)
-faprotax_in_lagoon <- read.table("~/Documenten/Data_set/ACFC_Wastewater_Metagenomics/faprotax/in_lagoon/in_lagoon_function_table.tsv", header = TRUE, sep = "\t", row.names = 1)
 
 args = commandArgs(trailingOnly=TRUE)
 
@@ -12,6 +7,10 @@ in_lagoon_file <- args[1]
 out_lagoon_file <- args[2]
 bubble_plot_output <- args[3]
 heatmap_output <- args[4]
+
+
+faprotax_out_lagoon <- read.table(in_lagoon_file, header = TRUE, sep = "\t", row.names = 1)
+faprotax_in_lagoon <- read.table(out_lagoon_file, header = TRUE, sep = "\t", row.names = 1)
 
 # Combine the data
 combination_in_out_lagoon <- data.frame(cbind(faprotax_out_lagoon, faprotax_in_lagoon))
