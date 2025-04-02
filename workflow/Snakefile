@@ -12,226 +12,51 @@ SAMPLE_NAMES = config["samples"].keys()
 SAMPLE_PAIRS = list(combinations(SAMPLE_NAMES, 2))
 
 
-rule barcode_concatenation:
-    input:
-        lambda wildcards: glob.glob(config["BARCODE_DIRECTORIES"][wildcards.barcode] + "/*")
-    output:
-        f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz"
-    log:
-        f"{LOG_DIR}/cat/{{barcode}}.log"
-    shell:
-        """
-        cat {input} > {output} 2> {log}
-        """
+# rule barcode_concatenation:
+#     input:
+#         lambda wildcards: glob.glob(config["BARCODE_DIRECTORIES"][wildcards.barcode] + "/*")
+#     output:
+#         f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz"
+#     log:
+#         f"{LOG_DIR}/cat/{{barcode}}.log"
+#     shell:
+#         """
+#         cat {input} > {output} 2> {log}
+#         """
+#
+# rule combining_samples:
+#     input:
+#         lambda wildcards: expand("data/fastq/{barcode}.fastq.gz", barcode=config["sample_barcodes"][wildcards.sample])
+#     output:
+#         f"{OUT_DIR}/combined_fastq/{{sample}}.fastq"
+#     log:
+#         f"{LOG_DIR}/combining_samples/{{sample}}.log"
+#     shell:
+#         """
+#         cat {input} > {output} 2> {log}
+#         """
 
-rule combining_samples:
-    input:
-        lambda wildcards: expand("data/fastq/{barcode}.fastq.gz", barcode=config["sample_barcodes"][wildcards.sample])
-    output:
-        f"{OUT_DIR}/combined_fastq/{{sample}}.fastq"
-    log:
-        f"{LOG_DIR}/combining_samples/{{sample}}.log"
-    shell:
-        """
-        cat {input} > {output} 2> {log}
-        """
-
-# Quality control and adapter trimming:
-rule fastq_qc_plong:
-    input:
-        # lambda wildcards: SAMPLES[wildcards.sample]
-        sample_data=f"{DATA_DIR}/{{sample}}.fastq.gz"
-    output:
-        trimmed_fastq=f"{OUT_DIR}/trimmed/{{sample}}.fastq",
-        html=f"{OUT_DIR}/QC/{{sample}}_fastplong_QC.html"
-    log:
-        f"{LOG_DIR}/QC/{{sample}}.log"
-    shell:
-        """
-        tools/fastplong \
-            -i {input.sample_data} \
-            -o {output.trimmed_fastq} \
-            -h {output.html} \
-            2> {log}
-        """
-
-rule kraken2_taxonomic_classification:
-    input:
-        reads=rules.fastq_qc_plong.output.trimmed_fastq
-    output:
-        kraken_report=f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt",
-        output=f"{OUT_DIR}/kraken2/output/{{sample}}_output.txt"
-    log:
-        f"{LOG_DIR}/kraken2/{{sample}}.log"
-    params:
-        db=f"{config['kraken2_db_dir']}/16S_Greengenes/",
-        confidence="0.1",
-        threads=64
-    conda:
-        "./envs/kraken2.yaml"
-    shell:
-        """
-        kraken2
-            --db {params.db} \
-            --threads {params.threads} \
-            --confidence {params.confidence} \
-            --output {output.output} \
-            --report {output.kraken_report} \
-            {input.reads} 2> {log}
-        """
-
-# For bracken, only genus level worked, not species level (https://github.com/jenniferlu717/Bracken/issues/117)
-rule bracken:
-    input:
-        kraken_report=rules.kraken2_taxonomic_classification.output.kraken_report,
-        kraken_database=f"{config['kraken2_db_dir']}/16S_Greengenes"
-    output:
-        bracken_report=f"{OUT_DIR}/bracken/reports/{{sample}}.txt",
-        bracken_output=f"{OUT_DIR}/bracken/output/{{sample}}.out"
-    params:
-        read_length=150,
-        threshold=10,
-        level="G"
-    log:
-        f"{LOG_DIR}/bracken/{{sample}}.log"
-    threads:
-        32
-    conda:
-        "envs/bracken.yaml"
-    shell:
-        """
-        bracken \
-            -d {input.kraken_database} \
-            -i {input.kraken_report} \
-            -o {output.bracken_output} \
-            -w {output.bracken_report} \
-            -r {params.read_length} \
-            -t {params.threshold} \
-            -l {params.level} \
-        2> {log}
-        """
-
-rule krona_visualisation:
-    input:
-        bracken_files=rules.bracken.output.bracken_report
-    output:
-        krona_vis=f"{OUT_DIR}/krona/{{sample}}_krona.html"
-    log:
-        f"{LOG_DIR}/krona/{{sample}}.log"
-    conda:
-        "envs/krona.yaml"
-    shell:
-        """
-        ktImportTaxonomy \
-            -t 5 \
-            -m 3 \
-            {input} \
-            -o {output} \
-        2> {log}
-        """
-
-rule kraken_biom:
-    input:
-        bracken_kraken=rules.bracken.output.bracken_report
-    output:
-        biom_files=f"{OUT_DIR}/kraken_biom/{{sample}}_output.biom"
-    log:
-        f"{LOG_DIR}/kraken_biom/{{sample}}.log"
-    conda:
-        "envs/kraken_biom.yaml"
-    shell:
-        """
-        kraken-biom {input} \
-                    -o {output} \
-                    --fmt json \
-                    2> {log}
-        """
-
-rule faprotax:
-    input:
-        biom_files=rules.kraken_biom.output.biom_files
-    output:
-        function_table=f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv",
-        faprotax_report=f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_report.txt",
-        sub_table_dir=directory(f"{OUT_DIR}/faprotax/{{sample}}/sub_groups/"),
-        groups_to_records=f"{OUT_DIR}/faprotax/{{sample}}/group_table.txt"
-    log:
-        f"{LOG_DIR}/faprotax/{{sample}}.log"
-    shell:
-        """
-        python3 tools/FAPROTAX_1.2.10/collapse_table.py \
-            -i {input.biom_files} \
-            -o {output.function_table} \
-            -g tools/FAPROTAX_1.2.10/FAPROTAX.txt \
-            -n columns_after_collapsing \
-            --collapse_by_metadata "taxonomy" \
-            --out_sub_tables_dir {output.sub_table_dir} \
-            --out_groups2records_table {output.groups_to_records} \
-            --out_report {output.faprotax_report} \
-            -v \
-            2> {log}
-        """
-
-
-rule generate_pathway_bubble_plot:
-    input:
-        rules.faprotax.output.faprotax_report
-    output:
-        bubble_plot_pdf = f"{RESULTS_DIR}/pathway_bubble_plot/{{sample}}.pdf",
-        heatmap_pdf = f"{RESULTS_DIR}/pathway_heatmap/{{sample}}_pathway_heatmap.pdf",
-    log:
-        f"{LOG_DIR}/generate_pathway_bubble_plots/{{sample}}.log"
-    params:
-        script = "scripts/bubble_chart.r"
-    shell:
-        """
-        Rscript {params.script} \
-            {input.in_lagoon} \
-            {input.out_lagoon} \
-            {output.bubble_plot} \
-            {output.heatmap} \
-            2> {log}
-        """
-
+include: "rules/fastq_qc_plong.smk"
+include: "rules/kraken2_taxonomic_classification.smk"
+include: "rules/bracken.smk"
+include: "rules/krona_visualisation.smk"
+include: "rules/kraken_biom.smk"
+include: "rules/faprotax.smk"
+include: "rules/generate_pathway_bubble_plot.smk"
 include: "rules/generate_sankey.smk"
 include: "rules/calculate_alpha_diversity.smk"
 include: "rules/calculate_beta_diversity.smk"
 
 rule all:
     input:
-        # Concatenation of barcode fastq's:
-        expand(f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz", barcode=config["BARCODE_DIRECTORIES"].keys()),
-        # Combined sample files:
-        expand(f"{OUT_DIR}/combined_fastq/{{sample}}.fastq", sample=config["sample_barcodes"].keys()),
-
-        # QC with Fastplong:
-        expand(f"{OUT_DIR}/QC/{{sample}}_fastplong_QC.html", sample=SAMPLE_NAMES),
-
-        # kraken2:
-        expand(f"{OUT_DIR}/kraken2/output/{{sample}}_output.txt", sample=SAMPLE_NAMES),
-        expand(f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt", sample=SAMPLE_NAMES),
-
-        # Bracken
-        expand(f"{OUT_DIR}/bracken/output/{{sample}}.out", sample=SAMPLE_NAMES),
-        expand(f"{OUT_DIR}/bracken/reports/{{sample}}.txt", sample=SAMPLE_NAMES),
-
-        # Krona
-        expand(f"{OUT_DIR}/krona/{{sample}}_krona.html", sample=SAMPLE_NAMES),
-
-        # kraken-biom
-        expand(f"{OUT_DIR}/kraken_biom/{{sample}}_output.biom", sample=SAMPLE_NAMES),
-
-        #Faprotax
-        expand(f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv", sample=SAMPLE_NAMES),
-        expand(f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_report.txt", sample=SAMPLE_NAMES),
-        expand(f"{OUT_DIR}/faprotax/{{sample}}/group_table.txt", sample=SAMPLE_NAMES),
-        expand(f"{OUT_DIR}/faprotax/{{sample}}/sub_groups/", sample=SAMPLE_NAMES),
-
-        alpha_diversity=expand(f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt", sample=SAMPLE_NAMES),
-        beta_diversity=expand(
+        alpha_diversity = expand(f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt",sample=SAMPLE_NAMES),
+        beta_diversity = expand(
             f"{RESULTS_DIR}/beta/{{sample1}}_vs_{{sample2}}.txt",
             zip,
             sample1=[p[0] for p in SAMPLE_PAIRS],
             sample2=[p[1] for p in SAMPLE_PAIRS]
         ),
-        sankey_plot=expand(f"{RESULTS_DIR}/sankey/{{sample}}.html", sample=SAMPLE_NAMES)
+        sankey_plot = expand(f"{RESULTS_DIR}/sankey/{{sample}}.html",sample=SAMPLE_NAMES),
+        pathway_bubble_plot = expand(f"{RESULTS_DIR}/pathway_bubble_plot/{{sample}}.pdf",sample=SAMPLE_NAMES),
+        pathway_heatmap_pdf = expand(f"{RESULTS_DIR}/pathway_heatmap/{{sample}}_pathway_heatmap.pdf",sample=SAMPLE_NAMES),
+        krona_vis = expand(f"{RESULTS_DIR}/krona/{{sample}}_krona.html",sample=SAMPLE_NAMES)
