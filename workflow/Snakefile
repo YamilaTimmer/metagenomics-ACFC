@@ -227,7 +227,7 @@ rule all:
         expand(f"{OUT_DIR}/faprotax/{{sample}}/group_table.txt", sample=SAMPLE_NAMES),
         expand(f"{OUT_DIR}/faprotax/{{sample}}/sub_groups/", sample=SAMPLE_NAMES),
 
-        alpha_diversity=expand(f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt", sample=SAMPLES),
+        alpha_diversity=expand(f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt", sample=SAMPLE_NAMES),
         beta_diversity=expand(
             f"{RESULTS_DIR}/beta/{{sample1}}_vs_{{sample2}}.txt",
             zip,
