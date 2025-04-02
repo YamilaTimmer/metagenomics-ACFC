@@ -8,6 +8,8 @@ rule faprotax:
         groups_to_records=f"{OUT_DIR}/faprotax/{{sample}}/group_table.txt"
     log:
         f"{LOG_DIR}/faprotax/{{sample}}.log"
+    conda:
+        workflow.source_path("../envs/faprotax.yaml")
     shell:
         """
         python3 {TOOLS_DIR}/FAPROTAX_1.2.10/collapse_table.py \
