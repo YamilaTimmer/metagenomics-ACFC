@@ -23,6 +23,7 @@ bibliography: library.bib
 # Used tools
 
 The pipeline has been made using SnakeMake version 8.27.1 and python version 3.12.8.
+Below you can find the tools that I worked with myself, for a full overview of all tools used to develop this pipeline, please look at the README.
 
 | Package Name        | Description                                                 | Version   |
 |---------------------|-------------------------------------------------------------|-----------|
@@ -89,6 +90,8 @@ These two main questions are a way to get a first insight into the two samples, 
 - What can be said on the difference/similarity of the processes that take place in the samples?
 - What can be said on the diversity in OTU's, looking at the alpha diversity?
 
+**18-03-2025**
+
 ## Hypothesis
 
 In order to hypothesize about what OTU's are likely present in the two samples and what processes likely take place, I looked for research papers on microbial communities in industrial ethanol production using molasses.
@@ -106,6 +109,8 @@ While *Saccharomyces cerevisiae* is essential to the process of producing ethano
 Most of the earlier named species are either anaerobic (e.g. *Lactobacillus*), facultative anaerobic (e.g. *Zymomonas mobilis*, *Saccharomyces cerevisiae*) or aerotolerant (e.g. *Pediococcus claussenii*), meaning they do not use oxygen but they are not harmed by oxygen either. All of the species could be present in the anaerobic digester, however this is difficult to confirm due to the lack of data from the digester samples. 
 
 Some of the anaerobic species could still be present in the lagoon influent, but likely not in the lagoon effluent, as the sample will have been exposed to oxygen over a span of multiple days. The facultative anaerobic species and aerotolerant species could however be present in both the lagoon influent and effluent, as they can either use oxygen or are not affected by it.
+
+**19-03-2025**
 
 ### What processes take place?
 
@@ -216,9 +221,25 @@ Two other flags have to be specified, which are `--gzip-compressed` and `--fastq
 kraken2 --db path/to/database path/to/input.fastq.gz --gzip-compressed --fastq-input --report path/to/report.txt > path/to/output/sample_1.kraken
 ```
 
-(show bit of example output from kraken + what it means)
-(show bit of example output from report + what it means)
+Kraken outputs two output files:
 
+- `Regular Kraken output`: each classified sequence results in 1 line of output. The standard output contains 5 tab-delimited fields (@Kraken2):
+1. "C"/"U": a one letter code indicating that the sequence was either **c**lassified or **u**nclassified.
+2. The sequence ID, obtained from the FASTA/FASTQ header.
+3. The taxonomy ID Kraken 2 used to label the sequence; this is 0 if the sequence is unclassified.
+4. The length of the sequence in bp. In the case of paired read data, this will be a string containing the lengths of the two sequences in bp, separated by a pipe character, e.g. "98|94".
+5. A space-delimited list indicating the LCA mapping of each k-mer in the sequence(s). For example, "562:13 561:4 A:31 0:1 562:3" would indicate that: the first 13 k-mers mapped to taxonomy ID #562 the next 4 k-mers mapped to taxonomy ID #561 the next 31 k-mers contained an ambiguous nucleotide the next k-mer was not in the database the last 3 k-mers mapped to taxonomy ID #562
+
+
+- `Kraken report`
+1. Percentage of fragments covered by the clade rooted at this taxon
+2. Number of fragments covered by the clade rooted at this taxon
+3. Number of fragments assigned directly to this taxon
+4. A rank code, indicating (U)nclassified, (R)oot, (D)omain, (K)ingdom, (P)hylum, (C)lass, (O)rder, (F)amily, (G)enus, or (S)pecies. 
+5. NCBI taxonomic ID number
+6. Indented scientific name
+
+The standard Kraken2 output is not used for any tools we used in the pipeline, instead the Kraken2 report is used. The report contains important information such as certain ratios of which fragments got covered in one clade and also the rank code and NCBI taxonomic ID.
 
 ### Bracken (Bayesian Re-estimation of Abundance with KrakEN)
 
@@ -252,49 +273,18 @@ bracken -d /path/to/database -i /path/to/input/sample_1.report.txt -o /path/to/o
 The output shows how many reads are newly assigned and to which species, the report output is not used other than for inspection by the user. Another file automatically gets added in the same directory as the report (`{sample}_bracken_genuses.txt`), containing the original report that is corrected with the output from Bracken. This is the file that we will use further down the pipeline. 
 
 
-```
-rule kraken2_taxonomic_classification:
-    input:
-        reads="trimmed/{sample}.fastq"
-    output:
-        report="reports/kraken2/{sample}_report.txt",
-        output="kraken2/{sample}_output.txt"
-    log:
-        "logs/kraken2/{sample}.log"
-    params:
-        db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes/",  
-        confidence="0.1",               
-        threads=128                    
-    shell:
-        """
-        kraken2 --db {params.db} \
-                --threads {params.threads} \
-                --confidence {params.confidence} \
-                --output {output.output} \
-                --report {output.report} \
-                --gzip-compressed
-                {input.reads} 2> {log}
-        """
-        
-rule bracken_estimation:
-    input:
-        kraken_report="reports/kraken2/{sample}_report.txt"
-    output:
-        
-    log:
-      "logs/bracken/{sample}.log"
-    shell:
-    """
-    bracken -d {params.db} \
-    -i {input} \
-    -o {output} \
-    -l G
 
-    """
-```
+**31-03-2025**
+We eventually decided not to use Bracken for the pipeline, as it seemed to make the classification results for kraken less specific and it seemed to remove a lot of the OTU's on deeper taxonomic levels. I already had this feeling, seeing as the functional analysis yielded way less pathways when Bracken had been ran after Kraken2, instead of using direct Kraken2 output. I tried to visualize the difference between a regular Kraken2 report and a Bracken re-estimated Kraken2 report, using a Sankey plot, you can see the results below:
 
+Sankey plot on regular Kraken2 report
+![Sankey plot on regular Kraken2 report](img/sankey_kraken.jfif)
 
-${THRESHOLD} - Default = 10. For species classification, any species with <= 10 (or otherwise specified) reads will not receive any additional reads from higher taxonomy levels when distributing reads for abundance estimation. If another classification level is specified, thresholding will occur at that level.
+Sankey plot on Bracken re-estimated Kraken2 report
+![Sankey plot on Bracken re-estimated Kraken2 report](img/sankey_bracken.jfif)
+
+Conclusion: as you can see, a lot of the thinner "branches" dissapear and the reads for this likely get merged into bigger, more established branches. Because of the way that Bracken works, where classifications get distributed over how "likely" they are to be from specific clades, based off of the earlier number of species classified in them. It is hard to determine whether the outcome of Kraken2 or Bracken is more accurate, however our problem with using Bracken after Kraken2 was that we had almost no output to say anything about. For example the functional analysis after running Bracken told us there are NO metabolic processes taking place in the out lagoon sample, but that is impossible as there will always be processes taking place in microbiomes with a variety of microorganisms present. Thus we have decided to continue without using Bracken.
+
 
 ## Functional analysis
 
@@ -352,8 +342,8 @@ Faprotax does not have a github repo, so everything has to be downloaded from th
 
 I used the following arguments:
 
-- i: input file (has to be json formatted .biom, containing info on species + abundances)
-- o: output file, shows all pathways included in the faprotax.txt database, with a corresponding number displaying how active this pathway is in the entire sample (or 'functional group abundances per sample'). See the example below:
+`- i`: input file (has to be json formatted .biom, containing info on species + abundances)
+`- o`: output file, shows all pathways included in the faprotax.txt database, with a corresponding number displaying how active this pathway is in the entire sample (or 'functional group abundances per sample'). See the example below:
 
 ```
 sulfate_respiration	0.006833712984
@@ -366,8 +356,8 @@ arsenate_detoxification	0
 
 ```
 
--g path to the faprotax database (faprotax.txt)
--n choose whether the output table should be normalized or not, by normalizing it will convert the number of OTU's to ratios. There are multiple different options:
+`- g` path to the faprotax database (faprotax.txt)
+`- n` choose whether the output table should be normalized or not, by normalizing it will convert the number of OTU's to ratios. There are multiple different options:
 
 - `none` (default)
 - `columns_before_collapsing`
@@ -377,7 +367,7 @@ arsenate_detoxification	0
 I chose for columns_after_collapsing, because it gives a good overview of the ratio of metabolic processes in the sample, as it only counts the OTU's with assigned functions and ignores the unassigned OTU's. After using this form of normalization, all active metabolic processes together add up to 1. The higher the number, the more represented the metabolic process is in this sample, so the more OTU's there are that perform this metabolic process.
 
 
-before normalizing: 
+Before normalizing: 
 
 ```
 group	in_lagoon_report_bracken_genuses
@@ -385,7 +375,7 @@ sulfate_respiration	138
 sulfur_respiration	104
 ```
 
-after normalizing:
+After normalizing:
 
 ```
 group	in_lagoon_report_bracken_genuses
@@ -395,6 +385,31 @@ sulfur_respiration	0.005150044568
 
 - `--collapse_by_metadata`
 Specify what OTU metadata field contains the taxonomic paths in the .biom input. kraken-biom sets this to `taxonomy`.
+
+
+**Specifiying different types of output**:
+
+`--out_sub_tables_dir`: specifies the directory in which you want to have the output files per detected pathway. Per detected pathway it will provide 1 .biom file, with the name of the pathway. The file is json formatted and contains all OTU's that have been linked to this metabolic pathway.
+
+`--out_groups2records_table`: specify path where you want the table to be saved. Gives a table format of the associations between OTU's and pathways, where 0 stands for no association and 1 stands for association.
+
+`--out_report`:	specify path where you want the report to be saved. The report gives an overview of what OTU's got linked to which pathways. See an example below:
+
+```
+# reductive_acetogenesis (1 records):
+    1788 (k__Bacteria*p__Firmicutes*c__Clostridia*o__Clostridiales*f__Eubacteriaceae*g__Acetobacterium*s__)
+
+
+# chemoheterotrophy (3 records):
+    1500 (k__Bacteria*p__Bacteroidetes*c__Bacteroidia*o__Bacteroidales*f__Porphyromonadaceae*g__Paludibacter*s__)
+    1501 (k__Bacteria*p__Bacteroidetes*c__Bacteroidia*o__Bacteroidales*f__Porphyromonadaceae*g__Parabacteroides*s__)
+    1502 (k__Bacteria*p__Bacteroidetes*c__Bacteroidia*o__Bacteroidales*f__Porphyromonadaceae*g__Porphyromonas*s__)
+```
+
+
+I used --force and -v to ensure I could run the pipeline and that the old files would be replaced and to get detailed information on the run as it was happening.
+
+I ran FAPROTAX using the following code:
 
 ```
 python3 collapse_table.py \
@@ -410,6 +425,10 @@ python3 collapse_table.py \
 -v \
 
 ```
+
+Based on this code I also wrote a SnakeMake rule, which you can find under the SnakeMake chapter in this logbook.
+
+
 ### Minor adjustments faprotax script
 
 **25-03-2025**
@@ -460,8 +479,9 @@ Another issue we have run into is that the data for the digestor does not seem s
 
 # Snakemake
 
-Floris has written the SnakeMake code for fastplong, bracken and Kraken2. I have made the Snakemake code for kraken-biom, faprotax and krona:
+Floris has written the SnakeMake code for Fastplong, Bracken and Kraken2. I have made the Snakemake code for kraken-biom, Faprotax and Krona:
 
+## Krona
 ```
 rule all:
     input:
@@ -488,7 +508,7 @@ rule krona_visualisation:
         """
 ```
 
-
+## kraken-biom
 ```
 rule all:
     input:
@@ -513,6 +533,8 @@ rule kraken_biom:
                     2> {log}
         """
 ```
+
+## FAPROTAX
 ```
 rule all:
     input:
