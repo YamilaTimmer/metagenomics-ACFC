@@ -13,7 +13,7 @@ output:
     toc: false      
     fig_caption: true
     includes:  
-      #  in_header: include_tex_header.tex
+        in_header: include_tex_header.tex
   word_document:
     toc: yes
     toc_depth: '3'
@@ -37,26 +37,28 @@ library(tidyverse)
 ```
 15-03-2025:
 
-## **Introduction** ##
-The wastewater of a Kenyan water treatment plant contains many organisms whose presence influences the water quality by their production of toxins like those produced by algal blooms from Cyanobacteria. **1** These algal blooms are a global threat to freshwater systems like the Nyando River. 
+# **Introduction** #
+The wastewater of a Kenyan water treatment plant contains many organisms whose presence influences the water quality by their production of toxins like those produced by algal blooms from Cyanobacteria. (@hart2025metagenomics) These algal blooms are a global threat to freshwater systems like the Nyando River. 
 Using more traditional chemical analyses, an abundance of nitrogen, phosphorus and potassium was determined.
 
 It is imperative to measure those toxins or in this case genetic material from the micro-organisms that produce them. This wastewater is directly exhausted into the Nyando River, a basin covering about 3,590 square kilometers. The population density at the basin is higher than the national average, this indicates it’s importance. The life expectancy is very low with an average of 37.7 years for males and 42.9 years for females. Enhancing water quality could contribute to a higher lifespan for the people and other organisms that make use of these wetlands.
 
-This water provides food, stores energy and is crucial for biodiversity. **2** These resources are threatened by wastewater from factories and treatment plants.
+This water provides food, stores energy and is crucial for biodiversity. (@obiero2012people) These resources are threatened by wastewater from factories and treatment plants.
 
 In the wastewater treatment facility is among other process steps a digester, with a lagoon where the  wastewater is expelled into. The influence of this digester on the microbial diversity and number will be determined.
 
 There are a total of three samples, the first one was taken before the water enters the digester, the second inside of the digester and the last one in the lagoon before entering the Nyando River. 
 We will make a comparison between these samples and we will determine if the amount of bacteria or other micro-organisms exceeds the limits for reclaimed water before and after entering the digester. Toxin producing algae can be present in the sample that exited the digester only if this was also the case before entering it. The scope of this article is limited to determining the influence of the digester in the wastewater treatment facility. So even if there already are contaminants, as long as their numbers are not increasing, the treatment process is not at fault.
 
-Metagenomics is DNA based and can provide information about what organisms are present in the sample, this can be taxonomic and phylogenetic information. **4** Metagenomics differs from whole genome sequencing which refers to the sequencing of a single genomes.
+Metagenomics is DNA based and can provide information about what organisms are present in the sample, this can be taxonomic and phylogenetic information. (@hong2020metagenomics) Metagenomics differs from whole genome sequencing which refers to the sequencing of a single genomes.
 
-To do this, a bio-informatics pipeline was constructed to compare these samples in which a taxonomic classification will be applied on the samples using the Kraken2 tool to check the presence of known algal bloom causing Cyanobacteria. **1**   Given the results from incubating the samples on agar plates, we hypothesize that there are toxin producing Cyanobacteria in the samples but that the digester doesn’t make a difference for the diversity and number of those organisms. 
+To do this, a bio-informatics pipeline was constructed to compare these samples in which a taxonomic classification will be applied on the samples using the Kraken2 tool to check the presence of known algal bloom causing Cyanobacteria. (@hart2025metagenomics) Given the results from incubating the samples on agar plates, we hypothesize that there are toxin producing Cyanobacteria in the samples but that the digester doesn’t make a difference for the diversity and number of those organisms. 
 
-In addition to the phylogenetic classification, there will also be an anti-biotic resistance test to determine to what antibiotic resistance genes the micro-organisms have. This will provide an overview of means to combat the bacteria found in the sample more effectively. **7**
+In addition to the phylogenetic classification, there will also be an anti-biotic resistance test to determine to what antibiotic resistance genes the micro-organisms have. This will provide an overview of means to combat the bacteria found in the sample more effectively. (@LALGUPTA2020105667)
 
-To first assemble the microbial genomes from the metagenomic dataset, several tools can be used like Metabat, Concoct and Maxbin4. Identifying potentially up to 2000 micro-organisms in the sample can be challenging given that their average genome size would be 4 Mpb 8 Gpb of reads would have to be obtained to get an average coverage of 1x **5**.
+To first assemble the microbial genomes from the metagenomic dataset, several tools can be used like Metabat, Concoct and Maxbin4. Identifying potentially up to 2000 micro-organisms in the sample can be challenging given that their average genome size would be 4 Mpb 8 Gpb of reads would have to be obtained to get an average coverage of 1x (al2015removal). A functional analysis can be done by comparing the microorganisms found using Kraken2 against a database like Faprotax (@terlouw2023mibig) This database has for every species/genus the pathways that are know to occur in them.  
+
+
 
 **To-do: 16S DNA explanation.**
 
@@ -74,7 +76,7 @@ Overview:
 5. Functional analysis of the micro-organisms found
 
 
-# **Library versions:** #
+## **Library / Tool versions:** ##
 
 
 | Tool | Version | Description |
@@ -176,7 +178,7 @@ According to the sample table, all samples taken in the same place where put tog
 no effect on the genetic material in the samples. 
 
 ## **1. Quality control** ##
-To check the quality of the raw sequence data, Fastplong was used.
+To check the quality of the raw sequence data, Fastplong was used. (@Chen2023)
 At first we planned to use Trimmomatic and FastQC like we had done in an earlier analysis but they are made to work with Illumina data while we are working with Nanopore data. 
 Fastplong functionally combines Trimmomatic and FastQC with its adaptertrimming and reports with the quality distribution of the reads, both before and after filtering.
 
@@ -316,7 +318,7 @@ rule kraken2_taxonomic_classification:
     params:
         db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes",  
         confidence="1",               
-        threads=128
+        threads=64
     conda:
         "envs/kraken2.yaml"              
     shell:
@@ -331,7 +333,9 @@ rule kraken2_taxonomic_classification:
 ```
 In the snakemake rule above, kraken2 is run with the parameters: database, confidence and threads. 
 The database used is Greengenes, this is a database for use with 16S reads. 
-Confidence is kept at its default value of 0 and 128 threads are used for this operation. 
+Confidence is kept at its default value of 0 and 128 threads are used for this operation.
+The 16S Greengenes database was used for this. @DeSantis2006
+
 
 
 ### **Tool Comparison** ###
@@ -460,12 +464,12 @@ The same data visualized with a heatmap. There is only overlap between the sampl
 
 1-04-2025:
 
-## **Discussion:** ##
+# **Discussion:** #
 
 The main objective of this study was to identify the microorganisms present in the digester, lagoon in and lagoon out samples . Due to sequencing problems, the digester sample only contained two reads, one of which was remove during the trimming with Fastplong. This sample was unusable for further analyses. 
 
 Our results demonstrate that the sample taken in the lagoon has the most diverse microbial community with an alpha diversity of … and a beta diversity between the two samples of …
-This difference can be partially atributed to a large difference in reads between the two samples. 
+This difference can be partially attributed to a large difference in reads between the two samples. 
 The sample taken from inside the lagoon has ~18K reads after filtering while the sample from the water that had exited the lagoon only contains ~2.2K reads.
 
 Kraken2 showed that most microorganisms in both samples are bacteria, specifically Firmicutes.
@@ -482,11 +486,13 @@ None of the pathways indicate the production of toxins but the database used Fap
 
 
 
+
+
+
 Unit tests where generated for all the snakemake rules: "snakemake --generate-unit-tests"
 
 
 ## **Citations** ##
-**To-do: use .bib file for this...**
 
 1. 
  https://www.zotero.org/groups/5870913/acfc_afvalwater/items/WLVUDDXJ/attachment/RHY85NTI/reader
@@ -497,12 +503,11 @@ Unit tests where generated for all the snakemake rules: "snakemake --generate-un
 
 4. https://www.zotero.org/groups/5870913/acfc_afvalwater/items/F3R5L7PV/attachment/6YZYPRXC/reader
 
-5. is the treated wastewater safe to reuse for agricultural irrigation? Water Res 73:277–290. https://doi .org/10.1016/
+5. is the treated wastewater safe to reuse for agricultural irrigation? Water Res 73:277–290. https://doi.org/10.1016/
 
 6. Best practices for analysing microbiomes. Nat Rev Microbiol 16:410 – 422. https://doi.org/10.1038/s41579-018-0029-9.
 
 7. Platforms for elucidating antibiotic resistance in single genomes and complex metagenomes. Environ Int 138:105667. https://doi.org/10.1016/j.envint.2020.105667.
-
 
 
 Fastplong
@@ -510,7 +515,4 @@ Shifu Chen. 2023. Ultrafast one-pass FASTQ data preprocessing, quality control, 
 
 Kraken2 visualization script:
 https://github.com/lorenzgerber/krakenSankey
-
-Taxonomic_classifier_tool_comparison
-Ye, S. H., Siddle, K. J., Park, D. J., & Sabeti, P. C. (2019). Benchmarking Metagenomics Tools for Taxonomic Classification. Cell, 178(4), 779–794. https://doi.org/10.1016/j.cell.2019.07.010
 
