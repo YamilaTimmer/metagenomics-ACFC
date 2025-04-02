@@ -84,7 +84,8 @@ rule combining_samples:
 # Quality control and adapter trimming:
 rule fastq_qc_plong:
     input:
-        lambda wildcards: SAMPLES[wildcards.sample]
+        # lambda wildcards: SAMPLES[wildcards.sample]
+        sample_data=f"{DATA_DIR}/{{sample}}.fastq.gz"
     output:
         trimmed_fastq=f"{OUT_DIR}/trimmed/{{sample}}.fastq",
         html=f"{OUT_DIR}/QC/{{sample}}_fastplong_QC.html"
@@ -93,7 +94,7 @@ rule fastq_qc_plong:
     shell:
         """
         tools/fastplong \
-            -i {input} \
+            -i {input.sample_data} \
             -o {output.trimmed_fastq} \
             -h {output.html} \
             2> {log}
@@ -108,8 +109,8 @@ rule kraken2_taxonomic_classification:
     log:
         f"{LOG_DIR}/kraken2/{{sample}}.log"
     params:
-        db="/data/datasets/KRAKEN2_INDEX/16S_Greengenes/",
-        confidence="0.1",               
+        db=f"{config['kraken2_db_dir']}/16S_Greengenes/",
+        confidence="0.1",
         threads=64
     conda:
         "./envs/kraken2.yaml"
@@ -128,8 +129,8 @@ rule kraken2_taxonomic_classification:
 
 rule bracken:
     input:
-        kraken_database="/data/datasets/KRAKEN2_INDEX/16S_Greengenes"
         kraken_report=rules.kraken2_taxonomic_classification.output.kraken_report,
+        kraken_database=f"{config['kraken2_db_dir']}/16S_Greengenes"
     output:
         bracken_report=f"{OUT_DIR}/bracken/reports/{{sample}}.txt",
         bracken_output=f"{OUT_DIR}/bracken/output/{{sample}}.out"
@@ -167,11 +168,12 @@ rule krona_visualisation:
         "envs/krona.yaml"
     shell:
         """
-        ktImportTaxonomy -t 5 \
-                         -m 3 \
-                         {input} \
-                         -o {output} \
-                         2> {log}
+        ktImportTaxonomy \
+            -t 5 \
+            -m 3 \
+            {input} \
+            -o {output} \
+        2> {log}
         """
 
 rule kraken_biom:

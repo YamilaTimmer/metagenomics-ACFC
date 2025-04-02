@@ -1,4 +1,8 @@
 data_dir: /students/2024-2025/Thema07/metagenomics/wastewater/data
+fastq_pass_dir: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass
+kraken2_db_dir: /data/datasets/KRAKEN2_INDEX
+#kraken2_db_dir: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX
+
 out_dir: /students/2024-2025/Thema07/metagenomics/wastewater/metagenomics-ACFC/output
 results_dir: /students/2024-2025/Thema07/metagenomics/wastewater/metagenomics-ACFC/results
 log_dir: /students/2024-2025/Thema07/metagenomics/wastewater/metagenomics-ACFC/logs
