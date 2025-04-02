@@ -62,9 +62,6 @@ To first assemble the microbial genomes from the metagenomic dataset, several to
 
 The diversity of the microbiome will be quantified using the alpha diversity measure. This is a formula that can be applied to calculate this measure for diversity. **6**.
 
-Biosynthetic gene clusters (BGCs) will also be detected by mapping the reads from the Oxford Nanopore sequencer to the MiBIG database. **3** The results from that analysis will show the biosynthetic potential of the organisms to produce toxins. 
-
-
 
 # **Pipeline** #
 The different steps of the pipeline are explained below.
@@ -179,11 +176,16 @@ According to the sample table, all samples taken in the same place where put tog
 no effect on the genetic material in the samples. 
 
 ## **1. Quality control** ##
-To check the quality of the raw sequence data, Fastplong was used. This tool uses
+To check the quality of the raw sequence data, Fastplong was used.
+At first we planned to use Trimmomatic and FastQC like we had done in an earlier analysis but they are made to work with Illumina data while we are working with Nanopore data. 
+Fastplong functionally combines Trimmomatic and FastQC with its adaptertrimming and reports with the quality distribution of the reads, both before and after filtering.
+
 
 ### **1.1 Results** ###
 
 The sample taken from the digester only contained 2 reads before filtering with Fastplong and 1 after. 
+We decided that it was unusable and all downstream analyses where done without it.
+The table below shows this in the "Total Reads" row. 
 
 
 | Statistic         | Before Filtering        | After Filtering         |
@@ -229,6 +231,8 @@ The sample taken from inside the lagoon has ~18K reads after filtering.
 
 
 And the last sample, taken when the water had exited the lagoon. 
+There are only 2.16K reads in this sample after filtering, almost a factor of ten less compared to the "in lagoon" sample. 
+This could have an significant impact on species diversity because there are simply less reads so less chance for a more diverse microbiome.
 
 
 
@@ -298,6 +302,7 @@ rule fastq_qc_plong:
 ## **2. Taxonomic classification** ##
 To classify all the reads as belonging to a species or less specific taxon, Kraken2 was used. 
 
+
 ```{bash, eval=F}
 rule kraken2_taxonomic_classification:
     input:
@@ -331,7 +336,9 @@ Confidence is kept at its default value of 0 and 128 threads are used for this o
 
 ### **Tool Comparison** ###
 This tools was chosen based on a comparison made in the following article, (@ye_benchmarking_2019)
-Kraken2 is 
+Kraken2 performed comparable to similar tools like MEGAN-N, Minimap2 and Kaiju. 
+The reason we choose this tool over the other ones is that there are more tools that can use Kraken2's output compared to many of the others. A close contender was Humann3 for taxonomic classification and metaphlan4 for functional analysis but since the nessasary databases for Kraken2 were already on the system, we setteled on Kraken2 and Faprotax for the functional analysis. 
+
 
 
 ![Workflow](Workflow_Diagram.jpg)
@@ -350,7 +357,7 @@ There are many more different microorganisms found in the "In lagoon" sample com
 ![Out Lagoon](Out_lagoon.png)
 .
 
-
+At first, I thought that DESeq2 could be insightful to compare the count data but after looking into it more, the statistical method used would not be usable for metagenomics data since the distribution is different than what DESeq2 expects. 
 
 
 # Test deseq2
@@ -449,6 +456,29 @@ ggplot(data_long, aes(x = Sample, y = Pathway, fill = Abundance)) +
     theme_minimal() 
 ```
 The same data visualized with a heatmap. There is only overlap between the samples for three pathways so it might not be the most informative graph. 
+
+
+1-04-2025:
+
+## **Discussion:** ##
+
+The main objective of this study was to identify the microorganisms present in the digester, lagoon in and lagoon out samples . Due to sequencing problems, the digester sample only contained two reads, one of which was remove during the trimming with Fastplong. This sample was unusable for further analyses. 
+
+Our results demonstrate that the sample taken in the lagoon has the most diverse microbial community with an alpha diversity of … and a beta diversity between the two samples of …
+This difference can be partially atributed to a large difference in reads between the two samples. 
+The sample taken from inside the lagoon has ~18K reads after filtering while the sample from the water that had exited the lagoon only contains ~2.2K reads.
+
+Kraken2 showed that most microorganisms in both samples are bacteria, specifically Firmicutes.
+This is a phylum of mostly gram-positive bacteria.
+Bracken was used to compute the abundance of species. When using 16S reads, this could not be done on a species level so the genus level was used. When comparing the output of Kraken2 with Bracken, many taxa where lost after running Bracken, this is why its output was discarded and the raw Kraken data was used for the downstream analyses. 
+
+The data gathered from Kraken depended heavily on what database was used. 
+
+Faprotax was used to determine some of the pathways these microorganisms use. 
+For the “out lagoon” sample, there where only three pathways found: fermentation, chemotherotropy and aromatic compound degradation. 
+The “in lagoon” sample had in addition to these pathways the following respiration pathways: sulfur, sufite, sulfate and iron respiration. 
+This larger amount of pathways could also be attributed to the difference in reads between the samples. Perhaps it should have been normalized.
+None of the pathways indicate the production of toxins but the database used Faprotax has a limited scope and mostly features enviromental pathways and not 
 
 
 
