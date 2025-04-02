@@ -60,7 +60,7 @@ rule barcode_concatenation:
     input:
         lambda wildcards: glob.glob(config["BARCODE_DIRECTORIES"][wildcards.barcode] + "/*")
     output:
-		"data/fastq/{barcode}.fastq.gz"
+        "data/fastq/{barcode}.fastq.gz"
     log:
         "logs/cat/{barcode}.log"
     shell:
@@ -70,16 +70,16 @@ rule barcode_concatenation:
 
 
 rule combining_samples:
-	input:
-        	lambda wildcards: expand("data/fastq/{barcode}.fastq.gz", barcode=config["sample_barcodes"][wildcards.sample])
-	output:
-		"/data/{sample}.fastq"
-	log:
-		"logs/combining_samples/{sample}.log"
-	shell:
-		"""
-		cat {input} > {output} 2> {log}
-		"""
+    input:
+            lambda wildcards: expand("data/fastq/{barcode}.fastq.gz", barcode=config["sample_barcodes"][wildcards.sample])
+    output:
+        "/data/{sample}.fastq"
+    log:
+        "logs/combining_samples/{sample}.log"
+    shell:
+        """
+        cat {input} > {output} 2> {log}
+        """
 
 # Quality control and adapter trimming:
 rule fastq_qc_plong:
