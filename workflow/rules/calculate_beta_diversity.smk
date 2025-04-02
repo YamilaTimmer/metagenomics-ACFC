@@ -1,7 +1,7 @@
 rule calculate_beta_diversity:
     input:
-        sample1=f"{OUT_DIR}/kraken2/output/{{sample1}}_output.txt",
-        sample2=f"{OUT_DIR}/kraken2/output/{{sample2}}_output.txt"
+        sample1=f"{OUT_DIR}/kraken2/reports/{{sample1}}_report.txt",
+        sample2=f"{OUT_DIR}/kraken2/reports/{{sample2}}_report.txt"
     output:
         f"{RESULTS_DIR}/beta/{{sample1}}_vs_{{sample2}}.txt"
     params:

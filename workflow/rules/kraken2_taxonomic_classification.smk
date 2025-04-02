@@ -18,7 +18,7 @@ rule kraken2_taxonomic_classification:
             --db {params.db} \
             --threads {params.threads} \
             --confidence {params.confidence} \
-            --output {output.output} \
+            --output {output.kraken_output} \
             --report {output.kraken_report} \
             {input.reads} 2> {log}
         """
