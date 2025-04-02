@@ -10,10 +10,10 @@ rule faprotax:
         f"{LOG_DIR}/faprotax/{{sample}}.log"
     shell:
         """
-        python3 tools/FAPROTAX_1.2.10/collapse_table.py \
+        python3 {TOOLS_DIR}/FAPROTAX_1.2.10/collapse_table.py \
             -i {input.biom_files} \
             -o {output.function_table} \
-            -g tools/FAPROTAX_1.2.10/FAPROTAX.txt \
+            -g {TOOLS_DIR}/FAPROTAX_1.2.10/FAPROTAX.txt \
             -n columns_after_collapsing \
             --collapse_by_metadata "taxonomy" \
             --out_sub_tables_dir {output.sub_table_dir} \

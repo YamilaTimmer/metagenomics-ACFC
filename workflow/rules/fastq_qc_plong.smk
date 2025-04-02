@@ -9,7 +9,7 @@ rule fastq_qc_plong:
         f"{LOG_DIR}/QC/{{sample}}.log"
     shell:
         """
-        tools/fastplong \
+        {TOOLS_DIR}/fastplong \
             -i {input.sample_data} \
             -o {output.trimmed_fastq} \
             -h {output.html} \

@@ -7,6 +7,7 @@ DATA_DIR = config["data_dir"]
 OUT_DIR = config["out_dir"]
 RESULTS_DIR = config["results_dir"]
 LOG_DIR = config["log_dir"]
+TOOLS_DIR = config["tools_dir"]
 
 SAMPLE_NAMES = config["samples"].keys()
 SAMPLE_PAIRS = list(combinations(SAMPLE_NAMES, 2))
