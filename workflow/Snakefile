@@ -101,7 +101,7 @@ rule fastq_qc_plong:
 
 rule kraken2_taxonomic_classification:
     input:
-        reads=f"{OUT_DIR}/trimmed/{{sample}}.fastq"
+        reads=rules.fastq_qc_plong.output.trimmed_fastq
     output:
         kraken_report=f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt",
         output=f"{OUT_DIR}/kraken2/output/{{sample}}_output.txt"
@@ -128,8 +128,8 @@ rule kraken2_taxonomic_classification:
 
 rule bracken:
     input:
-        kraken_report=f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt",
         kraken_database="/data/datasets/KRAKEN2_INDEX/16S_Greengenes"
+        kraken_report=rules.kraken2_taxonomic_classification.output.kraken_report,
     output:
         bracken_report=f"{OUT_DIR}/bracken/reports/{{sample}}.txt",
         bracken_output=f"{OUT_DIR}/bracken/output/{{sample}}.out"
@@ -158,7 +158,7 @@ rule bracken:
 
 rule krona_visualisation:
     input:
-        bracken_files=f"{OUT_DIR}/bracken/reports/{{sample}}.txt"
+        bracken_files=rules.bracken.output.bracken_report
     output: 
         krona_vis=f"{OUT_DIR}/krona/{{sample}}_krona.html"
     log:
@@ -176,7 +176,7 @@ rule krona_visualisation:
 
 rule kraken_biom:
     input:  
-        bracken_kraken=f"{OUT_DIR}/bracken/reports/{{sample}}.txt"
+        bracken_kraken=rules.bracken.output.bracken_report
     output: 
         biom_files=f"{OUT_DIR}/kraken_biom/{{sample}}_output.biom"
     log:
@@ -193,7 +193,7 @@ rule kraken_biom:
 
 rule faprotax:
     input:
-        biom_files=f"{OUT_DIR}/kraken_biom/{{sample}}_output.biom"
+        biom_files=rules.kraken_biom.output.biom_files
     output:
         function_table=f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv",
         faprotax_report=f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_report.txt",
@@ -219,7 +219,7 @@ rule faprotax:
 
 rule generate_pathway_bubble_plot:
     input:
-        f"{OUT_DIR}/faprotax/{{sample}}/{{sample}}_report.txt",
+        rules.faprotax.output.faprotax_report
     output:
         bubble_plot_pdf = f"{OUT_DIR}/results/pathway_bubble_plot{{sample}}.pdf",
         heatmap_pdf = f"{OUT_DIR}/results/pathway_heatmap.pdf",

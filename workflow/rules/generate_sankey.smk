@@ -1,6 +1,6 @@
 rule generate_sankey:
     input:
-        kraken_report = f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt"
+        kraken_report=rules.kraken2_taxonomic_classification.output.kraken_report
     output:
         html = f"{RESULTS_DIR}/sankey/{{sample}}.html"
     script:

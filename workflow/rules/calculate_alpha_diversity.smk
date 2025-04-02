@@ -1,7 +1,6 @@
 rule calculate_alpha_diversity:
     input:
-        kraken_report=f"{OUT_DIR}/kraken2/output/{{sample}}_output.txt"
-
+        kraken_report=rules.kraken2_taxonomic_classification.output.kraken_report
     output:
         html = f"{RESULTS_DIR}/sankey/{{sample}}.html"
     params:
