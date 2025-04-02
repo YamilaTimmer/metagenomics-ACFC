@@ -3,7 +3,7 @@ rule kraken2_taxonomic_classification:
         reads=rules.fastq_qc_plong.output.trimmed_fastq
     output:
         kraken_report=f"{OUT_DIR}/kraken2/reports/{{sample}}_report.txt",
-        output=f"{OUT_DIR}/kraken2/output/{{sample}}_output.txt"
+        kraken_output=f"{OUT_DIR}/kraken2/output/{{sample}}_output.txt"
     log:
         f"{LOG_DIR}/kraken2/{{sample}}.log"
     params:
