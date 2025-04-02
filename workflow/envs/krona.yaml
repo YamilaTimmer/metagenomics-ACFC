@@ -6,6 +6,3 @@ channels:
 dependencies:
   - krona = 2.8.1
   - python = 3.12.8
-  - pip
-  - pip:
-      - "bash -c 'ktUpdateTaxonomy.sh'"
