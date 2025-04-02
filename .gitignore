@@ -80,6 +80,7 @@ ENV/
 *.tgz
 
 analysis/fastplong/*.html
+/analysis/.snakemake/
 
 # Data files
 *.csv
@@ -98,4 +99,3 @@ analysis/fastplong/*.html
 *~
 .Rproj.user
 
-/analysis/
