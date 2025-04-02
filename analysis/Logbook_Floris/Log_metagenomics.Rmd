@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 bibliography: references.bib
 link-citations: true
 output:
-  html_document:
+  pdf_document:
     toc: yes
     toc_depth: '3'
   bookdown::pdf_document2:
@@ -17,7 +17,7 @@ output:
   word_document:
     toc: yes
     toc_depth: '3'
-  pdf_document:
+  html_document:
     toc: yes
     toc_depth: '3'
 editor_options: 
@@ -77,6 +77,22 @@ Overview:
 5. Functional analysis of the micro-organisms found
 
 
+# **Library versions:** #
+
+
+| Tool | Version | Description |
+|------|---------|-------------|
+| R | 4.4.1 | Statistical computing and graphics environment |
+| Fastplong | 0.2.2 | Tool for long-read sequence analysis |
+| Kraken | 2.1.2 | Taxonomic sequence classification system |
+| Bracken | 3.0.1 | Bayesian reestimation of abundance after classification with Kraken |
+| Krona | 2.8.1 | Interactive metagenomic visualization tool |
+| Pavian | 1.0 | Interactive browser application for analyzing metagenomics data |
+| kraken-biom | 1.2.0 | Creates BIOM-format tables from Kraken output |
+| FAPROTAX | 1.2.10 | Functional annotation of prokaryotic taxa |
+
+
+
 ## 1. Sample preparation ##
 
 Samples: 
@@ -129,12 +145,38 @@ cat barcode05.fastq barcode06.fastq barcode07.fastq barcode08.fastq  > /students
 cat barcode09.fastq barcode10.fastq barcode11.fastq barcode12.fastq  > /students/2024-2025/Thema07/metagenomics/wastewater/data/digester.fastq
 ```
 
-Later, I consolidated these bash commands into a snakemake rule:
+Later, I consolidated these bash commands into two snakemake rules:
 
-```{r}
+```{r, eval=F}
 
+rule barcode_concatenation:
+    input:
+        lambda wildcards: glob.glob(config["BARCODE_DIRECTORIES"][wildcards.barcode] + "/*")
+    output:
+        f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz"
+    log:
+        f"{LOG_DIR}/cat/{{barcode}}.log"
+    shell:
+        """
+        cat {input} > {output} 2> {log}
+        """
+
+rule combining_samples:
+    input:
+        lambda wildcards: expand("data/fastq/{barcode}.fastq.gz", barcode=config["sample_barcodes"][wildcards.sample])
+    output:
+        f"{OUT_DIR}/combined_fastq/{{sample}}.fastq"
+    log:
+        f"{LOG_DIR}/combining_samples/{{sample}}.log"
+    shell:
+        """
+        cat {input} > {output} 2> {log}
+        """
 ```
 
+The first rule concatenates all the fastq files in the barcode directories into one file for every barcode.
+According to the sample table, all samples taken in the same place where put together ignoring the use of glycerol that was used for some of the samples. It should have 
+no effect on the genetic material in the samples. 
 
 ## **1. Quality control** ##
 To check the quality of the raw sequence data, Fastplong was used. This tool uses
@@ -213,14 +255,16 @@ In the tables above, the N50 length is the largest lenght L such that 50% of all
 
 Q5, Q7, Q10 etc. bases is the value of the number of bases at each quality level (Phred score). 
 
-![image](fastplong/In_lagoon.png)
+![image](in_lagoon.png)
+
 The figure above displays the difference in read quality before and after filtering with Fastplong. 
 The amount of reads was reduced but the quality increased. Perhaps the reads with a lower phred score would suffice but I chose to remove them in order to have more statistical power in the downstream analyses like in Kraken2.
 
 
 
 
-![image](fastplong/Out_lagoon.png)
+![image](out_lagoon.png)
+
 The same was done with the sample from the water that had exited the lagoon. The digester sample contained only one read after filtering so displaying this graph would be meaningless.
 
 The rule in snakemake takes all the samples from the config.yaml used for all the rules. 
@@ -377,21 +421,21 @@ ggplot(data = faprotax_out_lagoon, mapping = aes(x = group, y = out_lagoon)) +
 faprotax_out_lagoon <- read.table("~/Documenten/Data_set/ACFC_Wastewater_Metagenomics/faprotax/out_lagoon/out_lagoon_function_table.tsv", header = TRUE, sep = "\t", row.names = 1)
 faprotax_in_lagoon <- read.table("~/Documenten/Data_set/ACFC_Wastewater_Metagenomics/faprotax/in_lagoon/in_lagoon_function_table.tsv", header = TRUE, sep = "\t", row.names = 1)
 
-combination_in_out_lagoon <- cbind(faprotax_out_lagoon, faprotax_in_lagoon) 
+combination_in_out_lagoon <- data.frame(cbind(faprotax_out_lagoon, faprotax_in_lagoon))
 
 data_long <- combination_in_out_lagoon %>% # Make it into long format for the plot.
-  rownames_to_column("Pathway") %>%
-  pivot_longer(cols = -Pathway, 
+    rownames_to_column("Pathway") %>%
+    pivot_longer(cols = -Pathway, 
                       names_to = "Sample", 
                       values_to = "Abundance")
 
 data_long <- data_long %>% filter(Abundance > 0) # Filter the 0 values.
 
 ggplot(data_long, aes(x = Sample, y = Pathway, size = Abundance)) +
-  geom_point(aes(color=Sample)) +
-  scale_size(range = c(1, 15), name = "Abundance") + # Looks better with scaling...
-  theme_minimal() +
-  labs(title = "Amount of pathways for the samples:",x = "Sample",y = "Pathway")
+    geom_point(aes(color=Sample)) +
+    scale_size(range = c(1, 15), name = "Abundance") + # Looks better with scaling...
+    theme_minimal() +
+    labs(title = "Amount of pathways for the samples:",x = "Sample",y = "Pathway")
 
 
 ```
