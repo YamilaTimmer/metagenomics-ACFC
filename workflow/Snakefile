@@ -180,7 +180,7 @@ rule generate_pathway_bubble_plot:
         bubble_plot_pdf = f"{RESULTS_DIR}/pathway_bubble_plot/{{sample}}.pdf",
         heatmap_pdf = f"{RESULTS_DIR}/pathway_heatmap/{{sample}}_pathway_heatmap.pdf",
     log:
-        "logs/generate_pathway_plots.log"
+        f"{LOG_DIR}/generate_pathway_bubble_plots/{{sample}}.log"
     params:
         script = "scripts/bubble_chart.r"
     shell:
