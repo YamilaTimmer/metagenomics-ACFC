@@ -112,8 +112,8 @@ rule bracken:
         """
 
 rule krona_visualisation:
-    input:rules.bracken.output.bracken_report
-        bracken_files=
+    input:
+        bracken_files=rules.bracken.output.bracken_report
     output:
         krona_vis=f"{OUT_DIR}/krona/{{sample}}_krona.html"
     log:
