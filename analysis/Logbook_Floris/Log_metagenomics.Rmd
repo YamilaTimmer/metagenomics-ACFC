@@ -75,6 +75,11 @@ Overview:
 4. Visualization of Kraken2 results using Kurona / Pavian 
 5. Functional analysis of the micro-organisms found
 
+## **Snakemake** ##
+To execute this pipeline Snakemake is used. 
+Snakemake is a workflow management system created to be reproducible and scalable. 
+Workflows are described via a human readable Python based language. Snakemake can also enatail a description of required software, which can be automatically be deplayed to the execution environment. 
+
 
 ## **Library / Tool versions:** ##
 
@@ -359,14 +364,71 @@ There are many more different microorganisms found in the "In lagoon" sample com
 
 
 ![Out Lagoon](Out_lagoon.png)
-.
 
-At first, I thought that DESeq2 could be insightful to compare the count data but after looking into it more, the statistical method used would not be usable for metagenomics data since the distribution is different than what DESeq2 expects. 
+Both charts show that most microorganisms are bacteria, specifically Firmicutes.
+This is a phylum of mostly gram-positive bacteria.
 
 
-# Test deseq2
 
-```{r, eval=F}
+Bracken was used to compute the abundance of species. When using 16S reads, this could not be done on a species level so the genus level was used.
+
+When comparing the output of Kraken2 with Bracken, many taxa where lost after running Bracken, this is why its output was discarded and the raw Kraken data was used for the downstream analyses. 
+
+## **Bracken** ##
+Bracken (Bayesian Reestimation of Abundance with KrakEN) is a statistical method that computes the abundance of species in DNA sequences from a metagenomics sample. Braken uses taxonomy labels that are assigned by Kraken2 to estimate the number of reads that originated from each species in the sample. Even though Kraken classifies reads to the best matching location in the taxonomic tree, it does not estimate the abundances of species. Bracken uses the Kraken database to derive probabilities that describe how much sequence from each genome is the same to other genomes in the database. This data is combined with with the assignments for the sample to estimate the abundance at the species level or in our case, the genus level. 
+
+The tool did not work when "S" for species was given as argument. After reading about researchers having the same problem and figuring out that species level estimation is not possible with 16S data, we used "G" to let bracken estimate it to the genus level instead. 
+
+After using Bracken, it became apparent that many species got filtered out that were there before and since species level estimation is not possible, we decided to omit Bracken from the pipeline. Yamila has a comparison of the bracken/ no bracken outputs in her Notebook.
+
+
+```{r rule-bracken, eval=F}
+
+rule bracken:
+    input:
+        kraken_report=rules.kraken2_taxonomic_classification.output.kraken_report,
+        kraken_database=f"{config['kraken2_db_dir']}/16S_Greengenes"
+    output:
+        bracken_report=f"{OUT_DIR}/bracken/reports/{{sample}}.txt",
+        bracken_output=f"{OUT_DIR}/bracken/output/{{sample}}.out"
+    params:
+        read_length=150,
+        threshold=10,
+        level="G"
+    log:
+        f"{LOG_DIR}/bracken/{{sample}}.log"
+    threads:
+        32
+    conda:
+        workflow.source_path("../envs/bracken.yaml")
+    shell:
+        """
+        bracken \
+            -d {input.kraken_database} \
+            -i {input.kraken_report} \
+            -o {output.bracken_output} \
+            -w {output.bracken_report} \
+            -r {params.read_length} \
+            -t {params.threshold} \
+            -l {params.level} \
+        2> {log}
+        """
+
+```
+
+The Snakemake rule uses bracken with a read length of 150, a phred threshold of 10 and estimation at genus level.
+The threshold is the default value of 10. The read length should require some experimentation because the average read length of the samples varies a lot. 
+But there was not enough time to do this and almost all reads conform to this length. 
+
+
+## DESeq2.... ##
+
+
+At first, I thought that DESeq2 could be insightful to compare the count data but after looking into it more, the statistical method used would not be usable for metagenomics data since the distribution is different than what DESeq2 expects.
+
+This means that the results would be statistical insignificant and not worth the time investment to adapt our data for use with it. The code below is my fruitless attempt at using Deseq2.
+
+```{r Test deseq2,  eval=F}
 colnames <- c("Group")
 
 coldata <- data.frame(c("In_Lagoon", "Out_Lagoon"), c("In_Lagoon","Out_Lagoon"), row.names = 1)
@@ -388,11 +450,24 @@ resultsNames(dds)
 
 res <- results(dds, name="In_vs_Out_lagoon")
 
-# Use lfcschrink to do a log transformation on the data:
 res <- lfcShrink(dds, coef="In_vs_Out_lagoon", type="apeglm")
 
 summary(res)
 ```
+
+
+
+
+## **Faprotax** ##
+After Kraken2 had classified the reads and the content of the sample became known, Faprotax was used to look up what known pathways are used by the microorganisms. 
+The Faprotax (Functional Annotation of Prokaryotic Taxa) database is a database that maps prokaryotic clades, for example genera and species. This is done in order to find out what ecologically relevant metabolic functions the organism possesses.
+
+FAPROTAX maintains a database of Over 7600 functional annotations covering over 4600 taxa. (@louca2016decoupling)
+Faprotax includes a tool that functions as a loop up table for the organisms from the OTU table gathered from Kraken2 and compares this to known pathways. 
+
+There are other databases that could be used that have a broader scope compared to the mostly ecological pathways from Faprotax. 
+I have found MinPath and Tax4fun2 which are functional profilers for 16S rRNA sequences like we have. In the end, due to time constrains only Faprotax was used. 
+
 
 
 ```{r}
@@ -407,8 +482,8 @@ ggplot(data = faprotax_in_lagoon, mapping = aes(x = group, y = in_lagoon)) +
     coord_flip()
 
 ```
-The graph above displays the results of the FAPROTAX analysis. This is a database with microorganisms and their known functions.
-FAPROTAX maintains a database of Over 7600 functional annotations covering over 4600 taxa.
+The graph above displays the results of the FAPROTAX analysis. 
+
 One of FAPROTAX's applications is the ecological interpretation of 16S marker gene data like what is done for this study. FAPROTAX is non-exhaustive, that means it is likely that many organisms known to perform certain functions may be missing or may only be partially included in the database. This could explain the few pathways found in both samples but especially in the "out lagoon" sample below. 
 
 (Source: https://pages.uoregon.edu/slouca/LoucaLab/archive/FAPROTAX/lib/php/index.php)
