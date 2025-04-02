@@ -14,7 +14,7 @@ rule kraken2_taxonomic_classification:
         workflow.source_path("../envs/kraken2.yaml")
     shell:
         """
-        kraken2
+        kraken2 \
             --db {params.db} \
             --threads {params.threads} \
             --confidence {params.confidence} \

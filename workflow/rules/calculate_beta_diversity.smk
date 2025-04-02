@@ -8,9 +8,9 @@ rule calculate_beta_diversity:
         sample_type="kreport2"
     shell:
         """
-        python scripts/beta_diversity.py
-            -i {input.sample1} {input.sample2}
-            --type {params.sample_type}
-            --level G
+        python scripts/beta_diversity.py \
+            -i {input.sample1} {input.sample2} \
+            --type {params.sample_type} \
+            --level G \
         > {output}
         """

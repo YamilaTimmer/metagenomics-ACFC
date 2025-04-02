@@ -7,8 +7,8 @@ rule calculate_alpha_diversity:
         shannon_index="Sh"
     shell:
         """
-        python scripts/alpha_diversity.py
-            -f {input}
-            -a {params.shannon_index}
+        python scripts/alpha_diversity.py \
+            -f {input} \
+            -a {params.shannon_index} \
         > {output}
         """
