@@ -99,3 +99,5 @@ analysis/fastplong/*.html
 *~
 .Rproj.user
 
+# Snakemake files
+*.snakemake
