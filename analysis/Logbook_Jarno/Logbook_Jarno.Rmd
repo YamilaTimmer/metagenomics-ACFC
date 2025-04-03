@@ -14,6 +14,7 @@ output:
 bibliography: bibliography.bib    # Path to your .bib file
 header-includes:
   - \usepackage{setspace}\doublespacing  # For PDF double-spacing (optional)
+   
 editor_options: 
   markdown: 
     wrap: 72
@@ -27,7 +28,8 @@ knitr::opts_chunk$set(
   warning = FALSE,               # Hide warnings
   message = FALSE,               # Hide package messages
   fig.path = "figures/",         # Save figures in subfolder
-  cache = TRUE                   # Cache results for speed
+  cache = TRUE,
+  python.reticulate = FALSE
 )
 ```
 
@@ -74,8 +76,6 @@ of Wastewater from a Molasses-Based Spirit and Yeast Production Factory
 -   [Material & Methods](#Mat-en-Meth)
 -   [Snakemake](#Snakemake)
 
-# Mat en Meth {#mat-en-meth}
-
 Goals: Find tools that will build our pipeline Find What our pipeline
 needs to do Write material and methods Clear up our question from our
 supervisor
@@ -84,9 +84,12 @@ supervisor
 
 Setting up a github project to devide the tasks among the team members
 
-kraken2 - Yamila - Pavian - Floris - KronaTools - Yamila - HUManN 3.0 -
-Floris - Shannon index for alpha diversity - Jarno - Presentation -
-conlusion and discussion needs to be written by everyone
+The tasks: Write materials - Jarno\
+Write Methods - Jarno\
+**Snakemake**\
+Fastplong - Floris\
+kraken2 - Yamila\
+KronaTools - Yamila   Funtional analysis tools (bubble plot /
 fastprotax) Floris\
 Shannon index for alpha diversity + beta diversity- Jarno\
 Presentation -conlusion and discussion needs to be written by everyone
@@ -501,7 +504,7 @@ classification - Show the diversity of what the samples contain
 
 18 mrt **Qiime2 - First version (not chosen)**
 
-```{python}
+```{python, eval=FALSE}
 
 SAMPLES = ["forward"]
 
@@ -556,7 +559,7 @@ server having an old version of chime. For this reason it was quite hard
 to find working solutions to my problem and i had to mostly rely on the
 documentation that could be found
 
-```{python}
+```{python, eval=FALSE}
 rule denoise_sequences:
     input:
         demux="demux.qza"
@@ -585,16 +588,12 @@ solutions
 ## March 20th
 
 **Snakemake rules for calculation of alpha and beta diversity** This
-build was done in a test enviroment on assemblix where i had the
-following file structure
+build was done in a test enviroment on assemblix where i had a test
+folder in my documents on my personal home. In this folder i had a data
+map and using that env i started experimenting with qiime2 and the
+diversity scripts.
 
--snakemake\
-\|\
-— data\
-\|\
-—
-
-```{python}
+```{python, eval=FALSE}
 SAMPLES, = glob_wildcards("data/kraken2/{sample}.kraken")
 
 rule all:
@@ -700,7 +699,7 @@ $$
 The alpha diversity is fully working but there are some problems with
 the beta diversity settings and inputs
 
-```{python}
+```{python, eval=FALSE}
 
 SAMPLES, = glob_wildcards("data/bracken/{sample}.out")
 
@@ -779,11 +778,15 @@ $$pi=n/N$$
 
 <https://www.omnicalculator.com/ecology/shannon-index#>:\~:text=How%20to%20interpret%20the%20Shannon,is%20present%20in%20the%20community.
 
+## 26 mrt
+
 **Data collection**
 
 Collection - Kit -
 <https://www.qiagen.com/us/products/discovery-and-translational-research/dna-rna-purification/dna-purification/microbial-dna/qiaamp-dna-microbiome-kit> -
-\## 26 mrt
+
+Today i looked at how our data was collected, our teacher told us the
+names of what was used to collect the data from the water samples.
 
 **QIAamp DNA Microbiome Kit (50) - 51704** - What is this kit used for:
 This is a purification and enrichment kit of bacterial microbiome DNA
@@ -807,7 +810,7 @@ samples, reducing host DNA interference.
 
 ## 28 mrt
 
-```{python}
+```{python, eval=FALSE}
 from itertools import combinations
 #To make a combination list for the beta diversity
 
@@ -880,7 +883,17 @@ shell:
 "python beta_diversity.py -i {input.file1} {input.file2} --type bracken --level G > {output}"
 ```
 
+This script is what our final calculate alpha diversity and calculate
+beta diversity rules are based off. It contains explenation for what
+each step does this is so my project teammates can read and understand
+what i did without having to look at the documentation.
+
 ## 29 mrt
+
+Today i looked at the second part of the data collection, the sequencing
+part was done using the minION and i was trying to figure out how and
+with what settings this was done. Because this has impact on the final
+results.
 
 Sequencing - <https://nanoporetech.com/document/16S-barcoding-1-24> -
 14Aug2019 - Rapid sequencing amplicons - 16S barcoding (SQK-16S024)
@@ -948,7 +961,7 @@ taxon.
 This repo has the option to use pip install however when i used it i got
 an error seen below
 
-```{shell}
+```{shell, eval=FALSE}
 Getting requirements to build wheel ... error error:
 subprocess-exited-with-error
 
@@ -971,7 +984,7 @@ command.
 
 the readme however did not explain what all the param options were.
 
-```{python}
+```{python, eval=FALSE}
        
 SAMPLES, = glob_wildcards("data/bracken/{sample}.txt")
 
@@ -1005,7 +1018,7 @@ language model* @deepseek2024"
 
 This gave me the following script:
 
-```{python}
+```{python, eval=FALSE}
 """
 This is a script that makes a sankey plot based on indentation in a kraken / bracken report.
 This script was developed with guidance from DeepSeek-R1-Lite-Preview, a large language model @deepseek2024"
@@ -1095,9 +1108,9 @@ if __name__ == "__main__":
 Using this script i was able to generate two html files that contain the
 sankey plots for lagoon in and lagoon out.
 
-Here is a screenshot of the **lagoon out**
-
-It seems that the bacili group has fallen away.
+(After some discussion with my project group it was decided to not
+present this script for the paper/ pipeline due to it being made with
+AI)
 
 ## 31 March
 
@@ -1109,7 +1122,7 @@ Changes alpha diversity rule
 Made a new file in the rules folder that is named
 "calculation_alpha_diversity" this rule looks the following
 
-```{python}
+```{python, eval=FALSE}
 
 rule alpha_diversity:
     input:
@@ -1132,6 +1145,51 @@ rule alpha_diversity:
 ## 1 april
 
 writing the discussion and fixing a part of the pipeline
+
+The pipeline had to be able to run from the git repo, This was not yet
+the case due to this we have put all the rules into their own .smk
+files. For example calculation_alpha_diversity.smk this is a seperate
+snakemake file that then can be imported into the main file with code
+like seen below.
+
+```{python, eval=FALSE}
+include: "rules/calculate_alpha_diversity.smk"
+
+#This is the way to call this function so it will work
+alpha_diversity=expand(f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt", sample=SAMPLE_NAMES),
+
+```
+
+A rule file will look as followed
+
+```{python, eval=FALSE}
+
+rule calculate_alpha_diversity:
+    input:
+        kraken_report=rules.bracken.output.bracken_output
+    output:
+        alpha_diversity=f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt"
+    params:
+        shannon_index="Sh"
+    shell:
+        """
+        python scripts/alpha_diversity.py \
+            -f {input} \
+            -a {params.shannon_index} \
+        > {output}
+        """
+```
+
+The reason for putting all the rules in seperate files is to comply with
+the snakemake conformaties, for this we also had to to change the
+directory structure. We had to add a workflow directory that contained
+the scripts folder that will hold all the python/rscripts. envs that are
+used in the rules a rules folder. The snakemake file and the
+config.yaml.
+
+![DAG plot of the pipeline](images/dag.png)
+
+Here is a DAG plot of our pipeline this shows every
 
 ## 2 april
 
