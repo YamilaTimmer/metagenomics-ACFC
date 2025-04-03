@@ -1,6 +1,6 @@
 rule fastq_qc_plong:
     input:
-        sample_data=f"{OUT_DIR}/combined_fastq/{{sample}}.fastq""
+        sample_data=f"{OUT_DIR}/combined_fastq/{{sample}}.fastq"
                     
     output:
         trimmed_fastq=f"{OUT_DIR}/trimmed/{{sample}}.fastq",
