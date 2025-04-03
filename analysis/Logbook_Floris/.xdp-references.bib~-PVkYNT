@@ -102,14 +102,3 @@
     publisher = {Elsevier},
     author = {Al-Jassim, Nada and Ansari, Mohd Ikram and Harb, Moustapha and Hong, Pei-Ying},
 }
-
-@article{louca2016decoupling,
-    pages = {1272--1277},
-    number = {6305},
-    journal = {Science},
-    publisher = {American Association for the Advancement of Science},
-    title = {Decoupling function and taxonomy in the global ocean microbiome},
-    year = {2016},
-    author = {Louca, Stilianos and Parfrey, Laura Wegener and Doebeli, Michael},
-    volume = {353},
-}

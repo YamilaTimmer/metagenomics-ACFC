@@ -1,0 +1,94 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0" version="26.0.10">
+  <diagram name="Page-1" id="AG0adBC3VKAUHIHF2Z_7">
+    <mxGraphModel dx="2688" dy="1093" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-34" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;" vertex="1" parent="1">
+          <mxGeometry x="530" y="290" width="290" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-33" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b1ddf0;strokeColor=#10739e;glass=0;" vertex="1" parent="1">
+          <mxGeometry x="750" y="290" width="590" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-30" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#647687;strokeColor=#314354;fontColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="-200" y="370" width="950" height="215" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-1" target="Tou6cDyQrj2QroLX8vQE-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-1" value="&lt;div&gt;Basecalling (Dorado)&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="365" y="450" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-2" target="Tou6cDyQrj2QroLX8vQE-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-2" value="Sequencing samples (Oxford nanopore)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="450" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-4" target="Tou6cDyQrj2QroLX8vQE-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-4" target="Tou6cDyQrj2QroLX8vQE-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-4" value="Filtering (Phred &amp;gt; 10)" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="550" y="450" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-6" value="Quality control (FastPlong)" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="550" y="310" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-8" target="Tou6cDyQrj2QroLX8vQE-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-13" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-8" target="Tou6cDyQrj2QroLX8vQE-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-8" value="Adapter trimming (Fastplong)" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="450" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-10" value="Quality control after trimming (Fastplong)" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="750" y="310" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-12" target="Tou6cDyQrj2QroLX8vQE-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-12" target="Tou6cDyQrj2QroLX8vQE-16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-12" target="Tou6cDyQrj2QroLX8vQE-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-12" value="Taxonomic classification (Kraken2)" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="450" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-21" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-14" target="Tou6cDyQrj2QroLX8vQE-20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-14" value="Functional analysis (Faprotax)" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="450" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-16" value="Visualization of taxonomic data (Pavian / Krona)" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="590" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-18" value="Alpha / Beta diversity determination" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="310" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-20" value="Visualization of Faprotax output" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="590" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-23" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-22" target="Tou6cDyQrj2QroLX8vQE-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-22" value="Sample preparation (DNA isolation / PCR)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry y="450" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-25" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="Tou6cDyQrj2QroLX8vQE-24" target="Tou6cDyQrj2QroLX8vQE-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Tou6cDyQrj2QroLX8vQE-24" value="Sample collection" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-180" y="450" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

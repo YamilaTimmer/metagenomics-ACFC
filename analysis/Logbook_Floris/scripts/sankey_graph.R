@@ -1,264 +1,238 @@
-main <- function() {
-  # Producing a Sanky Plot from a Kraken report file.
-  #
-  # Takes one argument:
-  # The file name of the kraken report.
-  #
-  # Ex. usage:
-  #   Rscript krakenSanky.R kraken.report
-  #
-  library(magrittr)
-  library(networkD3)
-  
-  # get input args
-  args <- commandArgs(trailingOnly = TRUE)
-  filepath <- toString(args[1])
-  
-  # Load data
-  report <- read_report(filepath)
-  
-  # Construct filename
-  basename <- sub(pattern = "(.*)\\..*$", replacement = "\\1", basename(filepath))
-  output_file <- paste(basename,'.html', sep = '')
-  
-  # Output to png file
-  build_sankey_network(report) %>% saveNetwork(file = output_file)
+build_sankey_network <- function(my_report, taxRanks =  c("U","D","K","P","C","O","F","G","S"), maxn=10,
+				 zoom = F, title = NULL,
+				 ...) {
+    stopifnot("taxRank" %in% colnames(my_report))
+    if (!any(taxRanks %in% my_report$taxRank)) {
+        warning("report does not contain any of the taxRanks - skipping it")
+        return()
+    }
+    my_report <- subset(my_report, taxRank %in% taxRanks)
+    my_report <- plyr::ddply(my_report, "taxRank", function(x) x[utils::tail(order(x$cladeReads,-x$depth), n=maxn), , drop = FALSE])
+
+    my_report <- my_report[, c("name","taxLineage","taxonReads", "cladeReads","depth", "taxRank")]
+
+    my_report <- my_report[!my_report$name %in% c('-_root'), ]
+    #my_report$name <- sub("^-_root.", "", my_report$name)
+
+    splits <- strsplit(my_report$taxLineage, "\\|")
+
+    ## for the root nodes, we'll have to add an 'other' link to account for all cladeReads
+    root_nodes <- sapply(splits[sapply(splits, length) ==2], function(x) x[2])
+
+    sel <- sapply(splits, length) >= 3
+    splits <- splits[sel]
+
+    links <- data.frame(do.call(rbind,
+                                lapply(splits, function(x) utils::tail(x[x %in% my_report$name], n=2))), stringsAsFactors = FALSE)
+    colnames(links) <- c("source","target")
+    links$value <- my_report[sel,"cladeReads"]
+
+    my_taxRanks <- taxRanks[taxRanks %in% my_report$taxRank]
+    taxRank_to_depth <- stats::setNames(seq_along(my_taxRanks)-1, my_taxRanks)
+
+
+    nodes <- data.frame(name=my_report$name,
+                        depth=taxRank_to_depth[my_report$taxRank],
+                        value=my_report$cladeReads,
+                        stringsAsFactors=FALSE)
+
+    for (node_name in root_nodes) {
+      diff_sum_vs_all <- my_report[my_report$name == node_name, "cladeReads"] - sum(links$value[links$source == node_name])
+      if (diff_sum_vs_all > 0) {
+        nname <- paste("other", sub("^._","",node_name))
+        #nname <- node_name
+        #links <- rbind(links, data.frame(source=node_name, target=nname, value=diff_sum_vs_all, stringsAsFactors = FALSE))
+        #nodes <- rbind(nodes, nname)
+      }
+    }
+
+    names_id = stats::setNames(seq_len(nrow(nodes)) - 1, nodes[,1])
+    links$source <- names_id[links$source]
+    links$target <- names_id[links$target]
+    links <- links[links$source != links$target, ]
+
+    nodes$name <- sub("^._","", nodes$name)
+    links$source_name <- nodes$name[links$source + 1]
+
+    if (!is.null(links))
+      sankeyD3::sankeyNetwork(
+        Links = links,
+        Nodes = nodes,
+        doubleclickTogglesChildren = TRUE,
+        Source = "source",
+        Target = "target",
+        Value = "value",
+        NodeID = "name",
+        NodeGroup = "name",
+        NodePosX = "depth",
+        NodeValue = "value",
+        dragY = TRUE,
+        xAxisDomain = my_taxRanks,
+        numberFormat = "pavian",
+        title = title,
+        nodeWidth = 15,
+        linkGradient = TRUE,
+        nodeShadow = TRUE,
+        nodeCornerRadius = 5,
+        units = "cladeReads",
+        fontSize = 12,
+        iterations = maxn * 100,
+        align = "none",
+        highlightChildLinks = TRUE,
+        orderByPath = TRUE,
+        scaleNodeBreadthsByString = TRUE,
+        zoom = zoom,
+	...
+      )
+}
+
+# vim: noai:ts=2:sw=2
+
+## recursive function that transforms the kraken dataframe into a cascading list
+build_kraken_tree <- function(report) {
+  if (nrow(report) == 0 || nrow(report) == 1) {
+    # this should only happen if the original input to the function has a size <= 1
+    return(list(report))
+  }
+
+  ## select the current depth as the one of the topmost data.frame row
+  sel_depth <- report[,'depth'] == report[1,'depth']
+
+  ## partition the data.frame into parts with that depth
+  depth_partitions <- cumsum(sel_depth)
+
+  ## for each depth partition
+  res <- lapply(unique(depth_partitions),
+                function(my_depth_partition) {
+                  sel <- depth_partitions == my_depth_partition
+
+                  ## return the data.frame row if it is only one row (leaf node, ends recursion)
+                  if (sum(sel) == 1)
+                    return(report[sel,,drop=F])
+
+                  ## otherwise: take first row as partition descriptor ..
+                  first_row <- which(sel)[1]
+                  ##  and recurse deeper into the depths with the remaining rows
+                  dres <- build_kraken_tree(report[which(sel)[-1],,drop=F])
+
+                  attr(dres,"row") <- report[first_row,,drop=F]
+                  dres
+                })
+  names(res) <- report$name[sel_depth]
+  res
 }
 
 
+## Collapse taxonomic taxRanks to only those mentioned in keep_taxRanks
+collapse.taxRanks <- function(krakenlist,keep_taxRanks=LETTERS,filter_taxon=NULL) {
+  ## input: a list, in which each element is either a
+  ##            a list or a data.frame (for the leafs)
+  ##   the input has an attribute row that gives details on the current taxRank
 
-
-#' Read Kraken-style and MetaPhlAn reports
-#'
-#' @param myfile Kraken-style or MetaPhlAn report file.
-#' @param has_header If the kraken report has a header or not.
-#' @param check_file If TRUE, only the first 5 lines of the file are loaded.
-#'
-#' @return report data.frame
-#' @export
-#'
-read_report <- function(myfile, has_header=NULL, check_file = FALSE) {
-
-  # TODO: Support for gzipped files ..
-  #myfile <- file(myfile)
-  #file_class <- summary(myfile)$class
-  #if (file_class == "gzfile")
-  #  myfile <- gzcon(myfile)
-
-  first.line <- tryCatch( readLines(myfile,n=1, warn=FALSE),
-                          error = function(e) { warning("Error reading ",myfile); return() })
-  isASCII <-  function(txt) {
-    if (length(txt) == 0)
-      return(FALSE)
-    raw <- charToRaw(txt)
-    all(raw <= as.raw(127) && (raw >= as.raw(32) | raw == as.raw(9)))
+  ## columns whose values are added to the next taxRank when
+  ##  a taxRank is deleted
+  cols <- c("taxonReads","n_unique_kmers","n_kmers")
+  if (length(krakenlist) == 0 || is.data.frame(krakenlist)) {
+    return(krakenlist)
   }
-  if (length(first.line) == 0) {
-    dmessage("Could not read ", myfile, ".")
-    return(NULL)
+
+  parent_row <- attr(krakenlist,"row")
+  all.child_rows <- c()
+
+  if (is.null(parent_row)) {
+    return(do.call(rbind,lapply(krakenlist,collapse.taxRanks,keep_taxRanks=keep_taxRanks,filter_taxon=filter_taxon)))
   }
-  tryCatch({
-    if (nchar(first.line) == 0) {
-      dmessage("First line of ", myfile, " is empty")
-      return(NULL)
+
+  ## rm.cladeReads captures the number of cladeReads that are deleted.
+  ##  this has to be propagated to the higher taxRank
+  rm.cladeReads <- 0
+
+  for (kl in krakenlist) {
+    if (is.data.frame(kl)) {  ## is a leaf node?
+      child_rows <- kl
+    } else {                 ## recurse deeper into tree
+      child_rows <- collapse.taxRanks(kl,keep_taxRanks,filter_taxon=filter_taxon)
+      if ('rm.cladeReads' %in% names(attributes(child_rows))) {
+        rm.cladeReads <- rm.cladeReads + attr(child_rows,'rm.cladeReads')
+      }
     }
-  }, error = function(e) {
-    dmessage(e)
-    return(NULL)
-  })
 
-  if (!isTRUE(isASCII(first.line))) {
-    dmessage(myfile," is not a ASCII file")
-    return(NULL)
+    ## check if this taxRank and the taxRanks below should be removed
+    delete.taxon <- child_rows[1,'name'] %in% filter_taxon
+    if (delete.taxon) {
+      rm.cladeReads <- rm.cladeReads + child_rows[1,'cladeReads']
+      dmessage(sprintf("removed %7s cladeReads, including %s childs, for %s",child_rows[1,'"cladeReads"'],nrow(child_rows)-1,child_rows[1,'name']))
+
+      ## remove all children
+      child_rows <- NULL
+
+    } else {
+
+      ## check if the last (top-most) row should be kept
+      keep_last.child <- child_rows[1,'taxRank'] %in% keep_taxRanks
+
+      if (!keep_last.child) {
+        cols <- cols[cols %in% colnames(parent_row)]
+
+        ## save the specified colum information to the parent
+        parent_row[,cols] <- parent_row[,cols] + child_rows[1,cols]
+
+        ## remove row
+        child_rows <- child_rows[-1,,drop=FALSE]
+
+        ## decrease depths of rows below child row
+        if (nrow(child_rows) > 0)
+          child_rows[,'depth'] <- child_rows[,'depth'] - 1
+
+      }
+    }
+    all.child_rows <- rbind(all.child_rows,child_rows)
   }
 
-  if (is.null(has_header)) {
-    has_header <- grepl("^[a-zA-Z#%\"]",first.line)
-  }
+  ## subtract deleted read count from parent row
+  parent_row[,'cladeReads'] <- parent_row[,'cladeReads'] - rm.cladeReads
+  res <- rbind(parent_row,all.child_rows)
 
-  is_krakenu_fmt <- grepl("^.?%\treads\ttaxReads\tkmers", first.line)
-  is_kaiju_fmt <- grepl("^  *%\t  *reads", first.line)
-  nrows <- ifelse(isTRUE(check_file), 5, -1)
-  if (!is_krakenu_fmt && is_kaiju_fmt) {
-    cont <- readLines(myfile)
-    cont <- cont[!grepl("^-", cont)]
-    cont <- sub(".*\t  *","", cont)
-    cont <- sub("; ?$","", cont)
-    report <- utils::read.delim(textConnection(cont), stringsAsFactors = FALSE)
-    colnames(report) <- c("taxonReads", "taxLineage")
-    report$cladeReads <- report$taxonReads
+  if (parent_row[,'cladeReads'] < 0)
+    stop("mistake made in removing cladeReads")
+  #if (parent_row[,'"cladeReads"'] == 0)
+  #  res <- c()
 
-    report$taxLineage <- gsub("^","-_",report$taxLineage)
-    report$taxLineage <- gsub("; ","|-_",report$taxLineage)
-    report$taxLineage <- gsub("-_Viruses", "d_Viruses", report$taxLineage, fixed=T)
-    report$taxLineage <- gsub("-_cellular organisms|-_Bacteria", "-_cellular organisms|d_Bacteria", report$taxLineage, fixed=T)
-    report$taxLineage <- gsub("-_cellular organisms|-_Eukaryota", "-_cellular organisms|d_Eukaryota", report$taxLineage, fixed=T)
-    report$taxLineage <- gsub("-_cellular organisms|-_Archaea", "-_cellular organisms|d_Archaea", report$taxLineage, fixed=T)
-    report$taxLineage[1:(length(report$taxLineage)-1)] <- paste0("-_root|", report$taxLineage[1:(length(report$taxLineage)-1)])
+  if (rm.cladeReads > 0)
+    attr(res,'rm.cladeReads') <- rm.cladeReads
+  return(res)
+}
 
-    report$taxLineage[report$taxLineage=="-_unclassified"] <- "u_unclassified"
+delete_taxRanks_below <- function(report,taxRank="S") {
+  del_taxRank <- 0
+  do_del <- FALSE
+  del_row <- 0
 
-    new_counts <- integer(length = 0)
-    for (j in seq_len(nrow(report))) {
-      count <- report$cladeReads[j]
-      tl <- report$taxLineage[j]
-      tl2 <- sub("\\|[^|]*$","", tl)
-      while (tl2 != tl) {
-        if (tl2 %in% names(new_counts)) {
-          new_counts[tl2] <- new_counts[tl2] + count
+  cols <- c("taxonReads","n_unique_kmers","n_kmers")
+  sub.sums <- c(0,0,0)
+
+  rows_to_delete <- c()
+  for (i in seq_len(nrow(report))) {
+    if (report[i,'taxRank'] %in% taxRank) {
+      del_depth <- report[i,'depth']
+      do_del <- TRUE
+      del_row <- i
+      sub.sums <- c(0,0,0)
+    } else {
+      if (do_del) {
+        if (report[i,'depth'] > del_taxRank) {
+          rows_to_delete <- c(rows_to_delete,i)
+          sub.sums <- sub.sums + report[i,cols]
         } else {
-          new_counts[tl2] <- count
+          report[del_row,cols] <- report[del_row,cols]+sub.sums
+          sub.sums <- c(0,0,0)
+          do_del <- FALSE
         }
-        tl <- tl2
-        tl2 <- sub("\\|[^|]*$","", tl)
       }
     }
-    report <- rbind(report,
-                    data.frame(taxonReads=0,taxLineage=names(new_counts),cladeReads=as.integer(new_counts)))
-    tl_order <- order(report$taxLineage)
-    tl_order <- c(tl_order[length(tl_order)],tl_order[-length(tl_order)])
-    report <- report[tl_order, c("taxLineage", "taxonReads", "cladeReads")]
-  } else if (has_header) {
-    report <- tryCatch({
-      utils::read.table(myfile,sep="\t",header = T,
-                        quote = "",stringsAsFactors=FALSE,
-                        comment.char = "#", nrows = nrows,
-                        check.names=FALSE)
-    }, error = function(x) NULL, warning = function(x) NULL)
-    if (is.null(report)) { return(NULL); }
-    #colnames(report) <- c("percentage","cladeReads","taxonReads","taxRank","taxID","n_unique_kmers","n_kmers","perc_uniq_kmers","name")
-
-    ## harmonize column names. TODO: Harmonize them in the scripts!
-    colnames(report)[colnames(report) %in% c("#%","%","clade_perc","perc","percReadsClade")] <- "percentage"
-    colnames(report)[colnames(report) %in% c("reads","numReadsClade","n_reads_clade","n.clade","n-clade")] <- "cladeReads"
-    colnames(report)[colnames(report) %in% c("taxReads","numReadsTaxon","n_reads_taxo","n.stay","n-stay")] <- "taxonReads"
-    colnames(report)[colnames(report) %in% c("rank","tax_taxRank","level")] <- "taxRank"
-    colnames(report)[colnames(report) %in% c("tax","taxonid")] <- "taxID"
-    colnames(report)[colnames(report) %in% c("indentedName","taxName")] <- "name"
-    colnames(report)[colnames(report) %in% c("dup")] <- "kmerDuplicity"
-    colnames(report)[colnames(report) %in% c("cov")] <- "kmerCoverage"
-  } else {
-    report <- tryCatch({
-      utils::read.table(myfile,sep="\t",header = F,
-                        col.names = c("percentage","cladeReads","taxonReads","taxRank","taxID","name"),
-                        quote = "",stringsAsFactors=FALSE,
-                        nrows = nrows)
-    }, error=function(x) NULL, warning=function(x) NULL)
-    if (is.null(report)) { return(NULL); }
   }
-
-  if (ncol(report) < 2) {
-    return(NULL)
-  }
-  if (colnames(report)[2] == "Metaphlan2_Analysis") {
-    ## Metaphlan report
-    colnames(report) <- c("taxLineage", "cladeReads")
-    report <- report[order(report$taxLineage), ]
-    report$taxLineage <- gsub("_"," ",report$taxLineage)
-    report$taxLineage <- gsub("  ","_",report$taxLineage)
-    report$taxLineage <- paste0("-_root|", report$taxLineage)
-
-    report <- rbind(
-      data.frame(taxLineage=c("u_unclassified","-_root"),"cladeReads"=c(0,100), stringsAsFactors = F),
-      report)
-  }
-
-  if (all(c("name","taxRank") %in% colnames(report)) && !"taxLineage" %in% colnames(report)) {
-    ## Kraken report
-    report$depth <- nchar(gsub("\\S.*","",report$name))/2
-    if (!all(report$depth == floor(report$depth))) {
-      warning("Depth doesn't work out!")
-      return(NULL)
-    }
-    report$name <- gsub("^ *","",report$name)
-
-    ## 'fix' taxRank
-    table(report$taxRank)
-    allowed_taxRanks <- c("U", "S", "G", "F", "C", "D", "O", "K", "P")
-    report$taxRank[report$taxRank=="class"] <- "C"
-    report$taxRank[report$taxRank=="family"] <- "F"
-    report$taxRank[report$taxRank=="genus"] <- "G"
-    report$taxRank[report$taxRank=="superkingdom"] <- "D"
-    report$taxRank[report$taxRank=="kingdom"] <- "K"
-    report$taxRank[report$taxRank=="order"] <- "O"
-    report$taxRank[report$taxRank=="phylum"] <- "P"
-    report$taxRank[report$taxRank=="species"] <- "S"
-    report$taxRank[report$name=="unclassified"] <- "U"
-    report$taxRank[!report$taxRank %in% allowed_taxRanks] <- "-"
-
-    report$name <- paste(tolower(report$taxRank),report$name,sep="_")
-
-    rownames(report) <- NULL
-
-    ## make taxLineage path
-    report$taxLineage <- report$name
-    n <- nrow(report)
-    depths <- report$depth
-    taxLineages <- report$name
-    taxLineages_p <- as.list(seq_along(report$name))
-
-    depth_row_tmp <- c(1:25)
-
-    for (current_row in seq(from=1, to=nrow(report))) {
-      dcr <- depths[current_row]
-      depth_row_tmp[dcr+1] <- current_row
-      if (dcr >= 1) {
-        prev_pos <- depth_row_tmp[[dcr]]
-        taxLineages_p[[current_row]] <- c(taxLineages_p[[prev_pos]], current_row)
-      }
-    }
-    report$taxLineage <- sapply(taxLineages_p, function(x) paste0(taxLineages[x], collapse="|"))
-    #report$taxLineage <- taxLineages
-
-  } else if ("taxLineage" %in% colnames(report)) {
-    taxLineages <- strsplit(report$taxLineage, "|", fixed=TRUE)
-
-    if (!"name" %in% colnames(report))
-      report$name <- sapply(taxLineages, function(x) x[length(x)])
-
-    if (!"depth" %in% colnames(report)) {
-      report$depth <- sapply(taxLineages, length) - 1
-    }
-    if (!"taxRank" %in% colnames(report))
-      report$taxRank <- toupper(substr(report$name, 0, 1))
-  }
-
-
-  if (!all(c("name","taxRank") %in% colnames(report)) ||
-      nrow(report) < 2 ||
-      !((report[1,"name"] == "u_unclassified" && report[2,"name"] == "-_root") || report[1,"name"] == "-_root")) {
-    message(paste("Warning: File",myfile,"does not have the required format"))
-    print(utils::head(report))
-    return(NULL)
-  }
-
-
-  if (!"taxonReads" %in% colnames(report)) {
-    parent <- sub("^\\(.*\\)\\|.*$", "\\1", report$taxLineage)
-    taxLineages <- strsplit(report$taxLineage, "|", fixed=TRUE)
-    ## fix taxonReads
-    report$taxonReads <- report$cladeReads - sapply(report$name, function(x) sum(report$cladeReads[parent == x]))
-    #report$taxonReads[sapply(report$taxonReads, function(x) isTRUE(all.equal(x, 0)))] <- 0
-    report$taxonReads[report$taxonReads <= 0.00001] <- 0  # fix for rounding in percentages by MetaPhlAn
-  }
-
-  report$percentage <- signif(report$cladeReads/sum(report$taxonReads),6) * 100
-  if ('n_unique_kmers'  %in% colnames(report))
-    report$kmerpercentage <- round(report$n_unique_kmers/sum(report$n_unique_kmers,na.rm=T),6) * 100
-  #report$taxRankperc <- 100/taxRank(report$cladeReads)
-
-  #report$depth <- NULL
-
-  if ("taxID" %in% colnames(report)) {
-    std_colnames <- c("percentage","cladeReads","taxonReads","taxRank", "taxID","name")
-  } else {
-    std_colnames <- c("percentage","cladeReads","taxonReads","taxRank","name")
-  }
-  stopifnot(all(std_colnames %in% colnames(report)))
-  report[, c(std_colnames, setdiff(colnames(report), std_colnames))]
+  report[-rows_to_delete,]
 }
-
-
 
 #' Read kraken or centrifuge-style report
 #'
@@ -350,7 +324,6 @@ read_report2 <- function(myfile,collapse=TRUE,keep_taxRanks=c("D","K","P","C","O
         report[i,report[i,'taxRank']] <- report[i,'name']
       }
     }
-    
     rows_to_consider[i] <- TRUE
   }
 
@@ -358,9 +331,9 @@ read_report2 <- function(myfile,collapse=TRUE,keep_taxRanks=c("D","K","P","C","O
 
   report$percentage <- round(report$cladeReads/sum(report$taxonReads),6) * 100
 
-  for (column in c("taxonReads", "cladeReads"))
-    if (all(floor(report[[column]]) == report[[column]]))
-      report[[column]] <- as.integer(report[[column]])
+	for (column in c("taxonReads", "cladeReads")) 
+  	if (all(floor(report[[column]]) == report[[column]])) 
+	  	report[[column]] <- as.integer(report[[column]])
 
   if ('n_unique_kmers'  %in% colnames(report))
     report$kmerpercentage <- round(report$n_unique_kmers/sum(report$n_unique_kmers,na.rm=T),6) * 100
@@ -370,7 +343,6 @@ read_report2 <- function(myfile,collapse=TRUE,keep_taxRanks=c("D","K","P","C","O
 
   report
 }
-
 
 
 
@@ -461,95 +433,278 @@ filter_taxon <- function(report, filter_taxon, rm_clade = TRUE, do_message=FALSE
 }
 
 
+#' Read Kraken-style and MetaPhlAn reports
+#'
+#' @param myfile Kraken-style or MetaPhlAn report file.
+#' @param has_header If the kraken report has a header or not.
+#' @param check_file If TRUE, only the first 5 lines of the file are loaded.
+#'
+#' @return report data.frame
+#' @export
+#'
+read_report <- function(myfile, has_header=NULL, check_file = FALSE) {
 
+  # TODO: Support for gzipped files ..
+  #myfile <- file(myfile)
+  #file_class <- summary(myfile)$class
+  #if (file_class == "gzfile")
+  #  myfile <- gzcon(myfile)
 
-build_sankey_network <- function(my_report, taxRanks =  c("D","K","P","C","O","F","G","S"), maxn=10,
-                                 zoom = F, title = NULL,
-                                 ...) {
-  stopifnot("taxRank" %in% colnames(my_report))
-  if (!any(taxRanks %in% my_report$taxRank)) {
-    warning("report does not contain any of the taxRanks - skipping it")
-    return()
+  first.line <- tryCatch( readLines(myfile,n=1, warn=FALSE),
+                          error = function(e) { warning("Error reading ",myfile); return() })
+  isASCII <-  function(txt) {
+    if (length(txt) == 0)
+      return(FALSE)
+    raw <- charToRaw(txt)
+    all(raw <= as.raw(127) & (raw >= as.raw(32) | raw == as.raw(9)))
   }
-  my_report <- subset(my_report, taxRank %in% taxRanks)
-  my_report <- plyr::ddply(my_report, "taxRank", function(x) x[utils::tail(order(x$cladeReads,-x$depth), n=maxn), , drop = FALSE])
+  if (length(first.line) == 0) { 
+    dmessage("Could not read ", myfile, ".")
+    return(NULL)
+  }
+  tryCatch({
+  if (nchar(first.line) == 0) {
+    dmessage("First line of ", myfile, " is empty")
+    return(NULL)
+  }
+  }, error = function(e) { 
+    dmessage(e)
+    return(NULL)
+  })
+  
+  if (!isTRUE(isASCII(first.line))) {
+    dmessage(myfile," is not a ASCII file")
+    return(NULL)
+  }
 
-  my_report <- my_report[, c("name","taxLineage","taxonReads", "cladeReads","depth", "taxRank")]
+  if (is.null(has_header)) {
+    has_header <- grepl("^[a-zA-Z#%\"]",first.line)
+  }
+  is_metaphlan3_fmt <- grepl("^#mpa_v", first.line)
+  is_metaphlan2_fmt <- grepl("Metaphlan2_Analysis$", first.line)
+  is_krakenu_fmt <- grepl("^.?%\treads\ttaxReads\tkmers", first.line)
+  is_kaiju_fmt <- grepl("^  *%\t  *reads", first.line)
+  
+  ntabs <- lengths(regmatches(first.line, gregexpr("\t", first.line)))
 
-  my_report <- my_report[!my_report$name %in% c('-_root'), ]
-  #my_report$name <- sub("^-_root.", "", my_report$name)
+  nrows <- ifelse(isTRUE(check_file), 5, -1)
+  if (!is_krakenu_fmt && is_kaiju_fmt) {
+    cont <- readLines(myfile)
+    cont <- cont[!grepl("^-", cont)]
+    cont <- sub(".*\t  *","", cont)
+    cont <- sub("; ?$","", cont)
+    report <- utils::read.delim(textConnection(cont), stringsAsFactors = FALSE)
+    colnames(report) <- c("taxonReads", "taxLineage")
+    report$cladeReads <- report$taxonReads
 
-  splits <- strsplit(my_report$taxLineage, "\\|")
+    report$taxLineage <- gsub("^","-_",report$taxLineage)
+    report$taxLineage <- gsub("; ","|-_",report$taxLineage)
+    report$taxLineage <- gsub("-_Viruses", "d_Viruses", report$taxLineage, fixed=T)
+    report$taxLineage <- gsub("-_cellular organisms|-_Bacteria", "-_cellular organisms|d_Bacteria", report$taxLineage, fixed=T)
+    report$taxLineage <- gsub("-_cellular organisms|-_Eukaryota", "-_cellular organisms|d_Eukaryota", report$taxLineage, fixed=T)
+    report$taxLineage <- gsub("-_cellular organisms|-_Archaea", "-_cellular organisms|d_Archaea", report$taxLineage, fixed=T)
+    report$taxLineage[1:(length(report$taxLineage)-1)] <- paste0("-_root|", report$taxLineage[1:(length(report$taxLineage)-1)])
 
-  ## for the root nodes, we'll have to add an 'other' link to account for all cladeReads
-  root_nodes <- sapply(splits[sapply(splits, length) ==2], function(x) x[2])
+    report$taxLineage[report$taxLineage=="-_unclassified"] <- "u_unclassified"
 
-  sel <- sapply(splits, length) >= 3
-  splits <- splits[sel]
-
-  links <- data.frame(do.call(rbind,
-                              lapply(splits, function(x) utils::tail(x[x %in% my_report$name], n=2))), stringsAsFactors = FALSE)
-  colnames(links) <- c("source","target")
-  links$value <- my_report[sel,"cladeReads"]
-
-  my_taxRanks <- taxRanks[taxRanks %in% my_report$taxRank]
-  taxRank_to_depth <- stats::setNames(seq_along(my_taxRanks)-1, my_taxRanks)
-
-
-  nodes <- data.frame(name=my_report$name,
-                      depth=taxRank_to_depth[my_report$taxRank],
-                      value=my_report$cladeReads,
-                      stringsAsFactors=FALSE)
-
-  for (node_name in root_nodes) {
-    diff_sum_vs_all <- my_report[my_report$name == node_name, "cladeReads"] - sum(links$value[links$source == node_name])
-    if (diff_sum_vs_all > 0) {
-      nname <- paste("other", sub("^._","",node_name))
-      #nname <- node_name
-      #links <- rbind(links, data.frame(source=node_name, target=nname, value=diff_sum_vs_all, stringsAsFactors = FALSE))
-      #nodes <- rbind(nodes, nname)
+    new_counts <- integer(length = 0)
+    for (j in seq_len(nrow(report))) {
+      count <- report$cladeReads[j]
+      tl <- report$taxLineage[j]
+      tl2 <- sub("\\|[^|]*$","", tl)
+      while (tl2 != tl) {
+        if (tl2 %in% names(new_counts)) {
+          new_counts[tl2] <- new_counts[tl2] + count
+        } else {
+          new_counts[tl2] <- count
+        }
+        tl <- tl2
+        tl2 <- sub("\\|[^|]*$","", tl)
+      }
     }
+    report <- rbind(report,
+                    data.frame(taxonReads=0,taxLineage=names(new_counts),cladeReads=as.integer(new_counts)))
+    tl_order <- order(report$taxLineage)
+    tl_order <- c(tl_order[length(tl_order)],tl_order[-length(tl_order)])
+    report <- report[tl_order, c("taxLineage", "taxonReads", "cladeReads")]
+  } else if (is_metaphlan3_fmt) {
+    report <- tryCatch({
+      ## TODO: Having comment_char here causes a problem w/ Metaphlan report!!
+      
+      utils::read.table(myfile,sep="\t",header = F,
+                        quote = "",stringsAsFactors=FALSE,
+                        comment.char = "#", nrows = nrows,
+                        col.names = c("taxLineage", "taxID", "cladeReads", "additional_species"),
+                        check.names=FALSE)
+    }, error = function(x) NULL, warning = function(x) NULL)
+    if (is.null(report)) { return(NULL); }
+    
+    report$taxID <- sub(".*\\|", "", report$taxID)
+    
+  } else if (has_header) {
+    report <- tryCatch({
+      ## TODO: Having comment_char here causes a problem w/ Metaphlan report!!
+
+      utils::read.table(myfile,sep="\t",header = T,
+                        quote = "",stringsAsFactors=FALSE,
+                        comment.char = ifelse(is_metaphlan2_fmt, "", "#"), nrows = nrows, 
+                        check.names=FALSE)
+    }, error = function(x) NULL, warning = function(x) NULL)
+    if (is.null(report)) { return(NULL); }
+    #colnames(report) <- c("percentage","cladeReads","taxonReads","taxRank","taxID","n_unique_kmers","n_kmers","perc_uniq_kmers","name")
+
+    ## harmonize column names. TODO: Harmonize them in the scripts!
+    colnames(report)[colnames(report) %in% c("#%","%","clade_perc","perc","percReadsClade")] <- "percentage"
+    colnames(report)[colnames(report) %in% c("reads","numReadsClade","n_reads_clade","n.clade","n-clade")] <- "cladeReads"
+    colnames(report)[colnames(report) %in% c("taxReads","numReadsTaxon","n_reads_taxo","n.stay","n-stay")] <- "taxonReads"
+    colnames(report)[colnames(report) %in% c("rank","tax_taxRank","level")] <- "taxRank"
+    colnames(report)[colnames(report) %in% c("tax","taxonid")] <- "taxID"
+    colnames(report)[colnames(report) %in% c("indentedName","taxName")] <- "name"
+    colnames(report)[colnames(report) %in% c("dup")] <- "kmerDuplicity"
+    colnames(report)[colnames(report) %in% c("cov")] <- "kmerCoverage"
+  } else {
+    report <- NULL
+    if (ntabs == 5) {
+      col_names <-  c("percentage","cladeReads","taxonReads","taxRank","taxID","name")
+    } else if (ntabs == 7) {
+      col_names <- c("percentage","cladeReads","taxonReads", "n_unique_kmers","n_kmers", "taxRank","taxID","name")
+    } 
+    report <- tryCatch({
+      utils::read.table(myfile,sep="\t",header = F,
+                        col.names = col_names,
+                        quote = "",stringsAsFactors=FALSE,
+                        nrows = nrows)
+    }, error=function(x) NULL, warning=function(x) NULL)
+    
+    if (is.null(report)) {
+      dmessage(paste("Warning: File",myfile,"does not have the required format"))
+      return(NULL); 
+    }
+    
   }
 
-  names_id = stats::setNames(seq_len(nrow(nodes)) - 1, nodes[,1])
-  links$source <- names_id[links$source]
-  links$target <- names_id[links$target]
-  links <- links[links$source != links$target, ]
+  if (ncol(report) < 2) {
+    dmessage(paste("Warning: File",myfile,"does not have the required format"))
+    return(NULL) 
+  }
+  if (is_metaphlan2_fmt || is_metaphlan3_fmt) {
+    ## Metaphlan report
+    colnames(report)[1] <- "taxLineage"
+    colnames(report)[colnames(report) == "Metaphlan2_Analysis"] <- "cladeReads"
+    report <- report[order(report$taxLineage), ]
+    report$taxLineage <- gsub("_"," ",report$taxLineage)
+    report$taxLineage <- gsub("  ","_",report$taxLineage)
+    report$taxLineage <- paste0("-_root|", report$taxLineage)
+    root_lines <- data.frame(taxLineage=c("u_unclassified","-_root"),"cladeReads"=c(0,100), stringsAsFactors = F)
+    
+    if ("taxID" %in% colnames(report)) {
+      root_lines <- cbind(root_lines, "taxID" = c(0, 1))
+      report <- report[, c("taxLineage", "cladeReads", "taxID")]
+    }
+      
+    report <- rbind(root_lines, report)
+  }
 
-  nodes$name <- sub("^._","", nodes$name)
-  links$source_name <- nodes$name[links$source + 1]
+  if (all(c("name","taxRank") %in% colnames(report)) && !"taxLineage" %in% colnames(report)) {
+    ## Kraken report
+    report$depth <- nchar(gsub("\\S.*","",report$name))/2
+    if (!all(report$depth == floor(report$depth))) {
+      warning("Depth doesn't work out!")
+      return(NULL)
+    }
+    report$name <- gsub("^ *","",report$name)
 
-  if (!is.null(links))
-    sankeyD3::sankeyNetwork(
-      Links = links,
-      Nodes = nodes,
-      doubleclickTogglesChildren = TRUE,
-      Source = "source",
-      Target = "target",
-      Value = "value",
-      NodeID = "name",
-      NodeGroup = "name",
-      NodePosX = "depth",
-      NodeValue = "value",
-      #dragY = TRUE,
-      xAxisDomain = my_taxRanks,
-      numberFormat = "pavian",
-      title = title,
-      nodeWidth = 15,
-      #linkGradient = TRUE,
-      #nodeShadow = TRUE,
-      nodeCornerRadius = 5,
-      units = "cladeReads",
-      fontSize = 12,
-      iterations = maxn * 100,
-      align = "none",
-      highlightChildLinks = TRUE,
-      orderByPath = TRUE,
-      scaleNodeBreadthsByString = TRUE,
-      zoom = zoom,
-      ...
-    )
+    ## 'fix' taxRank
+    table(report$taxRank)
+    allowed_taxRanks <- c("U", "S", "G", "F", "C", "D", "O", "K", "P")
+    report$taxRank[report$taxRank=="class"] <- "C"
+    report$taxRank[report$taxRank=="family"] <- "F"
+    report$taxRank[report$taxRank=="genus"] <- "G"
+    report$taxRank[report$taxRank=="superkingdom"] <- "D"
+    report$taxRank[report$taxRank=="kingdom"] <- "K"
+    report$taxRank[report$taxRank=="order"] <- "O"
+    report$taxRank[report$taxRank=="phylum"] <- "P"
+    report$taxRank[report$taxRank=="species"] <- "S"
+    report$taxRank[report$name=="unclassified"] <- "U"
+    report$taxRank[!report$taxRank %in% allowed_taxRanks] <- "-"
+
+    report$name <- paste(tolower(report$taxRank),report$name,sep="_")
+
+    rownames(report) <- NULL
+
+    ## make taxLineage path
+    report$taxLineage <- report$name
+    n <- nrow(report)
+    depths <- report$depth
+    taxLineages <- report$name
+    taxLineages_p <- as.list(seq_along(report$name))
+    
+    depth_row_tmp <- c(1:25)
+    
+    for (current_row in seq(from=1, to=nrow(report))) {
+      dcr <- depths[current_row]
+      depth_row_tmp[dcr+1] <- current_row
+      if (dcr >= 1) {
+        prev_pos <- depth_row_tmp[[dcr]]
+        taxLineages_p[[current_row]] <- c(taxLineages_p[[prev_pos]], current_row)
+      }
+    }
+    report$taxLineage <- sapply(taxLineages_p, function(x) paste0(taxLineages[x], collapse="|"))
+    #report$taxLineage <- taxLineages
+
+  } else if ("taxLineage" %in% colnames(report)) {
+    taxLineages <- strsplit(report$taxLineage, "|", fixed=TRUE)
+
+    if (!"name" %in% colnames(report))
+      report$name <- sapply(taxLineages, function(x) x[length(x)])
+
+    if (!"depth" %in% colnames(report)) {
+      report$depth <- sapply(taxLineages, length) - 1
+    }
+    if (!"taxRank" %in% colnames(report))
+      report$taxRank <- toupper(substr(report$name, 0, 1))
+  }
+
+
+  if (!all(c("name","taxRank") %in% colnames(report)) ||
+      nrow(report) < 2 ||
+      !((report[1,"name"] == "u_unclassified" && report[2,"name"] == "-_root") || report[1,"name"] == "-_root")) {
+    dmessage(paste("Warning: File",myfile,"does not have the required format"))
+    str(report)
+    return(NULL)
+  }
+
+
+  if (!"taxonReads" %in% colnames(report)) {
+    parent <- sub("^\\(.*\\)\\|.*$", "\\1", report$taxLineage)
+    taxLineages <- strsplit(report$taxLineage, "|", fixed=TRUE)
+    ## fix taxonReads
+    report$taxonReads <- report$cladeReads - sapply(report$name, function(x) sum(report$cladeReads[parent == x]))
+    #report$taxonReads[sapply(report$taxonReads, function(x) isTRUE(all.equal(x, 0)))] <- 0
+    report$taxonReads[report$taxonReads <= 0.00001] <- 0  # fix for rounding in percentages by MetaPhlAn
+  }
+
+  report$percentage <- signif(report$cladeReads/sum(report$taxonReads),6) * 100
+  if ('n_unique_kmers'  %in% colnames(report))
+    report$kmerpercentage <- round(report$n_unique_kmers/sum(report$n_unique_kmers,na.rm=T),6) * 100
+  #report$taxRankperc <- 100/taxRank(report$cladeReads)
+
+  #report$depth <- NULL
+
+  if ("taxID" %in% colnames(report)) {
+    std_colnames <- c("percentage","cladeReads","taxonReads","taxRank", "taxID","name")
+  } else {
+    std_colnames <- c("percentage","cladeReads","taxonReads","taxRank","name")
+  }
+  stopifnot(all(std_colnames %in% colnames(report)))
+  report[, c(std_colnames, setdiff(colnames(report), std_colnames))]
 }
 
+test <- read_report("/home/floris/Documenten/Data_set/ACFC_Wastewater_Metagenomics/kraken2/reports/in_lagoon_report.txt", has_header=NULL)
 
-main()
+test2 <- build_sankey_network(test, taxRanks =  c("D","K","P","C","O","F","G","S"), maxn=10, zoom = F)
+test2
+
+library(webshot)
+htmlwidgets::saveWidget(test2, "Sankey_chart.html")
+

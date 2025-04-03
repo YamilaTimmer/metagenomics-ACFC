@@ -32,7 +32,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r libraries, results='hold', message=FALSE, warning=FALSE}
+
 library(tidyverse)
+library(ggplot2)
+library(webshot)
 
 ```
 15-03-2025:
@@ -97,7 +100,7 @@ Workflows are described via a human readable Python based language. Snakemake ca
 
 
 
-## 1. Sample preparation ##
+## 1. **Sample preparation** ##
 
 Samples: 
 
@@ -167,7 +170,7 @@ rule barcode_concatenation:
 
 rule combining_samples:
     input:
-        lambda wildcards: expand("data/fastq/{barcode}.fastq.gz", barcode=config["sample_barcodes"][wildcards.sample])
+        lambda wildcards: expand(f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz", barcode=config["sample_barcodes"][wildcards.sample])
     output:
         f"{OUT_DIR}/combined_fastq/{{sample}}.fastq"
     log:
@@ -176,11 +179,13 @@ rule combining_samples:
         """
         cat {input} > {output} 2> {log}
         """
+
 ```
 
 The first rule concatenates all the fastq files in the barcode directories into one file for every barcode.
 According to the sample table, all samples taken in the same place where put together ignoring the use of glycerol that was used for some of the samples. It should have 
-no effect on the genetic material in the samples. 
+no effect on the genetic material in the samples. The "glob.glob" python function is used to match the path for all directories without needing to specify them all manually. 
+
 
 ## **1. Quality control** ##
 To check the quality of the raw sequence data, Fastplong was used. (@Chen2023)
@@ -234,7 +239,6 @@ The sample taken from inside the lagoon has ~18K reads after filtering.
 | Q20 Bases         | 18.308551 M (63.415037%)  | 15.468003 M (65.861496%) |
 | Q30 Bases         | 5.359630 M (18.564065%)   | 4.511358 M (19.208995%)  |
 | Q40 Bases         | 12.277000 K (0.042524%)   | 10.494000 K (0.044683%)  |
-
 
 
 And the last sample, taken when the water had exited the lagoon. 
@@ -590,4 +594,23 @@ Shifu Chen. 2023. Ultrafast one-pass FASTQ data preprocessing, quality control, 
 
 Kraken2 visualization script:
 https://github.com/lorenzgerber/krakenSankey
+
+To generate a Sankey chart from the Kraken2 report, the same script that is used within Pavian was used.  
+
+```{r}
+source(file = "scripts/sankey_graph.R")
+
+report_data <- "/home/floris/Documenten/Data_set/ACFC_Wastewater_Metagenomics/kraken2/reports/in_lagoon_report.txt"
+
+report <- read_report(report_data, has_header=NULL)
+
+sankey_network <- build_sankey_network(report, taxRanks =  c("D","K","P","C","O","F","G","S"), maxn=5, zoom = F)
+sankey_network
+
+htmlwidgets::saveWidget(sankey_network, "Sankey_chart.html")
+
+```
+The Sankey chart above 
+
+
 
