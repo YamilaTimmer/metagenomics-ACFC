@@ -89,13 +89,6 @@ Now there should be a folder called `FAPROTAX_1.2.10.zip`, containing:
 
 You are now done downloading all necessary files for FAPROTAX, make sure to **not** change any of the file names
 
-### Krona
-By running the pipeline, an environment for Krona will automatically be created, however, the user still needs to manually run the following below, in order to manually update the taxonomy databases. If this is not done, Krona will not be able to generate a piechart.
-
-```bash
-ktUpdateTaxonomy.sh
-```
-
 ### Running the pipeline
 In order to run the pipeline, you have to run the snakefile. This can be done using:
 
@@ -126,7 +119,8 @@ The pipeline is made using SnakeMake version `8.27.1` and python version `3.12.8
 | [Krona](https://github.com/marbl/Krona)|Visualising taxonomic classification in a sample|2.8.1|
 | [kraken-biom](https://github.com/smdabdoub/kraken-biom)|Converting kraken file to json formatted .biom|1.2.0|
 | [FAPROTAX](http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home) |Functional analysis for finding (metabolic) pathways that match the founc OTU's|1.2.10|
-
+| [krakentools](https://github.com/jenniferlu717/KrakenTools)|Used Python script for beta-diversity|n.a.|
+| [Pavian](https://github.com/fbreitwieser/pavian)|Interactive dashboard for visualizing kraken report (e.g. Sankey chart)|1.0|
 
 # How to interpret the data
 ## Background info
