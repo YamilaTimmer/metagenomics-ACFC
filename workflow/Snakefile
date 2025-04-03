@@ -30,7 +30,7 @@ rule all:
     input:
         ""
         expand(f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz", barcode=config["sample_barcodes"]["in_lagoon"] + config["sample_barcodes"]["out_lagoon"]),
-        expand(f"{OUT_DIR}/combined_fastq/{{sample}}.fastq", sample=SAMPLE_NAMES)
+        expand(f"{OUT_DIR}/combined_fastq/{{sample}}.fastq", sample=SAMPLE_NAMES),
 
         faprotax_function_table=expand(f"{RESULTS_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv", sample=SAMPLE_NAMES),
         faprotax_sub_groups=expand(f"{RESULTS_DIR}/faprotax/{{sample}}/sub_groups/", sample=SAMPLE_NAMES),
