@@ -1,0 +1,104 @@
+---
+title: "Wastewater Purification Process: A Metagenomic Analysis "
+author: "Y. Timmer, F.J.A. Menninga and J. Duiker"
+date: "`r Sys.Date()`"
+bibliography: references.bib
+link-citations: true
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  bookdown::pdf_document2:
+    keep_tex: false    
+    toc: false      
+    fig_caption: true
+    includes:  
+        in_header: include_tex_header.tex
+  word_document:
+    toc: yes
+    toc_depth: '3'
+  html_document:
+    toc: yes
+    toc_depth: '3'
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+# Materials and Methods #
+
+Three different sampling points were used within the water purification process. The first sample was taken from the digester, and the second and third samples were taken from the lagoons' influent and effluent. The obtained samples consist of 16S rRNA data and were sequenced using a MinION flowcell (FLO-MIN106, pore version: R9.4.1).  
+
+For analyzing the sequenced data, we created a SnakeMake (v. 8.27.1) (@molder2021sustainable) pipeline with various tools that perform quality control and taxonomic- and functional analysis. For quality control and trimming Fastplong (v. 0.2.2) was used (@fastplong), the reads got filtered based on phred score and any reads with an average phred score < 15 were removed. Kraken2 (v. 2.1.2) (@Wood2019) was used for the taxonomic classification of the reads, using Greengenes (@desantis2006greengenes) as mapping database.  
+
+Kraken2 outputs Kraken2 reports, which were used for visualizing taxonomic diversity. With the reports, Krona pie charts were made using Kronatools (v. 2.8.1) (@Ondov2011) and Sankey charts were generated using Pavian (v. 1.0) (@breitwieser2020pavian). Taxonomic diversity was also calculated using the Bray-Curtis dissimilarity (beta diversity). This is done using Kraken Tools (@lu2022metagenome) with a Python script (beta_diversity.py).  
+
+For functional analysis the Kraken2 reports were converted to json formatted .biom files using kraken-biom (v. 1.2.0) (@dabdoub2016) and mapped to a database of metabolic- and ecological pathways using FAPROTAX (v. 1.2.10) (@louca2016decoupling).  
+
+An overview of the pipeline steps is displayed in fig.1
+
+![Overview of pipeline steps, including the pre-processing steps that were not performed by us (gray) and the steps that were executed by us (blue). ]("/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Floris/Workflow_Diagram.jpg")
+
+figure: Fig.  Overview of pipeline steps, including the pre-processing steps that were not performed by us (gray) and the steps that were executed by us (blue). 
+Overview of pipeline steps, including the pre-processing steps that were not performed by us (gray) and the steps that were executed by us (blue). 
+
+---
+
+
+# Results #
+
+After running the pipeline the following results were gathered. 
+
+
+
+
+|      | Influent |   |
+|---------------|------------------|-----------------|
+| Statistic     | Before Filtering | After Filtering |
+|---------------|------------------|-----------------|
+| Total Reads   | 20.242K          | 18.042K         |
+| Mean Length   | 1.426K           | 1.301K          |
+| GC Content    | 54.45%           | 51.67%          |
+
+
+table: Overview of read statistics before and after filtering with Fastplong . 
+
+
+---
+
+
+### Out Lagoon
+
+|      | Effluent |   |
+|---------------|------------------|-----------------|
+| Statistic     | Before Filtering | After Filtering |
+|---------------|------------------|-----------------|
+| Total Reads   | 2.41K            | 2.16K           |
+| Mean Length   | 1.41K            | 1.32K           |
+| GC Content    | 53.65%           | 53.16%          |
+
+table: Overview of read statistics before and after filtering with Fastplong out lagoon. 
+
+
+---
+
+Table 2
+
+Table 1 shows a decrease in total reads from ~20K to ~18K in the influent. The mean read length is around 1.4K bases and the GC content is 53%.  The effluent contains 2.16K reads after filtering with Fastplong with a mean length of 1.32K bases. The GC content is 53%. 
+
+  
+
+Taxonomic analysis 
+
+Using Kraken2 reports, Krona pie charts were generated. These pie charts show the microbial diversity of the two samples (lagoon in/lagoon out) (fig.1, fig.2). Visibly most of the operational taxonomic units (OTU's), of both samples, consist of cellular organisms and a small percentage of transposons. Most of the cellular organisms consist of the domain Bacteria, the rest consists of a small percentage of Methanobacteriota (archaea). The entirety of OTU's in both samples, in the domain of Bacteria consists of the kingdom Bacillati. In the deeper taxonomic layers, the diversity in OTU’s seems to differ in the two samples. 
+
+In the lagoon influent (fig. 1), Bacillati divides into mostly Actinomycetes and a smaller percentage Bacillota. The most common species are Streptomyces noursei (20%), Geodermatophilus obscurus (15%) and Pseudonocardia nitrificans (12%). These 3 species make up 47% of total diversity. 14% is classified as ‘other root’ 
+
+In the lagoon effluent (fig. 2), at phylum level, there is a visible divide between Actinomycetes and Bacillota, with the majority of OTU's consisting of Actinomycetes. The most common species are Mycobacterium kansasii (22%), Thermoanaerobacter sp (20%) and Streptomyces viridochromogenes (9%). These 3 species make up 51% of total diversity. 6% is classified as ‘other Root’. 
+
+The Sankey charts (fig. 3, fig. 4) show only OTU's within the Bacteria domain, across both samples. However the charts display a difference in diversity across mostly phylum level and down. The lagoon influent (fig. 3) contains a seemingly even distributed number of OTU's in the phyla Bacilli and Clostridia, where the lagoon effluent (fig. 4) contains a much higher number of OTU's in the Clostridia phylum. On order level, Lactobacillales seems a lot more common in the lagoon influent than the effluent. All of the the Lactobacillales OTU's in the lagoon influent seem to belong to the Streptococcus genus. 
+
+The beta diversity (Bray-Curtis dissimilarity) resulted in a ratio of 0.89. 
+
+![]("/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Yamila/img/krona_in_lagoon.png")
+
