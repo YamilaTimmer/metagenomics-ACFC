@@ -108,8 +108,6 @@ You have to pass the flag `--use-conda`, so that conda knows that it has to use/
 snakemake --use-conda --profile slurm/
 ```
 
-#### Using with Bracken
-
 
 ### Version details
 The pipeline is made using SnakeMake version `8.27.1` and python version `3.12.8`. The following tools have been used for the pipeline:
