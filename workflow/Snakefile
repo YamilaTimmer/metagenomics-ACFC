@@ -28,6 +28,10 @@ include: "rules/calculate_beta_diversity.smk"
 
 rule all:
     input:
+        ""
+        expand(f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz", barcode=config["sample_barcodes"]["in_lagoon"] + config["sample_barcodes"]["out_lagoon"]),
+        expand(f"{OUT_DIR}/combined_fastq/{{sample}}.fastq", sample=SAMPLE_NAMES)
+
         faprotax_function_table=expand(f"{RESULTS_DIR}/faprotax/{{sample}}/{{sample}}_function_table.tsv", sample=SAMPLE_NAMES),
         faprotax_sub_groups=expand(f"{RESULTS_DIR}/faprotax/{{sample}}/sub_groups/", sample=SAMPLE_NAMES),
         alpha_diversity=expand(f"{RESULTS_DIR}/alpha/{{sample}}_alpha.txt", sample=SAMPLE_NAMES),
@@ -37,17 +41,7 @@ rule all:
             sample1=[p[0] for p in SAMPLE_PAIRS],
             sample2=[p[1] for p in SAMPLE_PAIRS]
         ),
-        # pathway_bubble_plot=expand(
-        #     f"{RESULTS_DIR}/pathway_bubble_plot/{{sample1}}_{{sample2}}.pdf",
-        #     zip,
-        #     sample1=[p[0] for p in SAMPLE_PAIRS],
-        #     sample2=[p[1] for p in SAMPLE_PAIRS]
-        # ),
-        # pathway_heatmap_pdf=expand(
-        #     f"{RESULTS_DIR}/pathway_heatmap/{{sample1}}_{{sample2}}_pathway_heatmap.pdf",
-        #     zip,
-        #     sample1=[p[0] for p in SAMPLE_PAIRS],
-        #     sample2=[p[1] for p in SAMPLE_PAIRS]
-        # ),
+
+
         sankey_plot=expand(f"{RESULTS_DIR}/sankey/{{sample}}.html", sample=SAMPLE_NAMES),
         krona_vis=expand(f"{RESULTS_DIR}/krona/{{sample}}_krona.html", sample=SAMPLE_NAMES)
