@@ -133,7 +133,7 @@ One step further, after classification, is looking at what kind of metabolic pro
 ### Krona Piechart
 Below you can see an example of a Krona piechart that gets generated using this pipeline. The piechart shows an overview of the different classifications found by Kraken2, based on the input .FASTQ reads.
 
-![Piechart Example](analysis/Logbook_Yamila/img/krona_in_lagoon.png)
+![Piechart Example](analysis/Logbook_Yamila/img/in_lagoon.png)
 
 
 ### R plots
