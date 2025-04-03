@@ -146,8 +146,8 @@ Below you can see an example of a visualization of the different (metabolic) pat
 ![Bubblechart Example](analysis/Logbook_Floris/Bubble_chart.png)
 
 ## Support
-In case of any bugs or needed support, open up an issue at [this repo](https://github.com/YamilaTimmer/depmap-portal-data-visualizations/issues).
+In case of any bugs or needed support, open an issue [here](https://github.com/YamilaTimmer/depmap-portal-data-visualizations/issues).
 
 ## License
-This project is licensed under the ... License. See the [LICENSE file]() for details.
+This project is licensed under the GPL-3.0 license. See the [LICENSE file](https://github.com/YamilaTimmer/metagenomics-ACFC/blob/main/LICENSE) for details.
 
