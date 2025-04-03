@@ -13,7 +13,7 @@ This repository contains a metagenomics pipeline for analyzing 16S data in .FAST
 ### Pipeline features
 
 1. Quality control/trimming using fastplong
-2. Producing a taxonomic classification report using Kraken2, which will show the Operational Taxonomic Units (OTU's) that are present in the sample(s)
+2. Producing a taxonomic classification report using Kraken2, which will show the Operational Taxonomic Units (OTUs) that are present in the sample(s)
 3. Improving OTU assignment by using Bracken (optional)
 4. Visualising classification output with a Krona piechart
 5. Calculating alpha/beta diversity
@@ -83,18 +83,11 @@ unzip FAPROTAX_1.2.10.zip
 ```
 
 Now there should be a folder called `FAPROTAX_1.2.10.zip`, containing:
-- collapse_table.py, which is the python script that links any given OTU's (in kraken report format) to corresponding (metabolic) pathways
+- collapse_table.py, which is the python script that links any given OTUs (in kraken report format) to corresponding (metabolic) pathways
 - FAPROTAX.txt, which contains the database of all (metabolic) pathways
 - README.txt, contains some extra info on the tool
 
 You are now done downloading all necessary files for FAPROTAX, make sure to **not** change any of the file names
-
-### Krona
-By running the pipeline, an environment for Krona will automatically be created, however, the user still needs to manually run the following below, in order to manually update the taxonomy databases. If this is not done, Krona will not be able to generate a piechart.
-
-```bash
-ktUpdateTaxonomy.sh
-```
 
 ### Running the pipeline
 In order to run the pipeline, you have to run the snakefile. This can be done using:
@@ -115,6 +108,9 @@ You have to pass the flag `--use-conda`, so that conda knows that it has to use/
 snakemake --use-conda --profile slurm/
 ```
 
+#### Using with Bracken
+
+
 ### Version details
 The pipeline is made using SnakeMake version `8.27.1` and python version `3.12.8`. The following tools have been used for the pipeline:
 
@@ -125,12 +121,14 @@ The pipeline is made using SnakeMake version `8.27.1` and python version `3.12.8
 | [Bracken](https://github.com/jenniferlu717/Bracken)|Re-estimating abundances from Kraken2 output|3.0|
 | [Krona](https://github.com/marbl/Krona)|Visualising taxonomic classification in a sample|2.8.1|
 | [kraken-biom](https://github.com/smdabdoub/kraken-biom)|Converting kraken file to json formatted .biom|1.2.0|
-| [FAPROTAX](http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home) |Functional analysis for finding (metabolic) pathways that match the founc OTU's|1.2.10|
+| [FAPROTAX](http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home) |Functional analysis for finding (metabolic) pathways that match the founc OTUs|1.2.10|
+| [krakentools](https://github.com/jenniferlu717/KrakenTools)|Used Python script for beta-diversity|n.a.|
+| [Pavian](https://github.com/fbreitwieser/pavian)|Interactive dashboard for visualizing kraken report (e.g. Sankey chart)|1.0|
 
+# Background info
+This pipeline is built around the concept of metagenomics, which is the study of microorganisms in an environment. Environments can range from the human gut to wastewater, so there are plenty of different applications. In order to create an overview of the different types of microorganisms that live in an environment, genetic material needs to be sequenced and further analyzed. In our case, this is 16S rRNA data. Classification software such as Kraken2 identifies reads within the .FASTQ files and assigns them to an OTU, which could be any level of taxonomy (from "broad" to "specific": domain, kingdom, phylum, class, order, family, genus, species). After classification, the results can be visualized using tools such as Krona, these visualizations are pretty simple to interpret as they consist merely of a multi-layer piechart and also Sankey charts are very intuitive. 
 
-# How to interpret the data
-## Background info
-
+One step further, after classification, is looking at what kind of metabolic processes are taking place in the environment. This can be estimated using the "abundance" of an OTU, or how much of the OTU is present in the sample. To figure out what OTUs belong to what kind of processes, they will have to be mapped against a pathway database. This can be done using FAPROTAX, where, each OTU will be checked if they are known for contributing to any of the pathways. The output of the functional analysis consists of .biom files per pathway, showing what OTUs are linked to it, and a larger overview file where the abundance is noted per pathway, the higher the number, the more likely it is that this pathway has a large influence on the environment. However, functional analysis is merely an estimate of the activity of the pathways. To confirm these estimates, metatranscriptomics will have to be performed.
 
 
 ## Examples of visualisations
@@ -146,8 +144,8 @@ Below you can see an example of a visualization of the different (metabolic) pat
 ![Bubblechart Example](analysis/Logbook_Floris/Bubble_chart.png)
 
 ## Support
-In case of any bugs or needed support, open up an issue at [this repo](https://github.com/YamilaTimmer/depmap-portal-data-visualizations/issues).
+In case of any bugs or needed support, open an issue [here](https://github.com/YamilaTimmer/depmap-portal-data-visualizations/issues).
 
 ## License
-This project is licensed under the ... License. See the [LICENSE file]() for details.
+This project is licensed under the GPL-3.0 license. See the [LICENSE file](https://github.com/YamilaTimmer/metagenomics-ACFC/blob/main/LICENSE) for details.
 
