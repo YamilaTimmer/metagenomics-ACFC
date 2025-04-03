@@ -13,30 +13,8 @@ SAMPLE_NAMES = config["samples"].keys()
 SAMPLE_PAIRS = list(combinations(SAMPLE_NAMES, 2))
 
 
-# rule barcode_concatenation:
-#     input:
-#         lambda wildcards: glob.glob(config["BARCODE_DIRECTORIES"][wildcards.barcode] + "/*")
-#     output:
-#         f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz"
-#     log:
-#         f"{LOG_DIR}/cat/{{barcode}}.log"
-#     shell:
-#         """
-#         cat {input} > {output} 2> {log}
-#         """
-#
-# rule combining_samples:
-#     input:
-#         lambda wildcards: expand("data/fastq/{barcode}.fastq.gz", barcode=config["sample_barcodes"][wildcards.sample])
-#     output:
-#         f"{OUT_DIR}/combined_fastq/{{sample}}.fastq"
-#     log:
-#         f"{LOG_DIR}/combining_samples/{{sample}}.log"
-#     shell:
-#         """
-#         cat {input} > {output} 2> {log}
-#         """
-
+include: "rules/fastq_concat.smk"
+include: "rules/sample_concat.smk"
 include: "rules/fastq_qc_plong.smk"
 include: "rules/kraken2_taxonomic_classification.smk"
 include: "rules/bracken.smk"
