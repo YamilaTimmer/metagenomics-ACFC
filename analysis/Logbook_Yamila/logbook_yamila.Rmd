@@ -1,28 +1,20 @@
 ---
-title: "Logboek 3.1 Metagenomics"
+title: "Logbook 3.1 Metagenomics"
 author: "Yamila Timmer"
 date: "`r Sys.Date()`"
 output:
   word_document:
     toc: true
-    toc_depth: '2'
-    number_sections: true
-  html_document:
-    toc: true
     toc_depth: '3'
     df_print: paged
-lang: nl
+lang: en
 bibliography: library.bib
 ---
-
-- meer gedachtegang geven/waar ik tegen aanloop
-- snakemake erin zetten
-- uitleggen hoe ik dingen heb opgelost
 
  
 # Used tools
 
-The pipeline has been made using SnakeMake version 8.27.1 and python version 3.12.8.
+The pipeline has been made using SnakeMake version `8.27.1` and python version `3.12.8`.
 Below you can find the tools that I worked with myself, for a full overview of all tools used to develop this pipeline, please look at the README.
 
 | Package Name        | Description                                                 | Version   |
@@ -31,26 +23,28 @@ Below you can find the tools that I worked with myself, for a full overview of a
 | [Bracken](https://github.com/jenniferlu717/Bracken)|Re-estimating abundances from Kraken2 output|3.0.1|
 | [Krona](https://github.com/marbl/Krona)|Visualising taxonomic classification in a sample|2.8.1|
 | [kraken-biom](https://github.com/smdabdoub/kraken-biom)|Converting kraken file to json formatted .biom|1.2.0|
-| [FAPROTAX](http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home) |Functional analysis for finding (metabolic) pathways that match the founc OTU's|1.2.10|
+| [FAPROTAX](http://www.loucalab.com/archive/FAPROTAX/lib/php/index.php?section=Home) |Functional analysis for finding (metabolic) pathways that match the founc OTUs|1.2.10|
 	
 
 # Introduction
 
-This introduction was written based on an overview of the purification processes and the problems that ACFC faces with, provided by Peter Matuku, a professor from the university of Eldoret, that is specialized in water purification.
+**11-03-2025**
 
-For this metagenomics project we will look at a Kenyan factory, owned by [Agro Chemical & Food Company Limited or ACFC](https://acfc.co.ke/), that produces industrial spirits and yeast from sugar molasses (waste product of sugar production). Specifically we will take a closer look at microbial communities present in different steps in the water purification process of this factory. 
+This introduction was written based on an overview of the purification processes and the problems that ACFC faces, provided by Peter Matuku, a professor from the University of Eldoret, who is specialized in water purification.
 
-The production of alcohol and yeast from molasses generates a high volume of wastewater rich in organic matter, nutrients and recalcitrant compounds (slowly biodegradable or non-biodegradable compounds). The first step in the water purification process is anaerobic digestion, which facilitates organic matter degradation and also produces biogas as a byproduct. The efficiency of anaerobic treatment depends on the dynamics within the microbial community involved in the process. Looking into these dynamics using metagenomics, could offer a way to improve the overall efficiency of the digester.
+For this metagenomics project, we will look at a Kenyan factory, owned by [Agro Chemical & Food Company Limited or ACFC](https://acfc.co.ke/), that produces industrial spirits and yeast from sugar molasses (a waste product of sugar production). Specifically, we will take a closer look at microbial communities present in different steps in the water purification process of this factory. 
 
-The following step after anaerobic digestion, is aerobic digestion. The wastewater flows into large, but undeep lagoons where the water is exposed to a lot of oxygen. The wastewater remains in the lagoons for a number of days. After this the water flows back into the Nyando river.
+The production of alcohol and yeast from molasses generates a high volume of wastewater rich in organic matter, nutrients, and recalcitrant compounds (slowly biodegradable or non-biodegradable compounds). The first step in the water purification process is anaerobic digestion, which facilitates organic matter degradation and also produces biogas as a byproduct. The efficiency of anaerobic treatment depends on the dynamics within the microbial community involved in the process. Looking into these dynamics using metagenomics, could offer a way to improve the overall efficiency of the digester.
 
-The main problem is that the effluent from the lagoons does not meet Kenyan standards for water pollution, as certain qualities as the amount of organic matter and nutrients are too high. This causes damage not only for animals and plants in the river, but also to people that live downstream, that use this water for bathing, cooking and drinking.
+The following step after anaerobic digestion, is aerobic digestion. The wastewater flows into large, but undeep lagoons where the water is exposed to a lot of oxygen. The wastewater remains in the lagoons for a number of days. After this, the water flows back into the Nyando river.
+
+The main problem is that the effluent from the lagoons does not meet Kenyan standards for water pollution, as certain qualities as the amount of organic matter and nutrients are too high. This causes damage not only to animals and plants in the river but also to people who live downstream, and use this water for bathing, cooking, and drinking.
 
 # Our data
 
 **05-03-2025**
 
-Our data consists of 16S data, which stems from the 16S rRNA component of prokaryotic ribosomes. The data is sequenced using a minION flowcell. The samples are taken from 3 different locations (digester, lagoon influent/lagoon effluent), with 4 replicates, with minor differences being that some samples have added glycerol, to protect the samples in the freezer. And half of the samples have been shaken. The lagoon influent (which is the effluent of the digester), will be called `lagoon in` from now. And the lagoon effluent (which is the river influent), will be called `lagoon out` from now.
+Our data consists of 16S data, which stems from the 16S rRNA component of prokaryotic ribosomes. The data is sequenced using a minION flow cell. The samples are taken from 3 different locations (digester, lagoon influent/lagoon effluent), with 4 replicates, with minor differences being that some samples have added glycerol, to protect the samples in the freezer. And half of the samples have been shaken. The lagoon influent (which is the effluent of the digester), will be called `lagoon in` from now. And the lagoon effluent (which is the river influent), will be called `lagoon out` from now.
 
 |    | Sample Location | Glycerol | Shaken |
 |----|-----------------|----------|--------|
@@ -67,14 +61,14 @@ Our data consists of 16S data, which stems from the 16S rRNA component of prokar
 | 11 | Digestor        | -        | -      |
 | 12 | Digestor        | -        | +      |
 
-We will merge the data from the samples, depending on the location of origin. So sample 1-4, sample 5-8 and sample 9-12 will be merged, as for our research question it is not important whether glycerol got added or not and whether the sample was shaken or not. Sample 10 and 12 are absent, which means that the quality of these samples was poor and that the barcodes could not be read. However this will likely not be a problem, as the other two digestor samples still remain.
+We will merge the data from the samples, depending on the location of origin. So samples 1-4, samples 5-8 and samples 9-12 will be merged, as for our research question it is not important whether glycerol got added or not and whether the sample was shaken or not. Samples 10 and 12 are absent, which means that the quality of these samples was poor and that the barcodes could not be read. However, this will likely not be a problem, as the other two digestor samples remain.
 
 
 **16-03-2025**
 
 The digestor samples seem to be of very low quality, with in total resulting in 1 read (after trimming, before trimming it had 2 reads). The minion flowcell used for sequencing the data had already been used before and was likely reaching its quotum. The digestor samples got sequenced last and that is most likely the reason for the low quality of the samples. 
 
-1 read is clearly not enough to be able to give an overview of the micro organisms present in the digestor sample, for this reason we will not be further using the digester samples and we will discuss with the client about what other research questions we could have for the lagoon in/out samples. The general research questions remain: what is present in the samples (taxonomic analysis) and what do the present micro organisms do (functional analysis). So for the pipeline we will only work with the lagoon in/out samples.
+1 read is not enough to be able to give an overview of the microorganisms present in the digestor sample, for this reason, we will not be further using the digester samples and we will discuss with the client what other research questions we could have for the lagoon in/out samples. The general research questions remain: what is present in the samples (taxonomic analysis) and what do the present microorganisms do (functional analysis)? So for the pipeline, we will only work with the lagoon in/out samples.
 
 
 # Research question
@@ -82,25 +76,27 @@ The digestor samples seem to be of very low quality, with in total resulting in 
 **17-03-2025**
 
 For this metagenomics project we have two main research questions, which are:
-- What Operational Taxonomic Units (OTU's) are present in the two samples: `lagoon_in` and `lagoon_out`
+- What Operational Taxonomic Units (OTUs) are present in the two samples: `lagoon_in` and `lagoon_out`
 - What (metabolic) processes take place in the samples of `lagoon_in` and `lagoon_out`
 
-These two main questions are a way to get a first insight into the two samples, after we have constructed a general profile of what OTU's live in the samples and what processes happen in the samples, we would like to compare the two samples to eachother:
+These two main questions are a way to get a first insight into the two samples, after we have constructed a general profile of what OTUs live in the samples and what processes happen in the samples, we would like to compare the two samples to each other:
 
-- What can be said on the difference/similarity of the processes that take place in the samples?
-- What can be said on the diversity in OTU's, looking at the alpha diversity?
-
-**18-03-2025**
+- What can be said about the difference/similarity of the processes that take place in the samples?
+- What can be said about the diversity in OTUs, looking at the alpha diversity?
 
 ## Hypothesis
 
-In order to hypothesize about what OTU's are likely present in the two samples and what processes likely take place, I looked for research papers on microbial communities in industrial ethanol production using molasses.
+**18-03-2025**
 
-### What OTU's are present?
+In order to hypothesize about what OTUs are likely present in the two samples and what processes likely take place, I looked for research papers on microbial communities in industrial ethanol production using molasses.
 
-My first expectation is that both samples (lagoon in/out) will mostly consist of aerobic bacteria, as both sample locations have aerobic conditions with plenty of exposure to oxygen. And that the anaerobic digester mostly contains anaerobic and facultative anaerobic bacteria, however this cannot be confirmed due to the lack of reads in the digester samples.
+### What OTUs are present?
 
-In order to research how to optimize ethanol yield in industrial sugarcane ethanol refineries, @De_Oliveira_Lino created a model system to simulate the 'typical' real world setup. This model system consists of *Lactobacillus amylovorus*, *Lactobacillus fermentum*, *Lactobacillus helveticus*, *Pediococcus claussenii*, *Zymomonas mobilis* and *Saccharomyces cerevisiae*, which is a type of yeast cells that are responsible for ethanol fermentation. These species make up over 80% of the diversity typically found in a real world setup.
+**18-03-2025**
+
+My first expectation is that both samples (lagoon in/out) will mostly consist of aerobic bacteria, as both sample locations have aerobic conditions with plenty of exposure to oxygen. And that the anaerobic digester mostly contains anaerobic and facultative anaerobic bacteria, however, this cannot be confirmed due to the lack of reads in the digester samples.
+
+In order to research how to optimize ethanol yield in industrial sugarcane ethanol refineries, @De_Oliveira_Lino created a model system to simulate the 'typical' real-world setup. This model system consists of *Lactobacillus amylovorus*, *Lactobacillus fermentum*, *Lactobacillus helveticus*, *Pediococcus claussenii*, *Zymomonas mobilis* and *Saccharomyces cerevisiae*, which is a type of yeast cells that are responsible for ethanol fermentation. These species make up over 80% of the diversity typically found in a real-world setup.
 
 While *Saccharomyces cerevisiae* is essential to the process of producing ethanol, all the bacterial species are seen as 'contaminants', meaning that they do not serve a purpose in the primary process of ethanol production. They will even compete with yeast for available nutrients and the metabolic products of these bacteria can also inhibit yeast cells.
 
@@ -110,24 +106,34 @@ Most of the earlier named species are either anaerobic (e.g. *Lactobacillus*), f
 
 Some of the anaerobic species could still be present in the lagoon influent, but likely not in the lagoon effluent, as the sample will have been exposed to oxygen over a span of multiple days. The facultative anaerobic species and aerotolerant species could however be present in both the lagoon influent and effluent, as they can either use oxygen or are not affected by it.
 
-**19-03-2025**
-
 ### What processes take place?
+
+**19-03-2025**
 
 Before the wastewater purification process, fermentation takes place, by *zymomonas mobilis*.
 
 In an anaerobic digester, the available organic carbon from the wastewater gets converted into biogas (60–70% methane + 30–40% carbon dioxide). This process consists of four stages: hydrolysis, acidogenesis, acetogenesis, and methanogenesis. In the image below the involved micro-organisms are shown per process @De_Carvalho.
 
-![](imgs/digester_overview.jpg)
+![Overview of subprocesses of biogas production.](img/digester_overview.jpg)
 
 It is difficult to say what processes likely take place in the aerobic lagoons, as there is not one 'type' of aerobic lagoon. I was not able to find any studies that discuss metagenomics on aerobic lagoons in the treatment process of wastewater from ethanol production. Obvious to state would be that in the lagoons mostly aerobic processes take place, as aerobic lagoons have a large surface area and low depth, allowing maximum exposure to oxygen.
 
 ### Diversity between lagoon in/out samples
 
-I expect the lagoon in sample to have a higher diversity than the lagoon out sample, as species might still be present from the anaerobic digester. However there is likely a difference in conditions between the digester and the lagoon. Such as a difference in pressure, temperature, humidity and of course the fact that oxygen is not present in the digestor. So any microbial species that leave the digester, might still be present in the digestor effluent (the lagoon in) sample, but might not be present in the lagoon effluent sample anymore, which is after a few days. Because of this I also expect that less (metabolic) take place in the lagoon out sample.
+I expect the lagoon influent to have a higher diversity than the lagoon effluent, as species might still be present from the anaerobic digester. However there is likely a difference in conditions between the digester and the lagoon. Such as a difference in pressure, temperature, humidity and of course the fact that oxygen is not present in the digestor. So any microbial species that leave the digester, might still be present in the digestor effluent (the lagoon in) sample, but might not be present in the lagoon effluent sample anymore, which is after a few days. Because of this I also expect that less (metabolic) take place in the lagoon out sample.
 
 
 # Metagenomics Pipeline
+## Overview of the pipeline
+**03-04-2025**
+
+Below you can see the Directed Acyclic Graph (**DAG**) of the pipeline. The pipeline starts with two sample files, for the lagoon influent and effluent. Kraken2 then classifies reads as OTUs, using the Greengenes database. Then Bracken gets run, to re-estimate OTUs on high taxonomic levels, in order to classify these OTUs as deeper levels (with Genus being the max). The output files for Bracken, which are a re-estimated Kraken2 report and a general Bracken output, get used to visualize the taxonomic diversity and calculate the alpha diversity. Bracken output is also used for functional analysis with FAPROTAX, where abundance of metabolic pathways gets determined based on abundance of OTUs. 
+
+After the DAG was generated, we still made some final changes to the pipeline that are worth discussing. We decided not to use bracken, as it seemed to make our found OTUs *less* specific, meaning it was classifying species at a higher taxonomic level and it was also merging a lot of OTUs, removing smaller distinct groups. So Bracken did not seem to be suited for what we wanted to accomplish, which was to provide an accurate overview of the taxonomic diversity in the samples. Sadly, without Bracken, the alpha diversity also could not be determined, as the script we used for alpha diversity, only takes Bracken files as input. We decided to only determine the beta diversity instead, as this does work with Kraken2 output. We also decided to leave out the Sankey chart, as the result we got from Pavian looked a lot better and a lot more readable/suitable to put on a poster or use for the paper.
+
+
+![Overview of tools used in pipeline, visualized as DAG.](img/dag.png)
+
 
 **03-03-2025**
 
@@ -137,33 +143,33 @@ Steps:
 
 - Quality control
 - Trimming (if needed)
-- Classification (determining what OTU's are present)
+- Classification (determining what OTUs are present)
 - Functional analysis (determining what processes take place in the samples)
 - Calculating alpha/beta diversity
 - Visualization
 
-Floris will be looking into the quality control and trimming steps. Quality control had already been performed for us, but our teacher recommended us to repeat this step, as it is always good to double check the data from a dataset that gets handed to you.
+Floris will be looking into the quality control and trimming steps. Quality control had already been performed for us, but our teacher recommended we repeat this step, as it is always good to double-check the data from a dataset that gets handed to you.
 
-Jarno will look into how we can calculate the alpha/beta diversity which gives an idea of the diversity of OTU's in the two samples.
+Jarno will look into how we can calculate the alpha/beta diversity which gives an idea of the diversity of OTUs in the two samples.
 
-I will be looking into the classification and functional analysis steps. For this I will be using Kraken2 and FAPROTAX. And together we will look into a way to visualise our results, for which I will look into Krona.
+I will be looking into the classification and functional analysis steps. For this, I will be using Kraken2 and FAPROTAX. And together we will look into a way to visualize our results, for which I will look into Krona.
 
-Finding a tool for functional analysis that can actually work with Kraken2 output was pretty hard. Most functional analysis tools work with outputs from other classification tools such as qiime and Humann. However I found that some people on forums mentioned that it is possible to convert kraken2 output to biom format and then plug it into a tool called faprotax.
+Finding a tool for functional analysis that can actually work with Kraken2 output was pretty hard. Most functional analysis tools work with outputs from other classification tools such as QIIME2 and Humann. However, I found that some people on forums mentioned that it is possible to convert Kraken2 output to biom format and then plug it into a tool called FAPROTAX, for functional analysis. 
 
 
 ## Base Calling
 
 **03-03-2025**
 
-This step needs to be done when nanopore sequencing has been used (such as with MinION). This form of sequencing results in a 'squiggle', this is a long electrical signal that has peaks and dips signifying what kind of molecule passed through the nanopore at that moment. The passing of a molecule through the pore disrupts the ionic current flowing across it and adds a characteristical electrical signal to the 'squiggle'. 
+This step needs to be done when nanopore sequencing has been used (such as with MinION). This form of sequencing results in a '*squiggle*', which is a long electrical signal that has peaks and dips signifying what kind of molecule passed through the nanopore at that moment. The passing of a molecule through the pore disrupts the ionic current flowing across it and adds a characteristical electrical signal to the 'squiggle'. 
 
-However, before you can move on to following steps in the metagenomics process, you first have to convert this electrical signal to a DNA or RNA sequence. This is normally done using **Dorado**, this is the default basecaller that is integrated within MinKNOW (the software used to control sequencing devices such as MinION) @OxfordNanopore_Basecalling.
+However, before you can move on to the following steps in the metagenomics process, you first have to convert this electrical signal to a DNA or RNA sequence. This is normally done using **Dorado**, which is the default basecaller that is integrated within MinKNOW (the software used to control sequencing devices such as MinION) @OxfordNanopore_Basecalling.
 
-Dorado works optimally with the POD5 file-format. Our data consists of fast5 files, so we will have to convert these first.
+Dorado works optimally with the POD5 file format. Our data consists of fast5 files, so we will have to convert these first.
 
 **04-03-2025**
 
-Our teacher has mentioned that base calling had already been performed on the data and that we were not expected to re-do this, so instead we moved onto the quality control, using the present .fastq  files instead of the FAST5 files.
+Our teacher mentioned that base calling had already been performed on the data and that we were not expected to re-do this, so instead we moved onto quality control, using the present .fastq files instead of the FAST5 files.
 
 
 ## Classification
@@ -171,19 +177,21 @@ Our teacher has mentioned that base calling had already been performed on the da
 
 **04-03-2025**
 
+Installing Kraken2:
+
 ```
 conda install bioconda::kraken2
 ```
 
-Kraken 2 is a tool used for taxonomic classification in metagenomics and was released in 2018 as a more efficient version of Kraken 1 (using less RAM). The tool uses a special kraken classification algorithm with k-mer based classification. This tool is useful for our research, as it can be used to analyse 16S data. A con about kraken 2 is that it has a small false-positive rate (<1%) where it wrongly assigns a read to a species. Another classification tool, KrakenUniq, does not have this false-positive rate @Different_classification_tools. However, as kraken 2 still remains much more efficient we decided to use this tool, as we do not think the small false-positive rate will have a large effect on the outcome.
+**Kraken2** is a tool used for taxonomic classification in metagenomics and was released in 2018 as a more efficient version of Kraken 1 (using less RAM). The tool uses a special kraken classification algorithm with k-mer-based classification. This tool is useful for our research, as it can be used to analyze 16S data, and it seems to be the most efficient and reliable tool available for classification. Another commonly used classification tool is **QIIME 2**, however according to @Salzberg Kraken2 is up to 300 times faster, uses 100x less RAM, and generates more accurate results for 16S rRNA classification than QIIME 2.
 
-Kraken assigns taxonomic labels to DNA sequences by examining the k-mers within a query sequence and then query a database. k-mers are substrings within the DNA sequence of length *k*. After quering the database, the k-mers get mapped to the lowest common ancestor (LCA) of all genomes that contain the given k-mer @Kraken2.
+A minor drawback of Kraken 2 is that it has a small false-positive rate (<1%) where it wrongly assigns a read to a species. Another classification tool, **KrakenUniq**, does not have this false-positive rate @Different_classification_tools. However, as Kraken 2 still remains much more efficient we decided to use this tool, as we do not think the small false-positive rate will have a large effect on the outcome.
 
-We have chosen to use Kraken2, as it seems to be the most efficient and reliable tool available for classification. Another common used classification tool is QIIME 2, however 
+Kraken assigns taxonomic labels to DNA sequences by examining the k-mers within a query sequence and then query a database. k-mers are substrings within the DNA sequence of length *k*. After quering the database, the k-mers get mapped to the `lowest common ancestor` (LCA) of all genomes that contain the given k-mer @Kraken2.
 
-The user also can choose the value k that determines the length of the sequences that Kraken uses for its index; every sequence (or k-mer) of length k is associated with the species in which it occurs. K-mers that occur in two or more species are associated with the lowest common ancestor of those species. The database files contain the taxonomy and k-mer information for the specified database. Following generation of these files, Bracken requires users to generate a k-mer distribution file. Kraken and Bracken additionally allow the use of multiple threads to accelerate database construction. 
+The user also can choose the value k that determines the length of the sequences that Kraken uses for its index; every sequence (or k-mer) of length k is associated with the species in which it occurs. K-mers that occur in two or more species are associated with the lowest common ancestor of those species. The database files contain the taxonomy and k-mer information for the specified database. Following the generation of these files, Bracken requires users to generate a k-mer distribution file. Kraken and Bracken additionally allow the use of multiple threads to accelerate database construction. 
 
-Kraken2 cannot take more than one file as input, so we will merge all fastq files that belong to the same sample locations. This can be done using:
+Kraken2 cannot take more than one file as input, so we will merge all .FASTQ files that belong to the same sample locations. This can be done using:
 
 ```
 cat FAX*.fastq.gz > sample_1.fastq.gz
@@ -197,11 +205,11 @@ Kraken2 offers support for 3 public 16S databases @Kraken2:
 - RDP
 - SILVA
 
-From these 3 databases, only Greengenes contains all available 16S data, whereas RDP and SILVA use smaller subsets of the data (e.g. containing only bacterial or achaeal 16S data). However RDP and SILVA seem to have deeper taxonomic levels whereas greengenes is more broad (see table). In #Comparing databases I have compared all databases, to see which one classifies the highest amounts of reads, which turned out to be:
+From these 3 databases, only Greengenes contains all available 16S data, whereas RDP and SILVA use smaller subsets of the data (e.g. containing only bacterial or archaeal 16S data). However, RDP and SILVA seem to have deeper taxonomic levels whereas greengenes is more broad (see table). In #Comparing databases I have compared all databases, to see which one classifies the highest amounts of reads, which turned out to be:
 
 We have decided to continue with Greengenes, as we want to make a complete overview of the microbiome in the different steps of the water purification process, so it would make more sense to use a complete database for this and not a subset. We will however test all databases, to make sure that Greengenes is the most thorough database to use in this situation. Possibly RDP or SILVA might be able to classify on a deeper taxonomy level than Greengenes. 
 
-There are also NCBI databases, which include whole genome data of organisms other than micro-organisms (e.g. eukaryota). I have tried to use the largest NCBI database (`core_nt`) and it was able to classify roots outside of the micro-biological roots, however the general results were much less thorough than when using Greengenes or any other 16S database. I imagine this is because `core_nt` is not specialised for classification of 16S data.
+There are also NCBI databases, which include whole genome data of organisms other than micro-organisms (e.g. Eukaryota). I have tried to use the largest NCBI database (`core_nt`) and it was able to classify roots outside of the micro-biological roots, however, the general results were much less thorough than when using Greengenes or any other 16S database. I imagine this is because `core_nt` is not specialized for the classification of 16S data.
 
 Kraken 2 needs the database to have 3 files present, which are
 
@@ -209,7 +217,7 @@ Kraken 2 needs the database to have 3 files present, which are
 - `opts.k2d`
 - `hash.k2d`
 
-Normally, one would have to "build" the database using specific Kraken2 commands, however all 16S databases are already present on the server.
+Normally, one would have to "build" the database using specific Kraken2 commands, however, all 16S databases are already present on the server.
 
 In order to use Kraken2 with one of the databases, the database has to be defined with the `--db` flag, followed by the location of the database.
 
@@ -273,26 +281,26 @@ bracken -d /path/to/database -i /path/to/input/sample_1.report.txt -o /path/to/o
 The output shows how many reads are newly assigned and to which species, the report output is not used other than for inspection by the user. Another file automatically gets added in the same directory as the report (`{sample}_bracken_genuses.txt`), containing the original report that is corrected with the output from Bracken. This is the file that we will use further down the pipeline. 
 
 
-
 **31-03-2025**
-We eventually decided not to use Bracken for the pipeline, as it seemed to make the classification results for kraken less specific and it seemed to remove a lot of the OTU's on deeper taxonomic levels. I already had this feeling, seeing as the functional analysis yielded way less pathways when Bracken had been ran after Kraken2, instead of using direct Kraken2 output. I tried to visualize the difference between a regular Kraken2 report and a Bracken re-estimated Kraken2 report, using a Sankey plot, you can see the results below:
+
+We eventually decided not to use Bracken for the pipeline, as it seemed to make the classification results for kraken less specific and it seemed to remove a lot of the OTUs on deeper taxonomic levels. I already had this feeling, seeing as the functional analysis yielded way less pathways when Bracken had been ran after Kraken2, instead of using direct Kraken2 output. I tried to visualize the difference between a regular Kraken2 report and a Bracken re-estimated Kraken2 report, using a Sankey plot, you can see the results below:
 
 Sankey plot on regular Kraken2 report
-![Sankey plot on regular Kraken2 report](img/sankey_kraken.jfif)
+![Sankey plot on regular Kraken2 report](img/sankey_kraken.jpeg)
 
 Sankey plot on Bracken re-estimated Kraken2 report
-![Sankey plot on Bracken re-estimated Kraken2 report](img/sankey_bracken.jfif)
+![Sankey plot on Bracken re-estimated Kraken2 report](img/sankey_bracken.jpeg)
 
-Conclusion: as you can see, a lot of the thinner "branches" dissapear and the reads for this likely get merged into bigger, more established branches. Because of the way that Bracken works, where classifications get distributed over how "likely" they are to be from specific clades, based off of the earlier number of species classified in them. It is hard to determine whether the outcome of Kraken2 or Bracken is more accurate, however our problem with using Bracken after Kraken2 was that we had almost no output to say anything about. For example the functional analysis after running Bracken told us there are NO metabolic processes taking place in the out lagoon sample, but that is impossible as there will always be processes taking place in microbiomes with a variety of microorganisms present. Thus we have decided to continue without using Bracken.
+**Conclusion**: as you can see, a lot of the thinner "branches" dissapear and the reads for this likely get merged into bigger, more established branches. Because of the way that Bracken works, where classifications get distributed over how "likely" they are to be from specific clades, based off of the earlier number of species classified in them. It is hard to determine whether the outcome of Kraken2 or Bracken is more accurate, however our problem with using Bracken after Kraken2 was that we had almost no output to say anything about. For example the functional analysis after running Bracken told us there are NO metabolic processes taking place in the out lagoon sample, but that is impossible as there will always be processes taking place in microbiomes with a variety of microorganisms present. Thus we have decided to continue without using Bracken.
 
 
 ## Functional analysis
 
 **21-03-2025**
 
-Now that we have gotten a general idea of what kind of micro organisms are present in the lagoon influent and effluent, we can take a closer look at what kind of processes these organisms indulge in. We can do this by doing a pathway analysis of all involved Operational Taxonomic Units (OTU's), this can refer to any classification such as a species, genus or class. But in this case we are only looking at species, as Bracken has been used to further classify any Kraken2 classifications to species level.
+Now that we have gotten a general idea of what kind of micro organisms are present in the lagoon influent and effluent, we can take a closer look at what kind of processes these organisms indulge in. We can do this by doing a pathway analysis of all involved Operational Taxonomic Units (OTUs), this can refer to any classification such as a species, genus or class. But in this case we are only looking at species, as Bracken has been used to further classify any Kraken2 classifications to species level.
 
-We can use the output of Kraken2 in a tool called `FAPROTAX`, this is a database that maps prokaryotic OTU's against metabolic- and other ecological functions @Louca. Examples include processes such as methanogenesis, fermentation and denitrification. However Kraken2 output can not directly be used, first the output has to be converted to .BIOM format. This can be done using the kraken-biom tool.
+We can use the output of Kraken2 in a tool called `FAPROTAX`, this is a database that maps prokaryotic OTUs against metabolic- and other ecological functions @Louca. Examples include processes such as methanogenesis, fermentation and denitrification. However Kraken2 output can not directly be used, first the output has to be converted to .BIOM format. This can be done using the kraken-biom tool.
 
 ### kraken-biom
 
@@ -357,14 +365,14 @@ arsenate_detoxification	0
 ```
 
 `- g` path to the faprotax database (faprotax.txt)
-`- n` choose whether the output table should be normalized or not, by normalizing it will convert the number of OTU's to ratios. There are multiple different options:
+`- n` choose whether the output table should be normalized or not, by normalizing it will convert the number of OTUs to ratios. There are multiple different options:
 
 - `none` (default)
 - `columns_before_collapsing`
 - `columns_after_collapsing` 
 - `columns_before_collapsing_excluding_unassigned`
 
-I chose for columns_after_collapsing, because it gives a good overview of the ratio of metabolic processes in the sample, as it only counts the OTU's with assigned functions and ignores the unassigned OTU's. After using this form of normalization, all active metabolic processes together add up to 1. The higher the number, the more represented the metabolic process is in this sample, so the more OTU's there are that perform this metabolic process.
+I chose for columns_after_collapsing, because it gives a good overview of the ratio of metabolic processes in the sample, as it only counts the OTUs with assigned functions and ignores the unassigned OTUs. After using this form of normalization, all active metabolic processes together add up to 1. The higher the number, the more represented the metabolic process is in this sample, so the more OTUs there are that perform this metabolic process.
 
 
 Before normalizing: 
@@ -389,11 +397,11 @@ Specify what OTU metadata field contains the taxonomic paths in the .biom input.
 
 **Specifiying different types of output**:
 
-`--out_sub_tables_dir`: specifies the directory in which you want to have the output files per detected pathway. Per detected pathway it will provide 1 .biom file, with the name of the pathway. The file is json formatted and contains all OTU's that have been linked to this metabolic pathway.
+`--out_sub_tables_dir`: specifies the directory in which you want to have the output files per detected pathway. Per detected pathway it will provide 1 .biom file, with the name of the pathway. The file is json formatted and contains all OTUs that have been linked to this metabolic pathway.
 
-`--out_groups2records_table`: specify path where you want the table to be saved. Gives a table format of the associations between OTU's and pathways, where 0 stands for no association and 1 stands for association.
+`--out_groups2records_table`: specify path where you want the table to be saved. Gives a table format of the associations between OTUs and pathways, where 0 stands for no association and 1 stands for association.
 
-`--out_report`:	specify path where you want the report to be saved. The report gives an overview of what OTU's got linked to which pathways. See an example below:
+`--out_report`:	specify path where you want the report to be saved. The report gives an overview of what OTUs got linked to which pathways. See an example below:
 
 ```
 # reductive_acetogenesis (1 records):
@@ -433,7 +441,7 @@ Based on this code I also wrote a SnakeMake rule, which you can find under the S
 
 **25-03-2025**
 
-faprotax used the python script `collapse_table.py` to assign OTU's to corresponding (metabolic) pathways. However at first when I tried to run this script with the bash command, I would get errors coming from the script, mentioning unescaped escape characters. All I had to do to fix this was to change the `\` in the script to `\\`.
+faprotax used the python script `collapse_table.py` to assign OTUs to corresponding (metabolic) pathways. However at first when I tried to run this script with the bash command, I would get errors coming from the script, mentioning unescaped escape characters. All I had to do to fix this was to change the `\` in the script to `\\`.
 
 
 
@@ -478,8 +486,7 @@ Another issue we have run into is that the data for the digestor does not seem s
 
 
 # Snakemake
-
-Floris has written the SnakeMake code for Fastplong, Bracken and Kraken2. I have made the Snakemake code for kraken-biom, Faprotax and Krona:
+I have made the Snakemake rules for for kraken-biom, Faprotax and Krona:
 
 ## Krona
 ```
@@ -594,7 +601,7 @@ For the dependencies I enter the used tool, including the version that we have m
 # Comparing databases
 To test which 16S database gives the highest percentage of classified sequences, I will run the kraken2-bracken-krona pipeline for `in_lagoon.fastq.gz` for all 3 databases (Greengenes, RDP, Silva). I decided to test it on this file, because `in_lagoon.fastq.gz` contains the most reads out of the 3 different sample locations for this project. `in_lagoon.fastq.gz` contains a gz compressed fastq file in which samples 1-4 have been merged with cat, because Kraken2 only takes 1 input file. `in_lagoon.fastq.gz` has also been quality checked and trimmed accordingly using fastplong. These 2 pre-processing steps have been performed by Floris and more information about this can be found in his logbook.
 
-First I ran Kraken2 with all 16S databases, the results can be seen in the table below. The percentages are the amount of reads that were classified, the remainder (100%-classified reads) are the amount of unclassified reads. RDP seems to have performed best here and Greengenes worst, however the differences do not seem to be very large. However the goal is to classify as many OTU's on genus level, as this will give better insights into metabolic processes and will help visualising the diversity. Kraken2 only mentions how many reads get classified, but not what level they get classified at.
+First I ran Kraken2 with all 16S databases, the results can be seen in the table below. The percentages are the amount of reads that were classified, the remainder (100%-classified reads) are the amount of unclassified reads. RDP seems to have performed best here and Greengenes worst, however the differences do not seem to be very large. However the goal is to classify as many OTUs on genus level, as this will give better insights into metabolic processes and will help visualising the diversity. Kraken2 only mentions how many reads get classified, but not what level they get classified at.
 
 |            | Lagoon in | Lagoon out |
 |------------|-----------|------------|
@@ -603,41 +610,38 @@ First I ran Kraken2 with all 16S databases, the results can be seen in the table
 | Greengenes | 99.71%    | 99.63%     |
 
 
-Now I will run Bracken on all the Kraken2 reports generated by Kraken2
-
-
-
-### Greengenes
-8 processen lagoon in
-3 processen lagoon out
-
-### RDP
-2 processen lagoon in
-0 processen lagoon out
-
-### Silva
-6 processen lagoon in
-2 processen lagoon out
-
+However, when generating Krona piecharts with the different Kraken2 reports, made with the 3 different databases, I noticed that the results that RDP and Silva were giving, was not exactly what I expected. Using RDP/Silva as database gave a higher number of 'other root', so assigned reads outside of the microbial clades and they also seemed to not classify as "deep" as Greengenes, with all the taxonomic units being higher than they are with Greengenes. So in the end we still decided to go with Greengenes.
 
 # Krona results
-### Digestor
-![](img/digester_krona.svg)
+Below you can see the Krona results, using Greengenes as database.
+
+## Lagoon in
+
+![](img/lagoon_in.png)
+
+**Description lagoon in**: 
+
+The entirety of OTUs in the domain of Bacteria consists of the kingdom Bacillati. One taxonomic level further down, at phylum level, there is a visible divide between actinomycetes and bacillota, with the majority of OTUs consisting of actinomycetes. 
+
+The most common species are Mycobacterium kansasii (22%), Thermoanaerobacter sp (20%) and Streptomyces viridochromogenes (9%). These 3 species make up 51% of the total diversity. 6% is classified as ‘other Root’. 
+
+## Lagoon out
+
+![](img/lagoon_out.png)
+**Description lagoon out**: 
+
+The entirety of the OTUs in the Bacteria domain consists of the kingdom Bacillati. Bacillati divides into Actinomycetes and Bacillota, with mostly actinomycetes. 
+
+The most common species are Streptomyces noursei (20%), Geodermatophilus obscurus (15%) and Pseudonocardia nitrificans (12%). These 3 species make up 47% of the total diversity. 14% is classified as ‘other root’ 
 
 
-### Lagoon in
-![](img/lagoon_in_krona.svg)
+# Conclusion/discussion
+
+In the end, we have determined the (taxonomic) diversity between the microbial communities in the lagoon influent and effluent. And we have determined what (metabolic) processes likely take place in these sample locations, based on the classified OTUs. However, it is difficult to say how accurate the results are, as there was a serious lack of data, with the digester sample missing completely and the lagoon in/out samples not having a high amount of reads. 
+
+I hope that our research can be used as a starting point for future research, where the sequencing can be redone to ensure a higher quality of the reads, as this will lead to more (accurate) classifications and thus a better overview of the actual communities. I think we have looked carefully into the tools we used and evaluated what tools to use and I think this pipeline can give more promising results when used with data of higher quality. The comparison between lagoon in/out was not what our contact person asked for, but it was all we could provide, seeing as the digester samples were absent and seeing as this was the main focus point for the contact person. 
 
 
-### Lagoon out
-
-![](img/lagoon_out_krona.svg)
-(per figuur nog wat zeggen)
-
-
-# Conclusion
-
-- answer hypothesis/conclusion
-
+# References
 
 
