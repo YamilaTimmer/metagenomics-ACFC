@@ -2,26 +2,30 @@
 title: "Metagenomics analysis ACFC Wastewater"
 author: "Floris Menninga"
 date: "`r Sys.Date()`"
-bibliography: references.bib
-link-citations: true
 output:
   pdf_document:
-    toc: yes
+    toc: true
     toc_depth: '3'
-  bookdown::pdf_document2:
-    keep_tex: false    
-    toc: false      
     fig_caption: true
-    includes:  
-        in_header: include_tex_header.tex
-  word_document:
-    toc: yes
-    toc_depth: '3'
+    number_sections: true
+  bookdown::pdf_document2:
+    keep_tex: false
+    toc: false
+    fig_caption: true
+    number_sections: true
+    includes:
+      in_header: include_tex_header.tex
   html_document:
-    toc: yes
+    toc: true
     toc_depth: '3'
-editor_options: 
-  markdown: 
+    number_sections: true
+  word_document:
+    toc: true
+    toc_depth: '3'
+link-citations: true
+bibliography: references.bib
+editor_options:
+  markdown:
     wrap: sentence
 ---
 
@@ -40,33 +44,33 @@ library(webshot)
 ```
 15-03-2025:
 
-# **1. Introduction** #
+# **Introduction** #
 
 The wastewater of a Kenyan water treatment plant contains many organisms whose presence influences the water quality by their production of toxins like those produced by algal blooms from Cyanobacteria. (@hart2025metagenomics) These algal blooms are a global threat to freshwater systems like the Nyando River. 
 Using more traditional chemical analyses, an abundance of nitrogen, phosphorus and potassium was determined.
 
-It is imperative to measure those toxins or in this case genetic material from the micro-organisms that produce them. This wastewater is directly exhausted into the Nyando River, a basin covering about 3,590 square kilometers. The population density at the basin is higher than the national average, this indicates it’s importance. The life expectancy is very low with an average of 37.7 years for males and 42.9 years for females. Enhancing water quality could contribute to a higher lifespan for the people and other organisms that make use of these wetlands.
+It is imperative to measure toxins or in this case genetic material from the micro-organisms that produce them. This wastewater is directly exhausted into the Nyando River, a basin covering about 3,590 square kilometers. Life expectancy in the region is very low, averaging 37.7 years for males and 42.9 years for females. Enhancing water quality could contribute to a higher crop yield and better health for other organisms that make use of these wetlands.
 
-This water provides food, stores energy and is crucial for biodiversity. (@obiero2012people) These resources are threatened by wastewater from factories and treatment plants.
+This water provides food, stores energy and is crucial for biodiversity. (@obiero2012people) These resources are threatened by wastewater from factories and treatment plants like ACFC, a Kenyan factory that produces industrial spirits and yeast from sugar molasses.
 
-In the wastewater treatment facility is among other process steps a digester, with a lagoon where the wastewater is expelled into. The influence of this digester on the microbial diversity and number will be determined.
+In this wastewater treatment facility is among other process steps a digester, with a lagoon where the wastewater is expelled into. The effect of this digester on the microbial diversity and number will be determined.
 
 There are a total of three samples, the first one was taken before the water enters the digester, the second inside of the digester and the last one in the lagoon before entering the Nyando River. 
-We will make a comparison between these samples and we will determine if the amount of bacteria or other microorganisms exceeds the limits for reclaimed water before and after entering the digester. Toxin producing algae can be present in the sample that exited the digester only if this was also the case before entering it. The scope of this article is limited to determining the influence of the digester in the wastewater treatment facility. So even if there already are contaminants, as long as their numbers are not increasing, the treatment process is not at fault.
+We will make a comparison between these samples and we will determine if the amount of bacteria or other microorganisms exceeds the limits for reclaimed water before and after entering the digester. The scope of this article is limited to determining the influence of the digester in the wastewater treatment facility. So even if there already are contaminants, as long as their numbers are not increasing, the treatment process is not at fault.
 
-Metagenomics is DNA based and can provide information about what organisms are present in the sample, this can be taxonomic and phylogenetic information. (@hong2020metagenomics) Metagenomics differs from whole genome sequencing which refers to the sequencing of a single genomes.
+Metagenomics is DNA based and can provide information about what organisms are present in the sample, this can be taxonomic and phylogenetic information. (@hong2020metagenomics)
 
 To do this, a bio-informatics pipeline was constructed to compare these samples in which a taxonomic classification will be applied on the samples using the Kraken2 tool to check the presence of known algal bloom causing Cyanobacteria. (@hart2025metagenomics) Given the results from incubating the samples on agar plates, we hypothesize that there are toxin producing Cyanobacteria in the samples but that the digester doesn’t make a difference for the diversity and number of those organisms. 
 
-In addition to the phylogenetic classification, there will also be an anti-biotic resistance test to determine to what antibiotic resistance genes the micro-organisms have. This will provide an overview of means to combat the bacteria found in the sample more effectively. (@LALGUPTA2020105667)
+In addition to the phylogenetic classification, there will also be an antibiotic resistance test to determine what antibiotic resistance genes the micro-organisms have if they are present as part of the functional analysis. This will provide an overview of means to combat the bacteria found in the sample more effectively. (@LALGUPTA2020105667)
 
-To first assemble the microbial genomes from the metagenomic dataset, several tools can be used like Metabat, Concoct and Maxbin4. Identifying potentially up to 2000 micro-organisms in the sample can be challenging given that their average genome size would be 4 Mpb 8 Gpb of reads would have to be obtained to get an average coverage of 1x (al2015removal). A functional analysis can be done by comparing the microorganisms found using Kraken2 against a database like Faprotax (@terlouw2023mibig) This database has for every species/genus the pathways that are know to occur in them.  
+To first assemble the microbial genomes from the metagenomic dataset, several tools can be used like Kraken2, Concoct and Kaiju.
+Identifying potentially up to 2000 micro-organisms in the sample can be challenging given that their average genome size would be 4 Mpb 8 Gpb of reads would have to be obtained to get an average coverage of 1x (al2015removal). A functional analysis can be done by comparing the microorganisms found using Kraken2 against a database like Faprotax (@terlouw2023mibig) This database has for every species/genus the pathways that are know to occur in them.  
 
 
 
-**To-do: 16S DNA explanation.**
 
-The diversity of the microbiome will be quantified using the alpha diversity measure. This is a formula that can be applied to calculate this measure for diversity. **6**.
+The diversity of the microbiome will be quantified using the alpha diversity measure (Shannon's index). This is a formula that can be applied to calculate this measure for diversity. (@knight2018best)
 
 
 # **Pipeline** #
@@ -86,6 +90,8 @@ Workflows are described via a human readable Python based language. Snakemake ca
 
 
 Unit tests where generated for all the snakemake rules: "snakemake --generate-unit-tests"
+Slurm was used to distribute the tasks over the cluster. (assemblix and assemblix2025)
+
 
 
 ## **Library / Tool versions:** ##
@@ -103,8 +109,7 @@ Unit tests where generated for all the snakemake rules: "snakemake --generate-un
 | FAPROTAX | 1.2.10 | Functional annotation of prokaryotic taxa |
 
 
-
-## 1. **Sample preparation** ##
+##  **Sample preparation** ##
 
 Samples: 
 
@@ -124,7 +129,10 @@ Samples:
 | 12 | Dig, - gly, +schud |
 
 The three groups: In the lagoon, Outside of the lagoon and in the digester. 
-Some samples have been treated with glycerol in order to better preserve the sample in the -80 freezer. 
+The "In lagoon" sample can also be called influent and the "Out lagoon" sample can be called effluent. 
+Some samples have been treated with glycerol in order to better preserve the sample in the -80 freezer but the glycerol and non glycerol samples have been combined. 
+
+
 
 As per usual with Nanopore results, the samples were distributed over many seperate .fastq files. These were combined using the following bash script:
 
@@ -190,14 +198,30 @@ The first rule concatenates all the fastq files in the barcode directories into 
 According to the sample table, all samples taken in the same place where put together ignoring the use of glycerol that was used for some of the samples. It should have 
 no effect on the genetic material in the samples. The "glob.glob" python function is used to match the path for all directories without needing to specify them all manually. 
 
+The relevant part of the config.yaml file:
+```{r, eval=F}
+samples:
+    #digester: /students/2024-2025/Thema07/metagenomics/wastewater/data/digester.fastq.gz
+    in_lagoon: /students/2024-2025/Thema07/metagenomics/wastewater/data/in_lagoon.fastq.gz
+    out_lagoon: /students/2024-2025/Thema07/metagenomics/wastewater/data/out_lagoon.fastq.gz
 
-## **1. Quality control** ##
+sample_barcodes:
+    in_lagoon: ["barcode01", "barcode02", "barcode03", "barcode04"]
+    out_lagoon: ["barcode05", "barcode06", "barcode07", "barcode08"]
+    #digester: ["barcode09", "barcode10", "barcode11", "barcode12"]
+
+```
+Both the samples and the sample barcodes can easily be changed to allow for the use of different samples and barcode combinations. 
+The digester sample is commented out for reasons that will become apparent in the quality control section below. 
+
+
+## **Quality control** ##
 To check the quality of the raw sequence data, Fastplong was used. (@Chen2023)
 At first we planned to use Trimmomatic and FastQC like we had done in an earlier analysis but they are made to work with Illumina data while we are working with Nanopore data. 
-Fastplong functionally combines Trimmomatic and FastQC with its adaptertrimming and reports with the quality distribution of the reads, both before and after filtering.
+Fastplong functionally combines Trimmomatic and FastQC with its adapter trimming and reports with the quality distribution of the reads, both before and after filtering.
+Fastplong returns both a .html report and a trimmed fastq file. 
 
-
-### **1.1 Results** ###
+### **Results** ###
 
 The sample taken from the digester only contained 2 reads before filtering with Fastplong and 1 after. 
 We decided that it was unusable and all downstream analyses where done without it.
@@ -270,18 +294,17 @@ This could have an significant impact on species diversity because there are sim
 | Q40 Bases         | 1.333000 K (0.039202%)   | 1.168000 K (0.040908%)   |
 
 
-In the tables above, the N50 length is the largest lenght L such that 50% of all nucleotides are contained in contigs of size at least L. (source: https://www.nature.com/articles/35057062)
+In the tables above, the N50 length is the largest length L such that 50% of all nucleotides are contained in contigs of size at least L. (source: https://www.nature.com/articles/35057062)
 
 Q5, Q7, Q10 etc. bases is the value of the number of bases at each quality level (Phred score). 
 
 These reads are mostly from 16S rRNA, this gene is commonly used as a phylogenetic marker. 
 
+
 ![image](in_lagoon.png)
 
 The figure above displays the difference in read quality before and after filtering with Fastplong. 
 The amount of reads was reduced but the quality increased. Perhaps the reads with a lower phred score would suffice but I chose to remove them in order to have more statistical power in the downstream analyses like in Kraken2.
-
-
 
 
 ![image](out_lagoon.png)
@@ -312,15 +335,16 @@ rule fastq_qc_plong:
         """
 
 ```
+In this Snakemake rule, Fastplong takes the arguments mentioned above. 
 
 
 
-
-## **2. Taxonomic classification** ##
+## **Taxonomic classification** ##
 To classify all the reads as belonging to a species or less specific taxon, Kraken2 was used. 
+Kraken2 is a taxonomic classification system that uses exact k-mer matches to achieve high accurarcy and fast classification speeds. Each k-mer sequence is matched to the lowest common ancestor of all genomes that contain that k-mer. A k-mer is a substring of length k in a biological sequence. 
+We use Kraken2 here to determine what microorganisms are present in the smamples. 
 
-
-```{bash, eval=F}
+```{r, eval=F}
 rule kraken2_taxonomic_classification:
     input:
         reads="trimmed/{sample}.fastq"
@@ -347,16 +371,21 @@ rule kraken2_taxonomic_classification:
         """
 ```
 In the snakemake rule above, kraken2 is run with the parameters: database, confidence and threads. 
-The database used is Greengenes, this is a database for use with 16S reads. 
-Confidence is kept at its default value of 0 and 128 threads are used for this operation.
+
+Confidence is kept at its default value of 1 and 64 threads are used for this operation.
+Kraken outputs a report file (.kraken_report) that lists the classified results in a hierarchical order with a read count and percentage at each taxonomic level. 
+
+The database used is Greengenes, version 13.8, this is a database for use with 16S reads. 
 The 16S Greengenes database was used for this. @DeSantis2006
+
+
 
 
 
 ### **Tool Comparison** ###
 This tools was chosen based on a comparison made in the following article, (@ye_benchmarking_2019)
 Kraken2 performed comparable to similar tools like MEGAN-N, Minimap2 and Kaiju. 
-The reason we choose this tool over the other ones is that there are more tools that can use Kraken2's output compared to many of the others. A close contender was Humann3 for taxonomic classification and metaphlan4 for functional analysis but since the nessasary databases for Kraken2 were already on the system, we setteled on Kraken2 and Faprotax for the functional analysis. 
+The reason we choose this tool over the other ones is that there are more tools that can use Kraken2's output compared to many of the others. A close contender was Humann3 for taxonomic classification and metaphlan4 for functional analysis but since the necessary databases for Kraken2 were already on the system, we setteled on Kraken2 and Faprotax for the functional analysis. 
 
 
 
@@ -370,12 +399,16 @@ Pavian was used to generate a Sankey graph based on the report from Kraken2.
 
 
 ![In Lagoon](In_Lagoon.png)
+
+\
+
 There are many more different microorganisms found in the "In lagoon" sample compared to the "Out lagoon" sample.
 
 
 ![Out Lagoon](Out_lagoon.png)
+\
 
-Both charts show that most microorganisms are bacteria, specifically Firmicutes.
+Both charts show that most microorganisms are bacteria, specifically *Firmicutes*.
 This is a phylum of mostly gram-positive bacteria.
 
 
@@ -428,10 +461,10 @@ The threshold is the default value of 10. The read length should require some ex
 But there was not enough time to do this and almost all reads conform to this length. 
 
 
-## DESeq2.... ##
+## **Testing deseq2...** ##
 
 
-At first, I thought that DESeq2 could be insightful to compare the count data but after looking into it more, the statistical method used would not be usable for metagenomics data since the distribution is different than what DESeq2 expects.
+At first, I thought that DESeq2 could be insightful to compare the count data but after looking into it more, the statistical method used would not be usable for metagenomics data since the distribution is different than what DESeq2 expects. 
 
 This means that the results would be statistical insignificant and not worth the time investment to adapt our data for use with it. The code below is my fruitless attempt at using Deseq2.
 
@@ -463,19 +496,21 @@ summary(res)
 ```
 
 
-# **3. Functional analysis** #
+# **Functional analysis** #
+The goal of a functional analysis is to determine what metabolic activity the organism is able to perform. In other words, the pathways that it can use. These pathways are predetermined for known organisms and are put into a database like faprotax, more about this database below.
 
-## **3.1 Faprotax** ##
+
+## **Faprotax** ##
 After Kraken2 had classified the reads and the content of the sample became known, Faprotax was used to look up what known pathways are used by the microorganisms. 
 The Faprotax (Functional Annotation of Prokaryotic Taxa) database is a database that maps prokaryotic clades, for example genera and species. This is done in order to find out what ecologically relevant metabolic functions the organism possesses.
 
-FAPROTAX maintains a database of Over 7600 functional annotations covering over 4600 taxa. (@louca2016decoupling)
+Faprotax maintains a database of Over 7600 functional annotations covering over 4600 taxa. (@louca2016decoupling)
 Faprotax includes a tool that functions as a loop up table for the organisms from the OTU table gathered from Kraken2 and compares this to known pathways. 
 
 There are other databases that could be used that have a broader scope compared to the mostly ecological pathways from Faprotax. 
 I have found MinPath and Tax4fun2 which are functional profilers for 16S rRNA sequences like we have. In the end, due to time constrains only Faprotax was used. 
 
-## **3.2 Visualisation of Faprotax** ##
+## **Visualisation of Faprotax** ##
 
 ```{r}
 
@@ -489,7 +524,9 @@ ggplot(data = faprotax_in_lagoon, mapping = aes(x = group, y = in_lagoon)) +
     coord_flip()
 
 ```
-The graph above displays the results of the FAPROTAX analysis. 
+\
+
+The graph above displays the results of the FAPROTAX analysis. Not visible on this chart but there is overlap in pathways between both samples for the following pathways: aromatic_compound_degradation, chemoheterotrophy and fermentation. 
 
 
 One of FAPROTAX's applications is the ecological interpretation of 16S marker gene data like what is done for this study. FAPROTAX is non-exhaustive, that means it is likely that many organisms known to perform certain functions may be missing or may only be partially included in the database. This could explain the few pathways found in both samples but especially in the "out lagoon" sample below. 
@@ -509,7 +546,7 @@ ggplot(data = faprotax_out_lagoon, mapping = aes(x = group, y = out_lagoon)) +
     coord_flip()
 
 ```
-## **3.3 Pathway abundance** ##
+## **Pathway abundance** ##
 
 
 ```{r bubblechart-pathway-abundance}
@@ -534,6 +571,8 @@ ggplot(data_long, aes(x = Sample, y = Pathway, size = Abundance)) +
 
 
 ```
+\
+
 The bubble chart above looks anemic with only a few pathways. I had to filter the data_long to only include pathways with an abundance of more than 0. 
 
 ```{r heatmap-pathway-abundance}
@@ -543,6 +582,8 @@ ggplot(data_long, aes(x = Sample, y = Pathway, fill = Abundance)) +
     labs(title = "Amount of pathways for the samples:", x = "Sample", y = "Pathway") +
     theme_minimal() 
 ```
+\
+
 The same data visualized with a heatmap. There is only overlap between the samples for three pathways so it might not be the most informative graph. 
 
 
@@ -550,42 +591,32 @@ The same data visualized with a heatmap. There is only overlap between the sampl
 
 # **Discussion:** #
 
-The main objective of this study was to identify the microorganisms present in the digester, lagoon in and lagoon out samples . Due to sequencing problems, the digester sample only contained two reads, one of which was remove during the trimming with Fastplong. This sample was unusable for further analyses. 
+The main objective of this study was to identify the microorganisms present in the digester, lagoon in and lagoon out samples. Due problems with the quality of the flowcell that was used for sequecing with a Nanopore, the digester sample only contained two reads, one of which was remove during trimming with Fastplong. This sample was unusable for further analyses and was discarded. 
 
-Our results demonstrate that the sample taken in the lagoon has the most diverse microbial community with an alpha diversity of … and a beta diversity between the two samples of …
-This difference can be partially attributed to a large difference in reads between the two samples. 
+Our results demonstrate that the sample taken in the lagoon has the most diverse microbial community with an alpha diversity of 1.56 versus 1.36 (Shannon's index) from the effluent sample and a beta diversity of 0.952 between the two samples. This suggests that either the microbiomes differ a lot or the results are not significant due to the factor ten difference in read count that was used to determine this score.  
 The sample taken from inside the lagoon has ~18K reads after filtering while the sample from the water that had exited the lagoon only contains ~2.2K reads.
 
-Kraken2 showed that most microorganisms in both samples are bacteria, specifically Firmicutes.
-This is a phylum of mostly gram-positive bacteria.
+Kraken2 showed that most microorganisms in both samples are bacteria, specifically *Firmicutes*, most of them Clostridia. 
+Even though species level data is not available due the use of 16S rRNA, some species of Clostridia are know to produce toxins. Clostridium botulinum produces the neurotoxin botulinum but the precence of this specific bacterium is speculation. 
+
+This is a phylum of mostly gram-positive bacteria and includes both aerobic and anaerobic bacteria.
+
 Bracken was used to compute the abundance of species. When using 16S reads, this could not be done on a species level so the genus level was used. When comparing the output of Kraken2 with Bracken, many taxa where lost after running Bracken, this is why its output was discarded and the raw Kraken data was used for the downstream analyses. 
 
-The data gathered from Kraken depended heavily on what database was used but we setteled on using Greengene for it contained less 
+The data gathered from Kraken depended heavily on what database was used but we settled on using Greengenes for it contained less of the "other root" reads.
 
 Faprotax was used to determine some of the pathways these microorganisms use. 
 For the “out lagoon” sample, there where only three pathways found: fermentation, chemotherotropy and aromatic compound degradation. 
 The “in lagoon” sample had in addition to these pathways the following respiration pathways: sulfur, sufite, sulfate and iron respiration. 
-This larger amount of pathways could also be attributed to the difference in reads between the samples. Perhaps it should have been normalized.
-None of the pathways indicate the production of toxins but the database used Faprotax has a limited scope and mostly features environmental pathways and not many others like the production of toxins. 
+This difference in found number of pathways can be partially attributed to the difference in reads between the samples.
+
+None of the pathways indicate the production of toxins but the database used by Faprotax has a limited scope and mostly features environmental pathways and not many others like the production of toxins. A follow up study could look into using other databases to compare against to find more relevant pathways for determining the quality of the effluent. 
 
 
 
-## **Citations** ##
+\
 
-1. 
- https://www.zotero.org/groups/5870913/acfc_afvalwater/items/WLVUDDXJ/attachment/RHY85NTI/reader
- 
-2. https://www.zotero.org/groups/5870913/acfc_afvalwater/items/DW2JTKTX/reader
-
-3. biosynthetic gene clusters. Nucleic Acids Res 51:D603–D610. https:// doi.org/10.1093/nar/gkac1049
-
-4. https://www.zotero.org/groups/5870913/acfc_afvalwater/items/F3R5L7PV/attachment/6YZYPRXC/reader
-
-5. is the treated wastewater safe to reuse for agricultural irrigation? Water Res 73:277–290. https://doi.org/10.1016/
-
-6. Best practices for analysing microbiomes. Nat Rev Microbiol 16:410 – 422. https://doi.org/10.1038/s41579-018-0029-9.
-
-7. Platforms for elucidating antibiotic resistance in single genomes and complex metagenomes. Environ Int 138:105667. https://doi.org/10.1016/j.envint.2020.105667.
+03-04-2025:
 
 
 Fastplong
@@ -595,7 +626,6 @@ Kraken2 visualization script:
 https://github.com/lorenzgerber/krakenSankey
 
 
-03-04-2025:
 
 To generate a Sankey chart from the Kraken2 report, the same script that is used within Pavian was used.  
 
@@ -616,16 +646,23 @@ htmlwidgets::saveWidget(sankey_network, "Sankey_chart.html")
 When knitting this file in .HTML, uncomment the "sankey_network" line to view an interactive version of the graph below. 
 Knitting this to .pdf did not work. An interactive version is also saved as .html file in the same directory as this notebook. This can be explored in the web browser. 
 
+\
 
 ![Sankey plot from lagoon influent sample](Sankey_plot_depth_6.png)
 
+\
 
 
-The Sankey chart above has an max number of taxa at the end of 6. This number was chosen to not clutter the screen with unreadable species names.
+The Sankey chart below has an max number of 6 taxa at the end of every node. This number was chosen to not clutter the screen with unreadable species names.
 
 
-Today, I also attended a meeting with among others Peter Matuku, the contact person for the ACFC wastewater plant. 
-The results of multiple student groups were discussed. Yamila and I presented our findings, interpretations for the gathered data and the pipeline. 
-Due to the abyssal quality of the Nanopore data, they wanted to run our pipeline again with a new flowcell.
+Today, I also attended a meeting with among others Peter Matuku, the contact person for the ACFC wastewater plant and a professor from the university of Eldoret in Kenia. 
+
+The results of multiple student groups were discussed. Yamila and I presented our findings and interpretations for the gathered data. 
+Due to the abyssal quality of the Nanopore data, they wanted to run our pipeline again with a new flowcell if they are able to collect the funds necessary (€500)
+
+
+
+# **Citations** #
 
 
