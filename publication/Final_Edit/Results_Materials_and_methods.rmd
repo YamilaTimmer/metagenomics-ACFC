@@ -85,7 +85,7 @@ Table 1 shows a decrease in total reads from ~20K to ~18K in the influent. The m
 
 ---
 
-Taxonomic analysis 
+## Taxonomic analysis 
 
 Using Kraken2 reports, Krona pie charts were generated. These pie charts show the microbial diversity of the two samples (lagoon in/lagoon out) (fig.1, fig.2). Visibly most of the operational taxonomic units (OTU's), of both samples, consist of cellular organisms and a small percentage of transposons. Most of the cellular organisms consist of the domain Bacteria, the rest consists of a small percentage of Methanobacteriota (archaea). The entirety of OTU's in both samples, in the domain of Bacteria consists of the kingdom Bacillati. In the deeper taxonomic layers, the diversity in OTU’s seems to differ in the two samples. 
 
@@ -123,9 +123,9 @@ The beta diversity (Bray-Curtis dissimilarity) resulted in a ratio of 0.89.
 \
 
 
-# Functional analysis #
+## Functional analysis
 
-The classified species were compared to the FAPROTAX database and from here certain (metabolic) pathways were found (fig. 5). The lagoon in contains OTU's that are known to play a role in the following eight pathways: sulfur respiration, sulfite respiration, sulfate respiration, respiration of sulfur compounds, iron respiration, fermentation, chemoheterotrophy and aromatic compound degeneration. The last three being the pathways with the highest abundance. The lagoon out contains OTU's that are known to play a role in the following three pathways: fermentation, chemoheterotrophy and aromatic compound degeneration. These three pathways seem to overlap with the three pathways with the highest abundance of the lagoon in sample. Chemoheterotrophy and aromatic compound degeneration seem to have an equal abundance in both samples, while fermentation seems to have a higher abundance in the out_lagoon sample. 
+The classified species were compared to the FAPROTAX database and from here certain (metabolic) pathways were found (fig. 5). The lagoon influent contains OTU's that are known to play a role in the following eight pathways: sulfur respiration, sulfite respiration, sulfate respiration, respiration of sulfur compounds, iron respiration, fermentation, chemoheterotrophy and aromatic compound degeneration. The last three being the pathways with the highest abundance. The lagoon effluent contains OTU's that are known to play a role in the following three pathways: fermentation, chemoheterotrophy and aromatic compound degeneration. These three pathways seem to overlap with the three pathways with the highest abundance of the lagoon influent. Chemoheterotrophy and aromatic compound degeneration seem to have an equal abundance in both samples, while fermentation seems to have a higher abundance in lagoon effluent. 
 \
 
 \
