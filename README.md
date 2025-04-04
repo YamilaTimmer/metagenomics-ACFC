@@ -155,7 +155,11 @@ Below you can see an example of a Krona piechart that gets generated using this 
 
 
 ### R plots
-Below you can see an example of a visualization of the different (metabolic) pathways across samples. It shows what processes take place in what samples, and with what abundance the processes take place. The more classified species that perform a certain metabolic pathway, the higher the abundance (and the larger the bubble).
+Below you can see an example of a visualization of the different (metabolic) pathways across samples. It shows what processes take place in what samples, and with what abundance the processes take place. The more classified species that perform a certain metabolic pathway, the higher the abundance (and the larger the bubble). A figure like the one below and a heatmatp can be generated, for 2 samples, using [this R-script](https://github.com/YamilaTimmer/metagenomics-ACFC/blob/main/workflow/scripts/bubble_chart.r). 
+
+```bash
+Rscript /workflow/scripts/bubble_chart.r path/to/input/1 path/to/input/2 path/to/bubble/output path/to/heatmap/output
+```
 
 ![Bubblechart Example](analysis/Logbook_Floris/Bubble_chart.png)
 
