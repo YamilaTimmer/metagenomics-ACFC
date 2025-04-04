@@ -1,3 +1,4 @@
+# Converts Kraken2 output to .json formatted biom file, in order to be used by FAPROTAX
 rule kraken_biom:
     input:
         bracken_kraken=rules.bracken.output.bracken_report
