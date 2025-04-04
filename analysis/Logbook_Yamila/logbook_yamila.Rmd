@@ -3,7 +3,7 @@ title: "Logbook 3.1 Metagenomics"
 author: "Yamila Timmer"
 date: "`r Sys.Date()`"
 output:
-  word_document:
+  html_document:
     toc: true
     toc_depth: '3'
     df_print: paged
@@ -127,12 +127,13 @@ I expect the lagoon influent to have a higher diversity than the lagoon effluent
 ## Overview of the pipeline
 **03-04-2025**
 
-Below you can see the Directed Acyclic Graph (**DAG**) of the pipeline. The pipeline starts with two sample files, for the lagoon influent and effluent. Kraken2 then classifies reads as OTUs, using the Greengenes database. Then Bracken gets run, to re-estimate OTUs on high taxonomic levels, in order to classify these OTUs as deeper levels (with Genus being the max). The output files for Bracken, which are a re-estimated Kraken2 report and a general Bracken output, get used to visualize the taxonomic diversity and calculate the alpha diversity. Bracken output is also used for functional analysis with FAPROTAX, where abundance of metabolic pathways gets determined based on abundance of OTUs. 
+Below you can see the Directed Acyclic Graph (**DAG**) of the pipeline. The pipeline starts with concateenating the different barcodes per sample and then joining the samples with the same sampling location together, this results in two sample files: for the lagoon influent and effluent. Kraken2 then classifies reads from the samples as OTUs, using the Greengenes database. Then Bracken gets run, to re-estimate OTUs on high taxonomic levels, in order to classify these OTUs as deeper levels (with Genus being the max). The output files for Bracken, which are a re-estimated Kraken2 report and a general Bracken output, get used to visualize the taxonomic diversity and calculate the alpha diversity. Bracken output is also used for functional analysis with FAPROTAX, where abundance of metabolic pathways gets determined based on abundance of OTUs. 
 
-After the DAG was generated, we still made some final changes to the pipeline that are worth discussing. We decided not to use bracken, as it seemed to make our found OTUs *less* specific, meaning it was classifying species at a higher taxonomic level and it was also merging a lot of OTUs, removing smaller distinct groups. So Bracken did not seem to be suited for what we wanted to accomplish, which was to provide an accurate overview of the taxonomic diversity in the samples. Sadly, without Bracken, the alpha diversity also could not be determined, as the script we used for alpha diversity, only takes Bracken files as input. We decided to only determine the beta diversity instead, as this does work with Kraken2 output. We also decided to leave out the Sankey chart, as the result we got from Pavian looked a lot better and a lot more readable/suitable to put on a poster or use for the paper.
+**Some final tools/rules we left out and why**:
+ We decided not to use bracken, as it seemed to make our found OTUs *less* specific, meaning it was classifying species at a higher taxonomic level and it was also merging a lot of OTUs, removing smaller distinct groups. So Bracken did not seem to be suited for what we wanted to accomplish, which was to provide an accurate overview of the taxonomic diversity in the samples. Sadly, without Bracken, the alpha diversity also could not be determined, as the script we used for alpha diversity, only takes Bracken files as input. We decided to only determine the beta diversity instead, as this does work with Kraken2 output. We also decided to leave out the Sankey chart, as the result we got from Pavian looked a lot better and a lot more readable/suitable to put on a poster or use for the paper.
 
 
-![Overview of tools used in pipeline, visualized as DAG.](img/dag.png)
+![Overview of tools used in pipeline, visualized as DAG.](../../workflow/dag.png)
 
 
 **03-03-2025**
