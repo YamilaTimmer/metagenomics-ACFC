@@ -38,7 +38,7 @@ For functional analysis the Kraken2 reports were converted to json formatted .bi
 
 An overview of the pipeline steps is displayed in fig.1
 
-![Overview of pipeline steps, including the pre-processing steps that were not performed by us (gray) and the steps that were executed by us (blue).]("/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Floris/Workflow_Diagram.jpg")
+![Overview of pipeline steps, including the pre-processing steps that were not performed by us (gray) and the steps that were executed by us (blue).](/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Floris/Images/Workflow_Diagram.jpg)
 
 
 ---
@@ -100,25 +100,25 @@ The beta diversity (Bray-Curtis dissimilarity) resulted in a ratio of 0.89.
 \
 
 
-![A pie chart showing the microbial diversity of the lagoon influent, generated using Krona.]("/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Yamila/img/krona_in_lagoon.png")
+![A pie chart showing the microbial diversity of the lagoon influent, generated using Krona.](/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Yamila/img/lagoon_in.png)
 
 \
 
 \
 
-![A pie chart showing the microbial diversity of the lagoon effluent, generated using Krona.]("/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Yamila/img/krona_in_lagoon.png")
+![A pie chart showing the microbial diversity of the lagoon effluent, generated using Krona.](/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Yamila/img/lagoon_out.png)
 
 \
 
 \
 
-![Sankey chart visualizing taxonomic diversity of lagoon influent, generated with Pavian.]("/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Floris/In_Lagoon.png")
+![Sankey chart visualizing taxonomic diversity of lagoon influent, generated with Pavian.](/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Floris/Images/In_Lagoon.png)
 
 \
 
 \
 
-![Sankey chart visualizing taxonomic diversity of lagoon effluent, generated with Pavian.]("/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Floris/Out_Lagoon.png")
+![Sankey chart visualizing taxonomic diversity of lagoon effluent, generated with Pavian.](/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Floris/Images/Out_lagoon.png)
 
 \
 
@@ -130,6 +130,6 @@ The classified species were compared to the FAPROTAX database and from here cert
 
 \
 
-![Comparison of read abundance signifying the presence of pathways across samples.](/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Floris/Bubble_chart.png)
+![Comparison of read abundance signifying the presence of pathways across samples.](/home/floris/Documenten/git_repo/metagenomics-ACFC/analysis/Logbook_Floris/Images/Bubble_chart.png)
 
 \
