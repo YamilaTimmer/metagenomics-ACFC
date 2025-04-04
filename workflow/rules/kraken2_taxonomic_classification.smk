@@ -1,3 +1,4 @@
+# Classify OTUs from reads in .FASTQ files and generate Kraken2 report
 rule kraken2_taxonomic_classification:
     input:
         reads=rules.fastq_qc_plong.output.trimmed_fastq
