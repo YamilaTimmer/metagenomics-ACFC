@@ -1,3 +1,4 @@
+# This rule concatenates the barcode directories from the config.yaml into one file per barcode dir.
 rule barcode_concatenation:
     input:
         lambda wildcards: glob.glob(config["BARCODE_DIRECTORIES"][wildcards.barcode] + "/*")

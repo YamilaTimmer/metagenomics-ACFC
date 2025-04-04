@@ -1,3 +1,4 @@
+# The following rule uses Kraken2 to do the taxonomic classification of the files outputed by Fastplong.
 rule kraken2_taxonomic_classification:
     input:
         reads=rules.fastq_qc_plong.output.trimmed_fastq
