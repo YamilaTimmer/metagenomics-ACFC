@@ -15,13 +15,13 @@ output:
     number_sections: true
     includes:
       in_header: include_tex_header.tex
+  word_document:
+    toc: true
+    toc_depth: '3'
   html_document:
     toc: true
     toc_depth: '3'
     number_sections: true
-  word_document:
-    toc: true
-    toc_depth: '3'
 link-citations: true
 bibliography: references.bib
 editor_options:
@@ -30,18 +30,16 @@ editor_options:
 ---
 
 
+\
+\
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r libraries, results='hold', message=FALSE, warning=FALSE}
 
-library(tidyverse)
-library(ggplot2)
-library(webshot)
-
-```
 15-03-2025:
 
 # **Introduction** #
@@ -71,7 +69,13 @@ Identifying potentially up to 2000 micro-organisms in the sample can be challeng
 
 \
 
+```{r libraries, results='hold', message=FALSE, warning=FALSE}
 
+library(tidyverse)
+library(ggplot2)
+library(webshot)
+
+```
 
 The diversity of the microbiome will be quantified using the alpha diversity measure (Shannon's index). This is a formula that can be applied to calculate this measure for diversity. (@knight2018best)
 
@@ -86,14 +90,15 @@ Overview:
 5. Functional analysis of the micro-organisms found
 
 ## **Snakemake** ##
-To execute this pipeline Snakemake is used. 
-Snakemake is a workflow management system created to be reproducible and scalable. 
-Workflows are described via a human readable Python based language. Snakemake can also entail a description of required software, which can be automatically be deployed to the execution environment. 
+To execute this pipeline Snakemake is used. \
+Snakemake is a workflow management system created to be reproducible and scalable. \
+Workflows are described via a human readable Python based language. Snakemake can also entail a description of required software, which can be automatically  be deployed to the execution environment. 
 
 
-Unit tests where generated for all the snakemake rules: "snakemake --generate-unit-tests"
-Slurm was used to distribute the tasks over the cluster. (assemblix and assemblix2025)
-
+Unit tests where generated for all the snakemake rules: "snakemake --generate-unit-tests" \
+Slurm was used to distribute the tasks over the cluster. (assemblix and assemblix2025) \
+The workflow was visualized using a DAG graph: \
+![DAG graph](..//..//../workflow/dag.png)
 
 ## **Library / Tool versions:** ##
 
@@ -103,7 +108,7 @@ Slurm was used to distribute the tasks over the cluster. (assemblix and assembli
 | R | 4.4.1 | Statistical computing and graphics environment |
 | Fastplong | 0.2.2 | Tool for long-read sequence analysis |
 | Kraken | 2.1.2 | Taxonomic sequence classification system |
-| Bracken | 3.0.1 | Bayesian reestimation of abundance after classification with Kraken |
+| Bracken | 3.0.1 | Bayesian re-estimation of abundance after classification with Kraken |
 | Krona | 2.8.1 | Interactive metagenomic visualization tool |
 | Pavian | 1.0 | Interactive browser application for analyzing metagenomics data |
 | kraken-biom | 1.2.0 | Creates BIOM-format tables from Kraken output |
@@ -113,6 +118,10 @@ Slurm was used to distribute the tasks over the cluster. (assemblix and assembli
 ##  **Sample preparation** ##
 
 Samples: 
+A nanopore with a FLO-MIN106 flowcell, pore version: R9.4.1 was used for sequencing. 
+Basecalling was done with Dorado and the samples were filtered for a phred score of > 10 before we received the data. 
+
+
 
 | # | Condition |
 |---|------------|
@@ -200,6 +209,7 @@ According to the sample table, all samples taken in the same place where put tog
 no effect on the genetic material in the samples. The "glob.glob" python function is used to match the path for all directories without needing to specify them all manually. 
 
 The relevant part of the config.yaml file:
+
 ```{r, eval=F}
 samples:
     #digester: /students/2024-2025/Thema07/metagenomics/wastewater/data/digester.fastq.gz
@@ -217,7 +227,7 @@ The digester sample is commented out for reasons that will become apparent in th
 
 
 ## **Quality control** ##
-To check the quality of the raw sequence data, Fastplong was used. (@Chen2023)
+To check the quality of the raw sequence data, Fastplong was used. (@Chen2023) \
 At first we planned to use Trimmomatic and FastQC like we had done in an earlier analysis but they are made to work with Illumina data while we are working with Nanopore data. 
 Fastplong functionally combines Trimmomatic and FastQC with its adapter trimming and reports with the quality distribution of the reads, both before and after filtering.
 Fastplong returns both a .html report and a trimmed fastq file. 
@@ -417,6 +427,7 @@ Bracken was used to compute the abundance of species. When using 16S reads, this
 
 When comparing the output of Kraken2 with Bracken, many taxa where lost after running Bracken, this is why its output was discarded and the raw Kraken data was used for the downstream analyses. 
 
+
 ## **Bracken** ##
 Bracken (Bayesian Re-estimation of Abundance with KrakEN) is a statistical method that computes the abundance of species in DNA sequences from a metagenomics sample. Bracken uses taxonomy labels that are assigned by Kraken2 to estimate the number of reads that originated from each species in the sample. Even though Kraken classifies reads to the best matching location in the taxonomic tree, it does not estimate the abundances of species. Bracken uses the Kraken database to derive probabilities that describe how much sequence from each genome is the same to other genomes in the database. This data is combined with with the assignments for the sample to estimate the abundance at the species level or in our case, the genus level. 
 
@@ -549,7 +560,10 @@ ggplot(data = faprotax_out_lagoon, mapping = aes(x = group, y = out_lagoon)) +
 
 ```
 ## **Pathway abundance** ##
+The pathway abundance is visualized below. It is a quantification of the relative abundance of genes associated with a pathway.
 
+These results are not certain because genomic data is used to check for the pathways. An organism can have the genetic material without expressing it. 
+We don't have any mRNA data so we won't know for sure. 
 
 ```{r bubblechart-pathway-abundance}
 faprotax_out_lagoon <- read.table("~/Documenten/Data_set/ACFC_Wastewater_Metagenomics/faprotax/out_lagoon/out_lagoon_function_table.tsv", header = TRUE, sep = "\t", row.names = 1)
@@ -593,13 +607,13 @@ The same data visualized with a heatmap. There is only overlap between the sampl
 
 # **Discussion:** #
 
-The main objective of this study was to identify the microorganisms present in the digester, lagoon in and lagoon out samples. Due problems with the quality of the flowcell that was used for sequecing with a Nanopore, the digester sample only contained two reads, one of which was remove during trimming with Fastplong. This sample was unusable for further analyses and was discarded. 
+The main objective of this study was to identify the microorganisms present in the digester, lagoon in and lagoon out samples. Due problems with the quality of the flowcell that was used for sequencing with a Nanopore, the digester sample only contained two reads, one of which was remove during trimming with Fastplong. This sample was unusable for further analyses and was discarded. 
 
 Our results demonstrate that the sample taken in the lagoon has the most diverse microbial community with an alpha diversity of 1.56 versus 1.36 (Shannon's index) from the effluent sample and a beta diversity of 0.952 between the two samples. This suggests that either the microbiomes differ a lot or the results are not significant due to the factor ten difference in read count that was used to determine this score.  
 The sample taken from inside the lagoon has ~18K reads after filtering while the sample from the water that had exited the lagoon only contains ~2.2K reads.
 
 Kraken2 showed that most microorganisms in both samples are bacteria, specifically *Firmicutes*, most of them Clostridia. 
-Even though species level data is not available due the use of 16S rRNA, some species of Clostridia are know to produce toxins. Clostridium botulinum produces the neurotoxin botulinum but the precence of this specific bacterium is speculation. 
+Even though species level data is not available due the use of 16S rRNA, some species of Clostridia are know to produce toxins. Clostridium *botulinum* produces the neurotoxin *botulinum* but the presence of this specific bacterium is speculation. 
 
 This is a phylum of mostly gram-positive bacteria and includes both aerobic and anaerobic bacteria.
 
@@ -612,7 +626,8 @@ For the “out lagoon” sample, there where only three pathways found: fermenta
 The “in lagoon” sample had in addition to these pathways the following respiration pathways: sulfur, sufite, sulfate and iron respiration. 
 This difference in found number of pathways can be partially attributed to the difference in reads between the samples.
 
-None of the pathways indicate the production of toxins but the database used by Faprotax has a limited scope and mostly features environmental pathways and not many others like the production of toxins. A follow up study could look into using other databases to compare against to find more relevant pathways for determining the quality of the effluent. 
+
+None of the pathways indicate the production of toxins but the database used by Faprotax has a limited scope and mostly features environmental pathways and not many others like the production of toxins. A follow up study could look into using other databases to compare against to find more relevant pathways for determining the quality of the effluent. Given that we used genomic data for the pathway analysis, we do not know for sure if those pathways really came to expression or not. For that, a transcriptomics study should be done. 
 
 
 
@@ -663,6 +678,9 @@ Today, I also attended a meeting with among others Peter Matuku, the contact per
 The results of multiple student groups were discussed. Yamila and I presented our findings and interpretations for the gathered data. 
 Due to the abyssal quality of the Nanopore data, they wanted to run our pipeline again with a new flowcell if they are able to collect the funds necessary (€500)
 
+04-04-2025:
+The pipeline was executed one last time and completed its run successfully. 
+Minor changes made to this notebook.
 
 
 # **Citations** #
