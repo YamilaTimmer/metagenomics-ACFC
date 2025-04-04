@@ -1,3 +1,4 @@
+# Re-estimate Kraken2 classifications by further classifying reads on a deeper taxonomic level (maximum level depends on data, but genus was used here)
 rule bracken:
     input:
         kraken_report=rules.kraken2_taxonomic_classification.output.kraken_report,
