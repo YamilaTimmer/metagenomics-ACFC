@@ -126,8 +126,6 @@ You have to pass the flag `--use-conda`, so that conda knows that it has to use/
 snakemake --use-conda --profile slurm/
 ```
 
-#### Using with Bracken
-
 
 ### Version details
 The pipeline is made using SnakeMake version `8.27.1` and python version `3.12.8`. The following tools have been used for the pipeline:
@@ -153,7 +151,7 @@ One step further, after classification, is looking at what kind of metabolic pro
 ### Krona Piechart
 Below you can see an example of a Krona piechart that gets generated using this pipeline. The piechart shows an overview of the different classifications found by Kraken2, based on the input .FASTQ reads.
 
-![Piechart Example](analysis/Logbook_Yamila/img/krona_in_lagoon.png)
+![Piechart Example](analysis/Logbook_Yamila/img/lagoon_in.png)
 
 
 ### R plots
