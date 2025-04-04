@@ -122,8 +122,8 @@ Under the "samples:" key, give the paths to the samples that should be used for 
 If there are multiple directories with fastq files that need to be concatenated, use the "BARCODE_DIRECTORIES:" selection. Put the paths to these barcode directories with the name of the barcode and optionally put the barcodes that correspond to one sample in the "sample_barcodes" key, these will be automatically combined into one fastq file. 
 
 If this functionality is not used, place a "#" in front of the following lines:
-`#barcode_files=expand(f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz", barcode=config["sample_barcodes"]["in_lagoon"] + config["sample_barcodes"]["out_lagoon"]),`
-`#combined_files=expand(f"{OUT_DIR}/combined_fastq/{{sample}}.fastq", sample=SAMPLE_NAMES),`
+- `#barcode_files=expand(f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz", barcode=config["sample_barcodes"]["in_lagoon"] + config["sample_barcodes"]["out_lagoon"]),`
+- `#combined_files=expand(f"{OUT_DIR}/combined_fastq/{{sample}}.fastq", sample=SAMPLE_NAMES),`
 
 In order to run the pipeline, you have to run the `Snakefile`. This can be done using:
 
