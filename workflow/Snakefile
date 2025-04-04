@@ -25,7 +25,6 @@ include: "rules/bracken.smk"
 include: "rules/krona_visualisation.smk"
 include: "rules/kraken_biom.smk"
 include: "rules/faprotax.smk"
-include: "rules/generate_pathway_bubble_plot.smk"
 include: "rules/calculate_alpha_diversity.smk"
 include: "rules/calculate_beta_diversity.smk"
 
