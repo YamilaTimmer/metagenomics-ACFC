@@ -1,0 +1,70 @@
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+	0[label = "all", color = "0.00 0.6 0.85", style="rounded,dashed"];
+	1[label = "barcode_concatenation\nbarcode: barcode01", color = "0.06 0.6 0.85", style="rounded,dashed"];
+	2[label = "barcode_concatenation\nbarcode: barcode02", color = "0.06 0.6 0.85", style="rounded,dashed"];
+	3[label = "barcode_concatenation\nbarcode: barcode03", color = "0.06 0.6 0.85", style="rounded,dashed"];
+	4[label = "barcode_concatenation\nbarcode: barcode04", color = "0.06 0.6 0.85", style="rounded,dashed"];
+	5[label = "barcode_concatenation\nbarcode: barcode05", color = "0.06 0.6 0.85", style="rounded,dashed"];
+	6[label = "barcode_concatenation\nbarcode: barcode06", color = "0.06 0.6 0.85", style="rounded,dashed"];
+	7[label = "barcode_concatenation\nbarcode: barcode07", color = "0.06 0.6 0.85", style="rounded,dashed"];
+	8[label = "barcode_concatenation\nbarcode: barcode08", color = "0.06 0.6 0.85", style="rounded,dashed"];
+	9[label = "combining_samples\nsample: in_lagoon", color = "0.30 0.6 0.85", style="rounded,dashed"];
+	10[label = "combining_samples\nsample: out_lagoon", color = "0.30 0.6 0.85", style="rounded,dashed"];
+	11[label = "faprotax", color = "0.36 0.6 0.85", style="rounded,dashed"];
+	12[label = "kraken_biom", color = "0.55 0.6 0.85", style="rounded,dashed"];
+	13[label = "bracken", color = "0.12 0.6 0.85", style="rounded,dashed"];
+	14[label = "kraken2_taxonomic_classification", color = "0.48 0.6 0.85", style="rounded,dashed"];
+	15[label = "fastq_qc_plong\nsample: in_lagoon", color = "0.42 0.6 0.85", style="rounded,dashed"];
+	16[label = "faprotax", color = "0.36 0.6 0.85", style="rounded,dashed"];
+	17[label = "kraken_biom", color = "0.55 0.6 0.85", style="rounded,dashed"];
+	18[label = "bracken", color = "0.12 0.6 0.85", style="rounded,dashed"];
+	19[label = "kraken2_taxonomic_classification", color = "0.48 0.6 0.85", style="rounded,dashed"];
+	20[label = "fastq_qc_plong\nsample: out_lagoon", color = "0.42 0.6 0.85", style="rounded,dashed"];
+	21[label = "calculate_alpha_diversity", color = "0.18 0.6 0.85", style="rounded,dashed"];
+	22[label = "calculate_alpha_diversity", color = "0.18 0.6 0.85", style="rounded,dashed"];
+	23[label = "calculate_beta_diversity\nsample1: in_lagoon\nsample2: out_lagoon", color = "0.24 0.6 0.85", style="rounded,dashed"];
+	24[label = "krona_visualisation", color = "0.61 0.6 0.85", style="rounded,dashed"];
+	25[label = "krona_visualisation", color = "0.61 0.6 0.85", style="rounded,dashed"];
+	1 -> 0
+	2 -> 0
+	3 -> 0
+	4 -> 0
+	5 -> 0
+	6 -> 0
+	7 -> 0
+	8 -> 0
+	9 -> 0
+	10 -> 0
+	11 -> 0
+	16 -> 0
+	21 -> 0
+	22 -> 0
+	23 -> 0
+	24 -> 0
+	25 -> 0
+	1 -> 9
+	2 -> 9
+	3 -> 9
+	4 -> 9
+	5 -> 10
+	6 -> 10
+	7 -> 10
+	8 -> 10
+	12 -> 11
+	13 -> 12
+	14 -> 13
+	15 -> 14
+	17 -> 16
+	18 -> 17
+	19 -> 18
+	20 -> 19
+	13 -> 21
+	18 -> 22
+	14 -> 23
+	19 -> 23
+	13 -> 24
+	18 -> 25
+}            
