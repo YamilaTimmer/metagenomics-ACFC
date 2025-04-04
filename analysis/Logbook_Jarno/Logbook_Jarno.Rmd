@@ -33,10 +33,11 @@ knitr::opts_chunk$set(
 
 # Tools
 
-For more indepth explenation of the tools, look at the logbook of Yamila and or Floris.
+For more indepth explenation of the tools, look at the logbook of Yamila
+and or Floris.
 
 | Package Name                                                                        | Description                                                                     | Version                                              |
-|----------------|----------------------------------------|----------------|
+|-------------------------------------------------------------------------------------|---------------------------------------------------------------------------------|------------------------------------------------------|
 | [Kraken2](https://github.com/DerrickWood/kraken2)                                   | Taxonomic classification of 16S data                                            | 2.1.3                                                |
 | [Bracken](https://github.com/jenniferlu717/Bracken)                                 | Re-estimating abundances from Kraken2 output                                    | 3.0.1                                                |
 | [Krona](https://github.com/marbl/Krona)                                             | Visualising taxonomic classification in a sample                                | 2.8.1                                                |
@@ -90,7 +91,7 @@ supervisor
 
 # Logbook
 
-## 4 march 
+## 4 march
 
 **Goal of the day:**
 
@@ -126,7 +127,7 @@ Below is a breakdown of the results from a FastQC check and how to
 interpret them.
 
 | Category                         | Result                                                                                                                                      | How to Interpret                                                                                                                                                                                                                                                                                                                                                         |
-|-------------------|-------------------|----------------------------------|
+|----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Basic Statistics**             | A table with details such as Filename, File Type, Sequence Length, %GC, Total Sequences, Encoding, and Sequences Flagged as Poor Quality.   | Read and check the table for errors.                                                                                                                                                                                                                                                                                                                                     |
 | **Per Base Sequence Quality**    | A graph (see Figure 1).                                                                                                                     | The graph has three colored zones: 28-40 (green, good quality), 20-28 (yellow/orange, moderate quality), and 0-20 (red, poor quality). The yellow box represents the 25th to 75th percentile, the black lines show the 10th and 90th percentiles, and the blue line represents the average quality score. A drop in quality after base 100 indicates trimming is needed. |
 | **Per Tile Sequence Quality**    | A heatmap plot showing read quality per tile and position.                                                                                  | Dark blue tiles indicate good quality, while lighter tiles indicate poorer quality. The Y-axis shows the tile number, and the X-axis shows the position.                                                                                                                                                                                                                 |
@@ -522,7 +523,7 @@ needed trim it. - Identify the microorganisms that are in the data with
 taxonomic classification - Visualise the results of the taxonomic
 classification - Show the diversity of what the samples contain
 
-## 18 march 
+## 18 march
 
 **Qiime2 - First version (not chosen)**
 
@@ -658,7 +659,7 @@ is used this means brillouin index. i will explain all the options given
 by the script in table 1
 
 | Name                        | What does it mean                                                                                               |
-|---------------------------|---------------------------------------------|
+|-----------------------------|-----------------------------------------------------------------------------------------------------------------|
 | BP (Brillouin index)        | Similar to Shannon but used when the community is sampled exhaustively (no randomness assumed).                 |
 | Sh (Shanon-wiener index)    | species richness and evenness (how evenly individuals are distributed among species)                            |
 | Si (simpson index)          | Measures dominance (probability that two randomly selected individuals belong to the same species).             |
