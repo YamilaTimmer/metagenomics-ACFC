@@ -1,7 +1,9 @@
 import glob
 from itertools import combinations
 
+# Use paths to your own input/output directories in the config.yaml file.
 configfile: "config.yaml"
+
 
 DATA_DIR = config["data_dir"]
 OUT_DIR = config["out_dir"]
@@ -14,6 +16,7 @@ SAMPLE_NAMES = config["samples"].keys()
 SAMPLE_PAIRS = list(combinations(SAMPLE_NAMES, 2))
 
 
+# Import the following rules from seperate files:
 include: "rules/fastq_concat.smk"
 include: "rules/sample_concat.smk"
 include: "rules/fastq_qc_plong.smk"
@@ -23,7 +26,6 @@ include: "rules/krona_visualisation.smk"
 include: "rules/kraken_biom.smk"
 include: "rules/faprotax.smk"
 include: "rules/generate_pathway_bubble_plot.smk"
-include: "rules/generate_sankey.smk"
 include: "rules/calculate_alpha_diversity.smk"
 include: "rules/calculate_beta_diversity.smk"
 
@@ -44,5 +46,4 @@ rule all:
         ),
 
 
-        sankey_plot=expand(f"{RESULTS_DIR}/sankey/{{sample}}.html", sample=SAMPLE_NAMES),
         krona_vis=expand(f"{RESULTS_DIR}/krona/{{sample}}_krona.html", sample=SAMPLE_NAMES)
