@@ -109,29 +109,23 @@ You are now done downloading all necessary files to run this pipeline, make sure
 
 ### Running the pipeline
 
-First, the config.yaml file should be adapted to your own situation (sample, database and output locations).
+First, the [config.yaml](https://github.com/YamilaTimmer/metagenomics-ACFC/blob/main/workflow/config.yaml) file should be adapted to your own situation (sample, database and output locations).
 
 The following config keys should be changed:
-fastq_pass_dir and tools_dir, the paths to the tool directory and a temporary file saving location.
-kraken2_db_dir, input here the path to the database to be used with kraken2.
-data_dir, input the directory that will be used to save the resulting files.
-log_dir, give the path the the location to be used for saving logs.
+- `fastq_pass_dir` and tools_dir, the paths to the tool directory and a temporary file saving location.
+- `kraken2_db_dir`, input here the path to the database to be used with kraken2.
+- `data_dir`, input the directory that will be used to save the resulting files.
+- `log_dir`, give the path the the location to be used for saving logs.
 
 Under the "samples:" key, give the paths to the samples that should be used for the analyses. 
-
 
 If there are multiple directories with fastq files that need to be concatenated, use the "BARCODE_DIRECTORIES:" selection. Put the paths to these barcode directories with the name of the barcode and optionally put the barcodes that correspond to one sample in the "sample_barcodes" key, these will be automatically combined into one fastq file. 
 
 If this functionality is not used, place a "#" in front of the following lines:
-        #barcode_files=expand(f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz", barcode=config["sample_barcodes"]["in_lagoon"] + config["sample_barcodes"]["out_lagoon"]),
-        
-        #combined_files=expand(f"{OUT_DIR}/combined_fastq/{{sample}}.fastq", sample=SAMPLE_NAMES),
+- `#barcode_files=expand(f"{OUT_DIR}/fastq/{{barcode}}.fastq.gz", barcode=config["sample_barcodes"]["in_lagoon"] + config["sample_barcodes"]["out_lagoon"]),`
+- `#combined_files=expand(f"{OUT_DIR}/combined_fastq/{{sample}}.fastq", sample=SAMPLE_NAMES),`
 
-
-
-
-
-In order to run the pipeline, you have to run the snakefile. This can be done using:
+In order to run the pipeline, you have to run the `Snakefile`. This can be done using:
 
 ```bash
 snakemake --use-conda
