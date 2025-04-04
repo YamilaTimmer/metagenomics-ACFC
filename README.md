@@ -89,6 +89,24 @@ Now there should be a folder called `FAPROTAX_1.2.10.zip`, containing:
 
 You are now done downloading all necessary files for FAPROTAX, make sure to **not** change any of the file names
 
+#### Fastplong:
+Navigate to the tools directory:
+
+```bash
+cd tools
+```
+```bash
+wget https://github.com/OpenGene/fastplong/archive/refs/tags/v0.2.2.zip
+```
+Unzip the file and extract here:
+
+```bash
+unzip v0.2.2.zip
+```
+There should now be an executable called "fastplong"
+
+
+
 ### Running the pipeline
 In order to run the pipeline, you have to run the snakefile. This can be done using:
 
