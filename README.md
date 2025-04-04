@@ -16,7 +16,7 @@ This repository contains a metagenomics pipeline for analyzing 16S data in .FAST
 2. Producing a taxonomic classification report using Kraken2, which will show the Operational Taxonomic Units (OTUs) that are present in the sample(s)
 3. Improving OTU assignment by using Bracken (optional)
 4. Visualising classification output with a Krona piechart
-5. Calculating beta diversity [Bray–Curtis dissimilarity](https://en.wikipedia.org/wiki/Bray%E2%80%93Curtis_dissimilarity)
+5. Calculating beta diversity, using [Bray–Curtis dissimilarity](https://en.wikipedia.org/wiki/Bray%E2%80%93Curtis_dissimilarity)
 6. Calculating alpha diversity, using [Shannon Index](https://nl.wikipedia.org/wiki/Shannon-index) (optional)
 
 ## System requirements and installation
