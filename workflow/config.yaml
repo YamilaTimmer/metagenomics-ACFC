@@ -1,38 +1,23 @@
+# Data directories
 data_dir: /students/2024-2025/Thema07/metagenomics/wastewater/data
 fastq_pass_dir: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass
 kraken2_db_dir: /data/datasets/KRAKEN2_INDEX
 tools_dir: /students/2024-2025/Thema07/metagenomics/wastewater/tools
-
-#kraken2_db_dir: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX
-
 out_dir: /students/2024-2025/Thema07/metagenomics/wastewater/metagenomics-ACFC/output
 results_dir: /students/2024-2025/Thema07/metagenomics/wastewater/metagenomics-ACFC/results
 log_dir: /students/2024-2025/Thema07/metagenomics/wastewater/metagenomics-ACFC/logs
 
+# Sample paths
 samples:
-    #digester: /students/2024-2025/Thema07/metagenomics/wastewater/data/digester.fastq.gz
     in_lagoon: /students/2024-2025/Thema07/metagenomics/wastewater/data/in_lagoon.fastq.gz
     out_lagoon: /students/2024-2025/Thema07/metagenomics/wastewater/data/out_lagoon.fastq.gz
 
+# Sample barcodes
 sample_barcodes:
     in_lagoon: ["barcode01", "barcode02", "barcode03", "barcode04"]
     out_lagoon: ["barcode05", "barcode06", "barcode07", "barcode08"]
-    #digester: ["barcode09", "barcode10", "barcode11", "barcode12"]
 
-
-KRAKEN_DB:
-    16S_Greengenes: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/16S_Greengenes
-    16S_RDP: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/16S_RDP
-    16S_Silva: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/16S_Silva
-    k2_core_nt: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/k2_core_nt
-    k2_pluspf: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/k2_pluspf
-    k2_pluspfp: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/k2_pluspfp
-    k2_standard: /students/2024-2025/Thema07/metagenomics/wastewater/data/datasets/KRAKEN2_INDEX/k2_standard
-
-GENOMES:
-    ["hg38_refgenome"] # Human ref genome.
-
-
+# Sample barcode directories
 BARCODE_DIRECTORIES:
     barcode01: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode01
     barcode02: /commons/Themas/Thema07/metagenomics/ACFC_afvalwater/20250207_1125_MN35459_FAX73268_e839126d/fastq_pass/barcode02

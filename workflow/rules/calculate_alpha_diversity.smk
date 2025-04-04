@@ -1,3 +1,5 @@
+# using bracken out file and a python script that uses a formula( in this case the shannon index formula) the alpha diversity gets calculated.
+
 rule calculate_alpha_diversity:
     input:
         kraken_report=rules.bracken.output.bracken_output

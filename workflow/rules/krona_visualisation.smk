@@ -1,3 +1,4 @@
+# Visualize taxonomic diversity in Kraken report as Krona pie chart 
 rule krona_visualisation:
     input:
         bracken_files=rules.bracken.output.bracken_report
