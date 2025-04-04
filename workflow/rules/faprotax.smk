@@ -1,3 +1,4 @@
+# Estimate abundances of pathways based on OTU abundance as found in Kraken2 reports
 rule faprotax:
     input:
         biom_files=rules.kraken_biom.output.biom_files
