@@ -16,7 +16,8 @@ This repository contains a metagenomics pipeline for analyzing 16S data in .FAST
 2. Producing a taxonomic classification report using Kraken2, which will show the Operational Taxonomic Units (OTUs) that are present in the sample(s)
 3. Improving OTU assignment by using Bracken (optional)
 4. Visualising classification output with a Krona piechart
-5. Calculating alpha/beta diversity
+5. Calculating beta diversity [Bray–Curtis dissimilarity](https://en.wikipedia.org/wiki/Bray%E2%80%93Curtis_dissimilarity)
+6. Calculating alpha diversity, using [Shannon Index](https://nl.wikipedia.org/wiki/Shannon-index) (optional)
 
 ## System requirements and installation
 
@@ -87,8 +88,6 @@ Now there should be a folder called `FAPROTAX_1.2.10.zip`, containing:
 - FAPROTAX.txt, which contains the database of all (metabolic) pathways
 - README.txt, contains some extra info on the tool
 
-You are now done downloading all necessary files for FAPROTAX, make sure to **not** change any of the file names
-
 #### Fastplong:
 Navigate to the tools directory:
 
@@ -105,6 +104,7 @@ unzip v0.2.2.zip
 ```
 There should now be an executable called "fastplong"
 
+You are now done downloading all necessary files to run this pipeline, make sure to **not** change any of the file names
 
 
 ### Running the pipeline
@@ -116,12 +116,31 @@ snakemake --use-conda
 
 You have to pass the flag `--use-conda`, so that conda knows that it has to use/build the environments in the env dir.
 
+#### Running the pipeline with optional features
+> [!WARNING]
+> Running these optional features is not recommended if you do not know what you are doing!
+
+The usage of Bracken and the calculation of alpha diversity are optional features in the pipeline. We have made these optional, because for our own data, Bracken did not improve on the classification of Kraken2, however in other situations this might be the case. So we decided to keep Bracken in  the pipeline and make it optional to run. 
+
+In order to add Bracken to the pipeline, file paths have to be changed, from Kraken2 output to Bracken report output for the following rules:
+
+- [krona_visualisation.smk](https://github.com/YamilaTimmer/metagenomics-ACFC/blob/main/workflow/rules/krona_visualisation.smk)
+- [kraken_biom.smk](https://github.com/YamilaTimmer/metagenomics-ACFC/blob/main/workflow/rules/kraken_biom.smk)
+
+To add the calculation of alpha diversity, you need to add it to `rule all` in the `Snakefile`. Calculating alpha diversity is **only** possible with Bracken output files, so if you want to calculate alpha diversity, you have to also add Bracken to the pipeline.
+
 
 #### Using with slurm
 
+Navigate to the workflow directory:
+```bash
+cd workflow
+```
+Install slurm:
 ```bash
  pip install snakemake-executor-plugin-slurm
 ```
+Run the pipeline with slurm:
 ```bash
 snakemake --use-conda --profile slurm/
 ```
@@ -145,6 +164,8 @@ The pipeline is made using SnakeMake version `8.27.1` and python version `3.12.8
 This pipeline is built around the concept of metagenomics, which is the study of microorganisms in an environment. Environments can range from the human gut to wastewater, so there are plenty of different applications. In order to create an overview of the different types of microorganisms that live in an environment, genetic material needs to be sequenced and further analyzed. In our case, this is 16S rRNA data. Classification software such as Kraken2 identifies reads within the .FASTQ files and assigns them to an OTU, which could be any level of taxonomy (from "broad" to "specific": domain, kingdom, phylum, class, order, family, genus, species). After classification, the results can be visualized using tools such as Krona, these visualizations are pretty simple to interpret as they consist merely of a multi-layer piechart and also Sankey charts are very intuitive. 
 
 One step further, after classification, is looking at what kind of metabolic processes are taking place in the environment. This can be estimated using the "abundance" of an OTU, or how much of the OTU is present in the sample. To figure out what OTUs belong to what kind of processes, they will have to be mapped against a pathway database. This can be done using FAPROTAX, where, each OTU will be checked if they are known for contributing to any of the pathways. The output of the functional analysis consists of .biom files per pathway, showing what OTUs are linked to it, and a larger overview file where the abundance is noted per pathway, the higher the number, the more likely it is that this pathway has a large influence on the environment. However, functional analysis is merely an estimate of the activity of the pathways. To confirm these estimates, metatranscriptomics will have to be performed.
+
+Also included in the pipeline is the calculation of the beta diversity, this expresses how much 2 (or more) microbial communities differ from each other, a higher score meaning a higher similarity. Calculating the alpha diversity is optional in the pipeline and expresses the diversity within one sample.
 
 
 ## Examples of visualisations
